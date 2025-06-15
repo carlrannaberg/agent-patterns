@@ -13,3 +13,5 @@
 .env.production.local
 
 .DS_Store
+
+*.swp
