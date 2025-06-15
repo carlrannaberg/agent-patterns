@@ -1,8 +1,19 @@
 #!/bin/bash
 set -e
 
-# Find the next issue number
-LAST_ID=$(ls -1 issues/*.md | sed -n 's/issues\/\([0-9]\+\)-.*/\1/p' | sort -rn | head -n 1)
+# Find the next issue number by reliably finding the max ID
+LAST_ID=0
+for f in issues/[0-9]*-*.md; do
+  # Check if any files match to avoid errors on the first run
+  [ -e "$f" ] || continue
+
+  # Extract number from filename: "issues/123-foo.md" -> "123"
+  CURRENT_ID=$(basename "$f" | sed -n 's/^\([0-9]\+\)-.*/\1/p')
+
+  if [[ -n "$CURRENT_ID" && "$CURRENT_ID" -gt "$LAST_ID" ]]; then
+    LAST_ID=$CURRENT_ID
+  fi
+done
 NEXT_ID=$((LAST_ID + 1))
 
 # Get the issue title from the first argument
@@ -10,7 +21,7 @@ if [ -z "$1" ]; then
   echo "Usage: $0 \"<issue-title>\""
   exit 1
 fi
-TITLE_SLUG=$(echo "$1" | tr '[:upper:]' '[:lower:]' | tr -s ' ' '-' | sed 's/[^a-z0-9-]//g')
+TITLE_SLUG=$(echo "$1" | tr '[:upper:]' '[:lower:]' | tr -s '[:punct:][:space:]' '-' | sed 's/[^a-z0-9-]*//g' | sed 's/--*//g')
 ISSUE_FILE="issues/${NEXT_ID}-${TITLE_SLUG}.md"
 PLAN_FILE="docs/plan_${NEXT_ID}-${TITLE_SLUG}.md"
 
@@ -28,7 +39,7 @@ EOL
 cat > "$PLAN_FILE" << EOL
 # Plan for Issue ${NEXT_ID}: $1
 
-This document outlines the step-by-step plan to complete \`issues/${NEXT_ID}-${TITLE_SLUG}.md\`.
+This document outlines the step-by-step plan to complete \`${ISSUE_FILE}\`.
 
 ## Implementation Plan
 
