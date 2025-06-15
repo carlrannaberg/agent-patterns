@@ -1,0 +1,12 @@
+{
+  "name": "agent-patterns",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "issue": "bash scripts/create-issue.sh",
+    "claude": "bash scripts/claude-context.sh"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}

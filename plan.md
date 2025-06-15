@@ -9,19 +9,36 @@
   - The Nest.js backend will use the Vercel AI SDK's `streamObject` function to stream JSON responses.
   - The React frontend will use the `useObject` hook from `ai/react` to consume and render the streamed data.
   - The Nest.js application must have CORS enabled to allow requests from the frontend development server.
-- **Environment Variables**: Use `dotenv` for API keys in the backend.
+- **Environment Variables**: Use `dotenv` for API keys in the backend. The `.env` file in `packages/api` should contain `GOOGLE_GENERATIVE_AI_API_KEY=your-api-key`.
 - **Testing**: Use Vitest for API-level tests.
 - **Code Quality**: Use ESLint, and Husky with lint-staged for a consistent and high-quality codebase.
 
+## Autonomy & Context Management (Claude Code)
+- Use an `issues/` directory to store each requirement or feature request as `<issue-id>.md`.
+- Mirror each issue with a design doc in `docs/plan_<issue-id>.md` that will serve as Claude's working context.
+- Maintain a concise `todo.md` at the project root summarizing all active tasks with links to the corresponding issues.
+- Provide helper CLI scripts in `scripts/` to automate:
+	- Creating issues and design docs.
+	- Invoking Claude Code SDK with the correct context.
+	- Compacting oversized design docs into summaries.
+- Keep context lightweight by rolling up discussion threads into `docs/plan_<issue-id>.md` once they exceed ~300 lines.
+
 # Tasks
+
+- [ ] 0.0 **Autonomy & Workflow Setup**
+  - [ ] 0.1 Create `issues/`, `docs/`, and `scripts/` directories.
+  - [ ] 0.2 Add `scripts/create-issue.sh` – generates `issues/<next_issue_id>.md`, opens $EDITOR, and initializes `docs/plan_<id>.md`.
+  - [ ] 0.3 Add `scripts/claude-context.sh` – runs Claude Code SDK with the relevant issue, design doc, and `todo.md` as context, automatically compacting when needed.
+  - [ ] 0.4 Add npm scripts `issue` and `claude` that wrap the above shell scripts for cross-platform use.
+  - [ ] 0.5 Bootstrap `todo.md` with links to all tasks in this plan.
 
 - [ ] 1.0 **Project & Developer Experience Setup**
   - [ ] 1.1 Initialize a Git monorepo with `pnpm workspaces` (`packages/api`, `packages/webapp`).
   - [ ] 1.2 Create the Nest.js app in `packages/api` and the React/Vite app in `packages/webapp`.
   - [ ] 1.3 **Code Quality Tooling**: Install and configure ESLint, TypeScript, Husky, and lint-staged at the project root with corresponding scripts.
   - [ ] 1.4 **Dependencies**
-    - [ ] 1.4.1 In `api`: install `dotenv`, `@ai-sdk/openai`, `zod`, and `mathjs`.
-    - [ ] 1.4.2 In `webapp`: install `ai`, `@ai-sdk/react`, `@mui/material`, `@emotion/react`, `@emotion/styled`, `react-router-dom`, `react-textarea-autosize`.
+    - [ ] 1.4.1 In `api`: install `dotenv`, `@ai-sdk/google@alpha`, `zod`, and `mathjs`.
+    - [ ] 1.4.2 In `webapp`: install `ai@alpha`, `@ai-sdk/react@alpha`, `@mui/material`, `@emotion/react`, `@emotion/styled`, `react-router-dom`, `react-textarea-autosize`.
 
 - [ ] 2.0 **Backend (Nest.js) Implementation**
   - [ ] 2.1 Enable CORS in `main.ts` in the `api` package.
@@ -31,12 +48,14 @@
     - [ ] 2.2.3 Implement the `SequentialProcessingService`. Adapt the logic below to use streaming (e.g., with `streamObject`).
       ```typescript
       // packages/api/src/sequential-processing/sequential-processing.service.ts
-      import { openai } from '@ai-sdk/openai';
+      import { createGoogleGenerativeAI } from '@ai-sdk/google';
       import { generateText, generateObject } from 'ai';
       import { z } from 'zod';
 
+      const google = createGoogleGenerativeAI();
+
       async function generateMarketingCopy(input: string) {
-        const model = openai('gpt-4o');
+        const model = google('models/gemini-2.5-flash-preview-05-20');
 
         const { text: copy } = await generateText({
           model,
@@ -70,12 +89,14 @@
     - [ ] 2.3.3 Implement the `RoutingService`, adapting the logic below for streaming.
       ```typescript
       // packages/api/src/routing/routing.service.ts
-      import { openai } from '@ai-sdk/openai';
+      import { createGoogleGenerativeAI } from '@ai-sdk/google';
       import { generateObject, generateText } from 'ai';
       import { z } from 'zod';
 
+      const google = createGoogleGenerativeAI();
+
       async function handleCustomerQuery(query: string) {
-        const model = openai('gpt-4o');
+        const model = google('models/gemini-1.5-pro-latest');
 
         const { object: classification } = await generateObject({
           model,
@@ -88,7 +109,7 @@
         });
 
         const { text: response } = await generateText({
-          model: classification.complexity === 'simple' ? openai('gpt-4o-mini') : openai('o3-mini'),
+          model: classification.complexity === 'simple' ? google('models/gemini-1.5-flash-latest') : google('models/gemini-1.5-pro-latest'),
           system: {
             general: 'You are an expert customer service agent handling general inquiries.',
             refund: 'You are a customer service agent specializing in refund requests. Follow company policy and collect necessary information.',
@@ -106,12 +127,14 @@
     - [ ] 2.4.3 Implement the `ParallelProcessingService`, adapting the logic below for streaming the final summary.
       ```typescript
       // packages/api/src/parallel-processing/parallel-processing.service.ts
-      import { openai } from '@ai-sdk/openai';
+      import { createGoogleGenerativeAI } from '@ai-sdk/google';
       import { generateText, generateObject } from 'ai';
       import { z } from 'zod';
 
+      const google = createGoogleGenerativeAI();
+
       async function parallelCodeReview(code: string) {
-        const model = openai('gpt-4o');
+        const model = google('models/gemini-1.5-pro-latest');
 
         const [securityReview, performanceReview, maintainabilityReview] = await Promise.all([
           generateObject({ model, system: 'You are an expert in code security...', schema: z.object({ vulnerabilities: z.array(z.string()), riskLevel: z.enum(['low', 'medium', 'high']), suggestions: z.array(z.string()) }), prompt: `Review this code:\n${code}` }),
@@ -140,13 +163,15 @@
     - [ ] 2.5.3 Implement the `OrchestratorWorkerService`, adapting the logic below for streaming.
       ```typescript
       // packages/api/src/orchestrator-worker/orchestrator-worker.service.ts
-      import { openai } from '@ai-sdk/openai';
+      import { createGoogleGenerativeAI } from '@ai-sdk/google';
       import { generateObject } from 'ai';
       import { z } from 'zod';
 
+      const google = createGoogleGenerativeAI();
+
       async function implementFeature(featureRequest: string) {
         const { object: implementationPlan } = await generateObject({
-          model: openai('o3-mini'),
+          model: google('models/gemini-1.5-pro-latest'),
           schema: z.object({ files: z.array(z.object({ purpose: z.string(), filePath: z.string(), changeType: z.enum(['create', 'modify', 'delete']) })), estimatedComplexity: z.enum(['low', 'medium', 'high']) }),
           system: 'You are a senior software architect planning feature implementations.',
           prompt: `Analyze this feature request and create an implementation plan:\n${featureRequest}`,
@@ -155,7 +180,7 @@
         const fileChanges = await Promise.all(
           implementationPlan.files.map(async file => {
             const workerSystemPrompt = { create: '...', modify: '...', delete: '...' }[file.changeType];
-            const { object: change } = await generateObject({ model: openai('gpt-4o'), schema: z.object({ explanation: z.string(), code: z.string() }), system: workerSystemPrompt, prompt: `Implement the changes for ${file.filePath} to support:\n${file.purpose}\n\nConsider the overall feature context:\n${featureRequest}` });
+            const { object: change } = await generateObject({ model: google('models/gemini-1.5-pro-latest'), schema: z.object({ explanation: z.string(), code: z.string() }), system: workerSystemPrompt, prompt: `Implement the changes for ${file.filePath} to support:\n${file.purpose}\n\nConsider the overall feature context:\n${featureRequest}` });
             return { file, implementation: change };
           }),
         );
@@ -169,22 +194,24 @@
     - [ ] 2.6.3 Implement the `EvaluatorOptimizerService`, adapting the logic below for streaming.
       ```typescript
       // packages/api/src/evaluator-optimizer/evaluator-optimizer.service.ts
-      import { openai } from '@ai-sdk/openai';
+      import { createGoogleGenerativeAI } from '@ai-sdk/google';
       import { generateText, generateObject } from 'ai';
       import { z } from 'zod';
+
+      const google = createGoogleGenerativeAI();
 
       async function translateWithFeedback(text: string, targetLanguage: string) {
         let currentTranslation = '';
         let iterations = 0;
         const MAX_ITERATIONS = 3;
 
-        const { text: translation } = await generateText({ model: openai('gpt-4o-mini'), system: 'You are an expert literary translator.', prompt: `Translate this text to ${targetLanguage}...\n${text}` });
+        const { text: translation } = await generateText({ model: google('models/gemini-1.5-flash-latest'), system: 'You are an expert literary translator.', prompt: `Translate this text to ${targetLanguage}...\n${text}` });
         currentTranslation = translation;
 
         while (iterations < MAX_ITERATIONS) {
-          const { object: evaluation } = await generateObject({ model: openai('gpt-4o'), schema: z.object({ qualityScore: z.number().min(1).max(10), preservesTone: z.boolean(), preservesNuance: z.boolean(), culturallyAccurate: z.boolean(), specificIssues: z.array(z.string()), improvementSuggestions: z.array(z.string()) }), system: 'You are an expert in evaluating literary translations.', prompt: `Evaluate this translation:\n\nOriginal: ${text}\nTranslation: ${currentTranslation}` });
+          const { object: evaluation } = await generateObject({ model: google('models/gemini-1.5-pro-latest'), schema: z.object({ qualityScore: z.number().min(1).max(10), preservesTone: z.boolean(), preservesNuance: z.boolean(), culturallyAccurate: z.boolean(), specificIssues: z.array(z.string()), improvementSuggestions: z.array(z.string()) }), system: 'You are an expert in evaluating literary translations.', prompt: `Evaluate this translation:\n\nOriginal: ${text}\nTranslation: ${currentTranslation}` });
           if (evaluation.qualityScore >= 8 && evaluation.preservesTone && evaluation.preservesNuance && evaluation.culturallyAccurate) break;
-          const { text: improvedTranslation } = await generateText({ model: openai('gpt-4o'), system: 'You are an expert literary translator.', prompt: `Improve this translation based on the following feedback:\n${evaluation.specificIssues.join('\n')}\n${evaluation.improvementSuggestions.join('\n')}\n\nOriginal: ${text}\nCurrent Translation: ${currentTranslation}` });
+          const { text: improvedTranslation } = await generateText({ model: google('models/gemini-1.5-pro-latest'), system: 'You are an expert literary translator.', prompt: `Improve this translation based on the following feedback:\n${evaluation.specificIssues.join('\n')}\n${evaluation.improvementSuggestions.join('\n')}\n\nOriginal: ${text}\nCurrent Translation: ${currentTranslation}` });
           currentTranslation = improvedTranslation;
           iterations++;
         }
@@ -198,14 +225,16 @@
     - [ ] 2.7.3 Implement the `MultiStepToolUsageService`, adapting the logic below for streaming a structured answer.
       ```typescript
       // packages/api/src/multi-step-tool-usage/multi-step-tool-usage.service.ts
-      import { openai } from '@ai-sdk/openai';
+      import { createGoogleGenerativeAI } from '@ai-sdk/google';
       import { generateText, tool, stepCountIs } from 'ai';
       import * as mathjs from 'mathjs';
       import { z } from 'zod';
 
+      const google = createGoogleGenerativeAI();
+
       async function solveMathProblem(prompt: string) {
         const { toolCalls, ... } = await generateText({
-          model: openai('gpt-4o-2024-08-06'),
+          model: google('models/gemini-1.5-pro-latest'),
           tools: {
             calculate: tool({ description: 'A tool for evaluating mathematical expressions...', parameters: z.object({ expression: z.string() }), execute: async ({ expression }) => mathjs.evaluate(expression) }),
             answer: tool({ description: 'A tool for providing the final answer.', parameters: z.object({ steps: z.array(z.object({ calculation: z.string(), reasoning: z.string() })), answer: z.string() }) }),
