@@ -1,6 +1,7 @@
 # Agent Patterns Repository Implementation Plan
 
 ## Notes
+- **AI SDK Docs**: https://v5.ai-sdk.dev/docs/foundations/agents
 - **Monorepo**: Use `pnpm workspaces` to manage the `api` (backend) and `webapp` (frontend) packages.
 - **Backend**: A Nest.js application. Each agent pattern will be implemented in its own module.
 - **Frontend**: A React.js application built with Vite and Material UI. Each pattern will have its own page.
