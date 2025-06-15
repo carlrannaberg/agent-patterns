@@ -1,17 +1,17 @@
-# Issue 4: API Testing
+# Issue 1: API Testing
 
 ## Requirement
-Implement comprehensive API testing for all six agent pattern endpoints using Vitest with proper mocking of AI SDK calls.
+Implement comprehensive API testing for all six agent pattern endpoints using Vitest, ensuring proper service wiring and functionality while mocking AI SDK calls.
 
 ## Acceptance Criteria
-- Vitest configured in the `api` package
-- API tests written for all six endpoints:
-  - `/sequential-processing`
-  - `/routing`
-  - `/parallel-processing`
-  - `/orchestrator-worker`
-  - `/evaluator-optimizer`
-  - `/multi-step-tool-usage`
-- AI SDK calls properly mocked to ensure services are wired correctly
-- All tests pass and verify proper request/response handling
+- [ ] Configure Vitest in the `api` package
+- [ ] Write API tests for each of the six endpoints:
+  - `/sequential-processing` - Test marketing copy generation flow
+  - `/routing` - Test customer query classification and routing
+  - `/parallel-processing` - Test concurrent code review functionality
+  - `/orchestrator-worker` - Test feature implementation planning
+  - `/evaluator-optimizer` - Test iterative translation improvement
+  - `/multi-step-tool-usage` - Test mathematical problem solving
+- [ ] Mock AI SDK calls to ensure services are wired correctly
+- [ ] All tests pass and validate proper request/response handling
 
