@@ -1,3 +1,3 @@
 # To-Do
 
-- [ ] **[Issue #1]** Project & Developer Experience Setup - `issues/1-dx-setup.md`
+- [ ] **[Issue #0]** Decompose Project Plan - `issues/0-bootstrap-plan.md`
