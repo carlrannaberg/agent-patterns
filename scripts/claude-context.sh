@@ -23,7 +23,7 @@ run_next_task() {
     echo "#################################################################"
     echo "#              AUTONOMOUS AGENT - NEW TASK                   #"
     echo "#################################################################"
-    echo "Found next task. Launching agent in headless mode for:"
+    echo "Found next task. Launching agent in headless JSON mode for:"
     echo "  - Current Issue:   ${ISSUE_FILE}"
     echo "  - Detailed Plan:   ${PLAN_FILE}"
     echo ""
@@ -35,12 +35,27 @@ run_next_task() {
 
     INITIAL_PROMPT="You are an autonomous AI agent. The following text, provided via stdin, contains your task context (TODO list, issue spec, and implementation plan). Your goal is to execute the plan to resolve the issue. Output your actions and reasoning as you work. The task is complete when you have fulfilled all requirements."
 
-    # Execute the agent in headless mode. If it succeeds, mark the task as done.
-    if ( cat todo.md "${ISSUE_FILE}" "${PLAN_FILE}" | claude -p "$INITIAL_PROMPT" --dangerously-skip-permissions ); then
-        echo "✅ Agent task completed successfully."
+    # Tee the output to a file while also printing it, and check the exit status
+    OUTPUT_LOG=$(mktemp)
+    AGENT_SUCCESS=false
+
+    # The 'set -o pipefail' ensures that the command fails if any part of the pipe fails.
+    set -o pipefail
+    if ( cat todo.md "${ISSUE_FILE}" "${PLAN_FILE}" | claude -p "$INITIAL_PROMPT" --dangerously-skip-permissions --output-format stream-json | tee "$OUTPUT_LOG" ); then
+        # Check the last line of the output log for the success signal from the JSON stream
+        LAST_LINE=$(tail -n 1 "$OUTPUT_LOG")
+        if echo "$LAST_LINE" | grep -q '"event":"result"' && echo "$LAST_LINE" | grep -q '"success":true'; then
+            AGENT_SUCCESS=true
+        fi
+    fi
+    set +o pipefail # Reset pipefail option
+    rm "$OUTPUT_LOG"
+
+
+    if $AGENT_SUCCESS; then
+        echo "✅ Agent task completed successfully (verified via JSON stream)."
 
         echo "➡️ Marking task as complete in todo.md..."
-        # Use sed to mark the specific line as done for reliability. macOS compatible syntax.
         sed -i.bak "s/${CURRENT_TASK_LINE}/[x]${CURRENT_TASK_LINE:3}/" todo.md
         rm todo.md.bak
 
@@ -51,7 +66,7 @@ run_next_task() {
 
         return 0 # Task was successful, continue loop
     else
-        echo "⚠️ Agent exited with an error. Stopping the autonomous loop."
+        echo "⚠️ Agent exited with an error or did not signal success. Stopping the autonomous loop."
         return 1 # Agent failed, stop loop
     fi
 }
