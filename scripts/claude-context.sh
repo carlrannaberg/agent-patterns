@@ -27,16 +27,37 @@ if [ ! -f "$PLAN_FILE" ]; then
 fi
 
 echo "#################################################################"
-echo "#                 CLAUDE CODE CONTEXT LOADER                    #"
+echo "#                 CLAUDE CONTEXT LOADER                    #"
 echo "#################################################################"
 echo ""
-echo "Loading context for the agent..."
+echo "Found task. Launching agent with the following context:"
 echo "  - TODO List:       todo.md"
 echo "  - Current Issue:   ${ISSUE_FILE}"
 echo "  - Detailed Plan:   ${PLAN_FILE}"
 echo ""
-echo "You can now prompt the agent, e.g., 'Begin work on the current task.'"
-echo ""
-echo "# --- This is where you would invoke the Claude Code SDK --- #"
-echo "# Example: claude-code --context todo.md --context ${ISSUE_FILE} --context ${PLAN_FILE} --dangerously-skip-permissions"
-echo ""
+
+# Check if claude is installed
+if ! command -v claude &> /dev/null
+then
+    echo "Error: 'claude' command not found."
+    echo "Please ensure the Claude Code CLI is installed and in your PATH."
+    exit 1
+fi
+
+# Concatenate context files and pipe them to the claude command with an initial prompt.
+INITIAL_PROMPT="You are an autonomous AI agent. The following text, provided via stdin, contains your task context. It consists of a TODO list, a high-level issue description, and a detailed implementation plan. Your goal is to execute the plan to resolve the issue. Please begin."
+
+(
+  echo "--- CONTEXT START (from stdin) ---"
+  echo ""
+  echo "## FILE: todo.md"
+  cat todo.md
+  echo ""
+  echo "## FILE: ${ISSUE_FILE}"
+  cat "${ISSUE_FILE}"
+  echo ""
+  echo "## FILE: ${PLAN_FILE}"
+  cat "${PLAN_FILE}"
+  echo ""
+  echo "--- CONTEXT END ---"
+) | claude "$INITIAL_PROMPT" --dangerously-skip-permissions
