@@ -44,7 +44,7 @@ run_next_task() {
     if ( cat todo.md "${ISSUE_FILE}" "${PLAN_FILE}" | claude -p "$INITIAL_PROMPT" --dangerously-skip-permissions --output-format stream-json --verbose | tee "$OUTPUT_LOG" ); then
         # Check the last line of the output log for the success signal from the JSON stream
         LAST_LINE=$(tail -n 1 "$OUTPUT_LOG")
-        if echo "$LAST_LINE" | grep -q '"event":"result"' && echo "$LAST_LINE" | grep -q '"success":true'; then
+        if echo "$LAST_LINE" | grep -q '"type":"result"' && echo "$LAST_LINE" | grep -q '"is_error":false'; then
             AGENT_SUCCESS=true
         fi
     fi
