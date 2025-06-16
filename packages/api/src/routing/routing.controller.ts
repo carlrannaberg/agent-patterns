@@ -8,10 +8,10 @@ export class RoutingController {
 
   @Post()
   async handleCustomerQuery(
-    @Body() body: { input: string },
+    @Body() body: { query: string },
     @Res() res: Response,
   ) {
-    const result = await this.routingService.handleCustomerQuery(body.input);
+    const result = await this.routingService.handleCustomerQuery(body.query);
 
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-cache');
