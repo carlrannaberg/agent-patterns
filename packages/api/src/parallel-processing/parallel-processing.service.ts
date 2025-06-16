@@ -9,12 +9,12 @@ const google = createGoogleGenerativeAI();
 export class ParallelProcessingService {
   private readonly logger = new Logger(ParallelProcessingService.name);
   async parallelCodeReview(code: string) {
-    this.logger.log('Starting parallel code review process');
+    this.logger.verbose('Starting parallel code review process');
     this.logger.debug(`Code length: ${code.length} characters`);
 
     const model = google('models/gemini-2.5-pro-preview-06-05');
 
-    this.logger.log(
+    this.logger.verbose(
       'Initiating parallel reviews: security, performance, and maintainability',
     );
 
@@ -55,7 +55,7 @@ export class ParallelProcessingService {
         }),
       ]);
 
-    this.logger.log('Parallel reviews completed successfully');
+    this.logger.verbose('Parallel reviews completed successfully');
     this.logger.debug(
       `Security risk level: ${securityReview.object.riskLevel}`,
     );
@@ -70,7 +70,7 @@ export class ParallelProcessingService {
       { ...maintainabilityReview.object, type: 'maintainability' },
     ];
 
-    this.logger.log('Generating comprehensive summary from all reviews');
+    this.logger.verbose('Generating comprehensive summary from all reviews');
 
     const { text: summary } = await generateText({
       model,
@@ -78,9 +78,9 @@ export class ParallelProcessingService {
       prompt: `Synthesize these code review results into a concise summary with key actions:\n${JSON.stringify(reviews, null, 2)}`,
     });
 
-    this.logger.log('Summary generation completed');
+    this.logger.verbose('Summary generation completed');
     this.logger.debug(`Summary length: ${summary.length} characters`);
-    this.logger.log('Starting final streaming result generation');
+    this.logger.verbose('Starting final streaming result generation');
 
     const result = streamObject({
       model,
@@ -104,7 +104,7 @@ export class ParallelProcessingService {
       prompt: `Return the following data as a structured object:\n\nReviews: ${JSON.stringify(reviews)}\nSummary: ${summary}`,
     });
 
-    this.logger.log(
+    this.logger.verbose(
       'Parallel code review process completed - streaming results',
     );
     return result;

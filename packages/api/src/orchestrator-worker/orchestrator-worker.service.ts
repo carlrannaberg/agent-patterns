@@ -9,7 +9,7 @@ const google = createGoogleGenerativeAI();
 export class OrchestratorWorkerService {
   private readonly logger = new Logger(OrchestratorWorkerService.name);
   async implementFeature(featureRequest: string) {
-    this.logger.log('Starting feature implementation planning process');
+    this.logger.verbose('Starting feature implementation planning process');
     this.logger.debug(
       `Feature request: ${featureRequest.substring(0, 100)}...`,
     );
@@ -17,7 +17,7 @@ export class OrchestratorWorkerService {
     const orchestratorModel = google('models/gemini-2.5-pro-preview-06-05');
     const workerModel = google('models/gemini-2.5-pro-preview-06-05');
 
-    this.logger.log('Generating implementation plan with orchestrator');
+    this.logger.verbose('Generating implementation plan with orchestrator');
 
     const { object: implementationPlan } = await generateObject({
       model: orchestratorModel,
@@ -36,12 +36,12 @@ export class OrchestratorWorkerService {
       prompt: `Analyze this feature request and create an implementation plan:\n${featureRequest}`,
     });
 
-    this.logger.log('Implementation plan generated successfully');
+    this.logger.verbose('Implementation plan generated successfully');
     this.logger.debug(`Files to change: ${implementationPlan.files.length}`);
     this.logger.debug(
       `Estimated complexity: ${implementationPlan.estimatedComplexity}`,
     );
-    this.logger.log('Starting worker execution for each file change');
+    this.logger.verbose('Starting worker execution for each file change');
 
     const fileChanges = await Promise.all(
       implementationPlan.files.map(async (file, index) => {
@@ -77,9 +77,9 @@ export class OrchestratorWorkerService {
       }),
     );
 
-    this.logger.log('All worker executions completed successfully');
+    this.logger.verbose('All worker executions completed successfully');
     this.logger.debug(`Total implementations generated: ${fileChanges.length}`);
-    this.logger.log('Starting final streaming result generation');
+    this.logger.verbose('Starting final streaming result generation');
 
     const result = streamObject({
       model: orchestratorModel,
@@ -111,7 +111,7 @@ export class OrchestratorWorkerService {
       prompt: `Return the following data as a structured object:\n\nPlan: ${JSON.stringify(implementationPlan)}\nChanges: ${JSON.stringify(fileChanges)}`,
     });
 
-    this.logger.log(
+    this.logger.verbose(
       'Feature implementation process completed - streaming results',
     );
     return result;

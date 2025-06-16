@@ -9,7 +9,7 @@ const google = createGoogleGenerativeAI();
 export class EvaluatorOptimizerService {
   private readonly logger = new Logger(EvaluatorOptimizerService.name);
   async translateWithFeedback(text: string, targetLanguage: string) {
-    this.logger.log('Starting translation with iterative feedback process');
+    this.logger.verbose('Starting translation with iterative feedback process');
     this.logger.debug(`Text length: ${text.length} characters`);
     this.logger.debug(`Target language: ${targetLanguage}`);
 
@@ -26,7 +26,7 @@ export class EvaluatorOptimizerService {
     const translatorModel = google('models/gemini-2.5-flash-preview-05-20');
     const evaluatorModel = google('models/gemini-2.5-pro-preview-06-05');
 
-    this.logger.log('Step 1: Generating initial translation');
+    this.logger.verbose('Step 1: Generating initial translation');
 
     const { text: translation } = await generateText({
       model: translatorModel,
@@ -36,17 +36,17 @@ export class EvaluatorOptimizerService {
     });
     currentTranslation = translation;
 
-    this.logger.log('Initial translation completed');
+    this.logger.verbose('Initial translation completed');
     this.logger.debug(
       `Initial translation length: ${currentTranslation.length} characters`,
     );
-    this.logger.log('Starting evaluation-optimization loop');
+    this.logger.verbose('Starting evaluation-optimization loop');
 
     while (iterations < MAX_ITERATIONS) {
       this.logger.debug(
         `Starting iteration ${iterations + 1}/${MAX_ITERATIONS}`,
       );
-      this.logger.log(
+      this.logger.verbose(
         `Evaluating translation quality - iteration ${iterations + 1}`,
       );
 
@@ -82,14 +82,14 @@ export class EvaluatorOptimizerService {
         evaluation.preservesNuance &&
         evaluation.culturallyAccurate
       ) {
-        this.logger.log(
+        this.logger.verbose(
           `Translation quality threshold met (score: ${evaluation.qualityScore}/10) - stopping optimization`,
         );
         break;
       }
 
       if (iterations < MAX_ITERATIONS - 1) {
-        this.logger.log(
+        this.logger.verbose(
           `Generating improved translation based on feedback - iteration ${iterations + 1}`,
         );
 
@@ -108,10 +108,10 @@ export class EvaluatorOptimizerService {
       iterations++;
     }
 
-    this.logger.log(
+    this.logger.verbose(
       `Translation optimization completed after ${iterations} iterations`,
     );
-    this.logger.log('Starting final streaming result generation');
+    this.logger.verbose('Starting final streaming result generation');
 
     const result = streamObject({
       model: evaluatorModel,
@@ -138,7 +138,7 @@ export class EvaluatorOptimizerService {
       prompt: `Return the following data as a structured object:\n\nFinal Translation: ${currentTranslation}\nIterations Required: ${iterations}\nIteration Results: ${JSON.stringify(iterationResults)}\nOriginal Text: ${text}\nTarget Language: ${targetLanguage}`,
     });
 
-    this.logger.log(
+    this.logger.verbose(
       'Translation with feedback process completed - streaming results',
     );
     return result;
