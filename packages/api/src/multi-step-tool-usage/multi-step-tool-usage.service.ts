@@ -25,12 +25,12 @@ export class MultiStepToolUsageService {
           execute: async ({ expression }) => {
             try {
               const result = mathjs.evaluate(expression) as number | string;
-              return { result: String(result), expression };
+              return Promise.resolve({ result: String(result), expression });
             } catch (error: unknown) {
-              return {
+              return Promise.resolve({
                 error: `Error evaluating expression: ${error instanceof Error ? error.message : 'Unknown error'}`,
                 expression,
-              };
+              });
             }
           },
         }),
@@ -63,7 +63,8 @@ export class MultiStepToolUsageService {
 
     const calculationResults = calculations.map((calc, index) => {
       const toolResult = toolResults.find(
-        (r: { toolCallId: string; result: unknown }) => r.toolCallId === calc.toolCallId,
+        (r: { toolCallId: string; result: unknown }) =>
+          r.toolCallId === calc.toolCallId,
       );
       const resultValue =
         toolResult &&
