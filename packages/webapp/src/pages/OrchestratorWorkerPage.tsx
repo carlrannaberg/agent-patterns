@@ -73,7 +73,7 @@ export default function OrchestratorWorkerPage() {
   const [codeExpanded, setCodeExpanded] = useState(false);
 
   return (
-    <Box sx={{ maxWidth: '100%', mx: 'auto', p: 2 }}>
+    <Box sx={{ maxWidth: '100%', mx: 'auto', p: 2, mt: 0 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         Orchestrator-Worker
       </Typography>
