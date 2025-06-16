@@ -220,7 +220,7 @@ describe('RoutingService - Business Logic', () => {
 
       const mockStream = new Readable({ read() {} });
       const mockStreamObjectResult = {
-        toTextStreamResponse: jest.fn().mockReturnValue(mockStream),
+        pipeTextStreamToResponse: jest.fn(),
       };
       mockStreamObject.mockReturnValue(mockStreamObjectResult as any);
 

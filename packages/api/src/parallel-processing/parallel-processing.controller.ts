@@ -18,7 +18,7 @@ export class ParallelProcessingController {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    // For streamObject, use pipeDataStreamToResponse
-    result.pipeDataStreamToResponse(res);
+    // For streamObject, use pipeTextStreamToResponse
+    result.pipeTextStreamToResponse(res);
   }
 }

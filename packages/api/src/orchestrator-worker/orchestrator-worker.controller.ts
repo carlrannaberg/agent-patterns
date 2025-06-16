@@ -17,11 +17,15 @@ export class OrchestratorWorkerController {
       body.featureRequest,
     );
 
+    console.log('All methods on result:', Object.getOwnPropertyNames(result));
+    console.log('All methods including prototype:', Object.getOwnPropertyNames(Object.getPrototypeOf(result)));
+
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    // For streamObject, use pipeDataStreamToResponse
-    result.pipeDataStreamToResponse(res);
+    // For streamObject, call toTextStreamResponse with the response object
+    // @ts-ignore
+    result.toTextStreamResponse(res);
   }
 }

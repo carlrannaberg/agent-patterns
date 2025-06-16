@@ -8,7 +8,7 @@ describe('SequentialProcessingController', () => {
   beforeEach(() => {
     const mockService = {
       generateMarketingCopy: jest.fn().mockResolvedValue({
-        pipeDataStreamToResponse: jest.fn(),
+        pipeTextStreamToResponse: jest.fn(),
       }),
     } as unknown as SequentialProcessingService;
 

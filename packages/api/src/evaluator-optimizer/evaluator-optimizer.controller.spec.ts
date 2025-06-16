@@ -7,7 +7,7 @@ describe('EvaluatorOptimizerController', () => {
   let service: EvaluatorOptimizerService;
 
   const mockResult = {
-    pipeDataStreamToResponse: jest.fn(),
+    pipeTextStreamToResponse: jest.fn(),
   };
 
   beforeEach(() => {
@@ -53,7 +53,7 @@ describe('EvaluatorOptimizerController', () => {
         'Connection',
         'keep-alive',
       );
-      expect(mockResult.pipeDataStreamToResponse).toHaveBeenCalledWith(mockResponse);
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle different target languages', async () => {

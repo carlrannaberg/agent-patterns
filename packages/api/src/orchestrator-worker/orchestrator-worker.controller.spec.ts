@@ -7,7 +7,7 @@ describe('OrchestratorWorkerController', () => {
   let service: OrchestratorWorkerService;
 
   const mockResult = {
-    pipeDataStreamToResponse: jest.fn(),
+    pipeTextStreamToResponse: jest.fn(),
   };
 
   beforeEach(() => {
@@ -46,7 +46,7 @@ describe('OrchestratorWorkerController', () => {
         'Connection',
         'keep-alive',
       );
-      expect(mockResult.pipeDataStreamToResponse).toHaveBeenCalledWith(mockResponse);
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle complex feature request', async () => {

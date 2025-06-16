@@ -7,7 +7,7 @@ describe('MultiStepToolUsageController', () => {
   let service: MultiStepToolUsageService;
 
   const mockResult = {
-    pipeDataStreamToResponse: jest.fn(),
+    pipeTextStreamToResponse: jest.fn(),
   };
 
   beforeEach(() => {
@@ -46,7 +46,7 @@ describe('MultiStepToolUsageController', () => {
         'Connection',
         'keep-alive',
       );
-      expect(mockResult.pipeDataStreamToResponse).toHaveBeenCalledWith(mockResponse);
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle complex math problem', async () => {

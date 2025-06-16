@@ -10,6 +10,7 @@ import {
 import TextareaAutosize from 'react-textarea-autosize';
 import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { z } from 'zod';
+import SequentialProcessingDisplay from './SequentialProcessingDisplay';
 
 interface AgentInteractionProps {
   apiEndpoint: string;
@@ -95,28 +96,34 @@ export default function AgentInteraction({
       )}
 
       {object && (
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Response
-            </Typography>
-            <Box
-              component="pre"
-              sx={{
-                backgroundColor: '#f5f5f5',
-                p: 2,
-                borderRadius: 1,
-                overflow: 'auto',
-                fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-                fontSize: '14px',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-              }}
-            >
-              {JSON.stringify(object, null, 2)}
-            </Box>
-          </CardContent>
-        </Card>
+        <>
+          {apiEndpoint === 'sequential-processing' ? (
+            <SequentialProcessingDisplay result={object} />
+          ) : (
+            <Card>
+              <CardContent>
+                <Typography variant="h6" gutterBottom>
+                  Response
+                </Typography>
+                <Box
+                  component="pre"
+                  sx={{
+                    backgroundColor: '#f5f5f5',
+                    p: 2,
+                    borderRadius: 1,
+                    overflow: 'auto',
+                    fontFamily: 'Monaco, Consolas, "Courier New", monospace',
+                    fontSize: '14px',
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {JSON.stringify(object, null, 2)}
+                </Box>
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
     </Box>
   );
