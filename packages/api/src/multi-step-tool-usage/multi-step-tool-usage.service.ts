@@ -22,7 +22,7 @@ export class MultiStepToolUsageService {
               .string()
               .describe('The mathematical expression to evaluate'),
           }),
-          execute: ({ expression }) => {
+          execute: async ({ expression }) => {
             try {
               const result = mathjs.evaluate(expression) as number | string;
               return { result: String(result), expression };
@@ -63,7 +63,7 @@ export class MultiStepToolUsageService {
 
     const calculationResults = calculations.map((calc, index) => {
       const toolResult = toolResults.find(
-        (r) => r.toolCallId === calc.toolCallId,
+        (r: any) => r.toolCallId === calc.toolCallId,
       );
       const resultValue =
         toolResult &&
@@ -73,7 +73,7 @@ export class MultiStepToolUsageService {
           ? (toolResult.result as { result?: string }).result
           : 'Error';
       return {
-        expression: String(calc.args?.expression || ''),
+        expression: String((calc.args as any)?.expression || ''),
         result: resultValue || 'Error',
         step: index + 1,
       };
@@ -99,7 +99,7 @@ export class MultiStepToolUsageService {
         finalAnswer: z.string(),
         workingSteps: z.string(),
       }),
-      prompt: `Return the following data as a structured object:\n\nProblem: ${prompt}\nCalculations performed: ${JSON.stringify(calculationResults)}\nSteps: ${JSON.stringify(finalAnswer?.args?.steps || [])}\nFinal Answer: ${finalAnswer?.args?.answer || 'No answer provided'}\nWorking Steps: ${text}`,
+      prompt: `Return the following data as a structured object:\n\nProblem: ${prompt}\nCalculations performed: ${JSON.stringify(calculationResults)}\nSteps: ${JSON.stringify((finalAnswer?.args as any)?.steps || [])}\nFinal Answer: ${(finalAnswer?.args as any)?.answer || 'No answer provided'}\nWorking Steps: ${text}`,
     }).toTextStreamResponse();
   }
 }
