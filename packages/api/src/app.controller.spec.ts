@@ -1,13 +1,12 @@
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 describe('AppController', () => {
   let appController: AppController;
   let appService: AppService;
 
   const mockAppService = {
-    getHello: vi.fn().mockReturnValue('Hello World!'),
+    getHello: jest.fn().mockReturnValue('Hello World!'),
   } as unknown as AppService;
 
   beforeEach(() => {

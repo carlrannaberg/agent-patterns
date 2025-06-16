@@ -1,40 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { App } from 'supertest/types';
-import { ParallelProcessingController } from '../src/parallel-processing/parallel-processing.controller';
-import { ParallelProcessingService } from '../src/parallel-processing/parallel-processing.service';
+import * as request from 'supertest';
 import { ParallelProcessingModule } from '../src/parallel-processing/parallel-processing.module';
-import { Readable } from 'stream';
-import { vi } from 'vitest';
 
 describe('ParallelProcessingController (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: INestApplication;
 
-  beforeEach(async () => {
-    const mockStream = new Readable({
-      read() {
-        this.push('{"data": "mock response"}');
-        this.push(null);
-      }
-    });
-
-    const mockService = {
-      parallelCodeReview: vi.fn().mockResolvedValue(mockStream),
-    };
-
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [ParallelProcessingModule],
-    })
-    .overrideProvider(ParallelProcessingService)
-    .useValue(mockService)
-    .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
   });
 

@@ -1,6 +1,5 @@
 import { RoutingController } from './routing.controller';
 import { RoutingService } from './routing.service';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Response } from 'express';
 
 describe('RoutingController', () => {
@@ -8,12 +7,12 @@ describe('RoutingController', () => {
   let service: RoutingService;
 
   const mockStream = {
-    pipe: vi.fn(),
+    pipe: jest.fn(),
   } as unknown as NodeJS.ReadableStream;
 
   beforeEach(() => {
     const mockService = {
-      handleCustomerQuery: vi.fn().mockResolvedValue(mockStream),
+      handleCustomerQuery: jest.fn().mockResolvedValue(mockStream),
     } as unknown as RoutingService;
 
     // Manually inject the service to bypass DI issues
@@ -29,7 +28,7 @@ describe('RoutingController', () => {
     it('should handle customer query and stream response', async () => {
       const query = 'How do I cancel my subscription?';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.handleCustomerQuery({ query }, mockResponse);
@@ -53,7 +52,7 @@ describe('RoutingController', () => {
     it('should handle technical support query', async () => {
       const query = 'My app crashes when I click the export button';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.handleCustomerQuery({ query }, mockResponse);
@@ -64,7 +63,7 @@ describe('RoutingController', () => {
     it('should handle empty query', async () => {
       const query = '';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.handleCustomerQuery({ query }, mockResponse);
@@ -79,7 +78,7 @@ describe('RoutingController', () => {
       );
 
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await expect(
@@ -90,7 +89,7 @@ describe('RoutingController', () => {
     it('should handle billing queries', async () => {
       const query = 'I was charged twice this month';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.handleCustomerQuery({ query }, mockResponse);

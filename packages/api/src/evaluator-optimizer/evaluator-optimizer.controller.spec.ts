@@ -1,6 +1,5 @@
 import { EvaluatorOptimizerController } from './evaluator-optimizer.controller';
 import { EvaluatorOptimizerService } from './evaluator-optimizer.service';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Response } from 'express';
 
 describe('EvaluatorOptimizerController', () => {
@@ -8,12 +7,12 @@ describe('EvaluatorOptimizerController', () => {
   let service: EvaluatorOptimizerService;
 
   const mockStream = {
-    pipe: vi.fn(),
+    pipe: jest.fn(),
   } as unknown as NodeJS.ReadableStream;
 
   beforeEach(() => {
     const mockService = {
-      translateWithFeedback: vi.fn().mockResolvedValue(mockStream),
+      translateWithFeedback: jest.fn().mockResolvedValue(mockStream),
     } as unknown as EvaluatorOptimizerService;
 
     // Manually inject the service to bypass DI issues
@@ -30,7 +29,7 @@ describe('EvaluatorOptimizerController', () => {
       const text = 'Hello, how are you today?';
       const targetLanguage = 'Spanish';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.translateWithFeedback(
@@ -61,7 +60,7 @@ describe('EvaluatorOptimizerController', () => {
       const text = 'Good morning, beautiful weather today!';
       const targetLanguage = 'French';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.translateWithFeedback(
@@ -80,7 +79,7 @@ describe('EvaluatorOptimizerController', () => {
         'The quick brown fox jumps over the lazy dog. This sentence contains every letter of the alphabet.';
       const targetLanguage = 'German';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.translateWithFeedback(
@@ -98,7 +97,7 @@ describe('EvaluatorOptimizerController', () => {
       const text = '';
       const targetLanguage = 'Italian';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.translateWithFeedback(
@@ -120,7 +119,7 @@ describe('EvaluatorOptimizerController', () => {
       );
 
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await expect(
@@ -136,7 +135,7 @@ describe('EvaluatorOptimizerController', () => {
         'Machine learning algorithms process large datasets to identify patterns.';
       const targetLanguage = 'Japanese';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.translateWithFeedback(

@@ -1,40 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { App } from 'supertest/types';
-import { OrchestratorWorkerController } from '../src/orchestrator-worker/orchestrator-worker.controller';
-import { OrchestratorWorkerService } from '../src/orchestrator-worker/orchestrator-worker.service';
+import * as request from 'supertest';
 import { OrchestratorWorkerModule } from '../src/orchestrator-worker/orchestrator-worker.module';
-import { Readable } from 'stream';
-import { vi } from 'vitest';
 
 describe('OrchestratorWorkerController (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: INestApplication;
 
-  beforeEach(async () => {
-    const mockStream = new Readable({
-      read() {
-        this.push('{"data": "mock response"}');
-        this.push(null);
-      }
-    });
-
-    const mockService = {
-      implementFeature: vi.fn().mockResolvedValue(mockStream),
-    };
-
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [OrchestratorWorkerModule],
-    })
-    .overrideProvider(OrchestratorWorkerService)
-    .useValue(mockService)
-    .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
   });
 

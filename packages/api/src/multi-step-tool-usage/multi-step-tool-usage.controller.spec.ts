@@ -1,6 +1,5 @@
 import { MultiStepToolUsageController } from './multi-step-tool-usage.controller';
 import { MultiStepToolUsageService } from './multi-step-tool-usage.service';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Response } from 'express';
 
 describe('MultiStepToolUsageController', () => {
@@ -8,12 +7,12 @@ describe('MultiStepToolUsageController', () => {
   let service: MultiStepToolUsageService;
 
   const mockStream = {
-    pipe: vi.fn(),
+    pipe: jest.fn(),
   } as unknown as NodeJS.ReadableStream;
 
   beforeEach(() => {
     const mockService = {
-      solveMathProblem: vi.fn().mockResolvedValue(mockStream),
+      solveMathProblem: jest.fn().mockResolvedValue(mockStream),
     } as unknown as MultiStepToolUsageService;
 
     // Manually inject the service to bypass DI issues
@@ -29,7 +28,7 @@ describe('MultiStepToolUsageController', () => {
     it('should solve math problem and stream response', async () => {
       const prompt = 'What is the area of a circle with radius 5?';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.solveMathProblem({ prompt }, mockResponse);
@@ -53,7 +52,7 @@ describe('MultiStepToolUsageController', () => {
     it('should handle complex math problem', async () => {
       const prompt = 'Calculate the derivative of x^3 + 2x^2 - 5x + 1';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.solveMathProblem({ prompt }, mockResponse);
@@ -65,7 +64,7 @@ describe('MultiStepToolUsageController', () => {
       const prompt =
         'If a train travels 120 miles in 2 hours, what is its average speed?';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.solveMathProblem({ prompt }, mockResponse);
@@ -76,7 +75,7 @@ describe('MultiStepToolUsageController', () => {
     it('should handle algebraic equation', async () => {
       const prompt = 'Solve for x: 2x + 3 = 11';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.solveMathProblem({ prompt }, mockResponse);
@@ -87,7 +86,7 @@ describe('MultiStepToolUsageController', () => {
     it('should handle empty prompt', async () => {
       const prompt = '';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.solveMathProblem({ prompt }, mockResponse);
@@ -102,7 +101,7 @@ describe('MultiStepToolUsageController', () => {
       );
 
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await expect(
@@ -114,7 +113,7 @@ describe('MultiStepToolUsageController', () => {
       const prompt =
         'Calculate the mean, median, and mode of: 1, 2, 3, 3, 4, 5, 5, 5, 6';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.solveMathProblem({ prompt }, mockResponse);

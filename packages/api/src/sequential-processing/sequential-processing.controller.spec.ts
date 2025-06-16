@@ -1,6 +1,5 @@
 import { SequentialProcessingController } from './sequential-processing.controller';
 import { SequentialProcessingService } from './sequential-processing.service';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 describe('SequentialProcessingController', () => {
   let controller: SequentialProcessingController;
@@ -8,8 +7,8 @@ describe('SequentialProcessingController', () => {
 
   beforeEach(() => {
     const mockService = {
-      generateMarketingCopy: vi.fn().mockResolvedValue({
-        pipe: vi.fn(),
+      generateMarketingCopy: jest.fn().mockResolvedValue({
+        pipe: jest.fn(),
       }),
     } as unknown as SequentialProcessingService;
 
@@ -25,11 +24,11 @@ describe('SequentialProcessingController', () => {
   describe('generateMarketingCopy', () => {
     it('should call service and set proper headers', async () => {
       const input = 'AI-powered productivity app';
-      const mockStream = { pipe: vi.fn() };
+      const mockStream = { pipe: jest.fn() };
       (service.generateMarketingCopy as any).mockResolvedValue(mockStream);
 
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.generateMarketingCopy({ input }, mockResponse);
@@ -52,11 +51,11 @@ describe('SequentialProcessingController', () => {
 
     it('should handle empty input', async () => {
       const input = '';
-      const mockStream = { pipe: vi.fn() };
+      const mockStream = { pipe: jest.fn() };
       (service.generateMarketingCopy as any).mockResolvedValue(mockStream);
 
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.generateMarketingCopy({ input }, mockResponse);
@@ -71,7 +70,7 @@ describe('SequentialProcessingController', () => {
       );
 
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await expect(

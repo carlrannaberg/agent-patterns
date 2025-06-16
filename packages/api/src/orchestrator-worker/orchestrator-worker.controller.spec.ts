@@ -1,6 +1,5 @@
 import { OrchestratorWorkerController } from './orchestrator-worker.controller';
 import { OrchestratorWorkerService } from './orchestrator-worker.service';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Response } from 'express';
 
 describe('OrchestratorWorkerController', () => {
@@ -8,12 +7,12 @@ describe('OrchestratorWorkerController', () => {
   let service: OrchestratorWorkerService;
 
   const mockStream = {
-    pipe: vi.fn(),
+    pipe: jest.fn(),
   } as unknown as NodeJS.ReadableStream;
 
   beforeEach(() => {
     const mockService = {
-      implementFeature: vi.fn().mockResolvedValue(mockStream),
+      implementFeature: jest.fn().mockResolvedValue(mockStream),
     } as unknown as OrchestratorWorkerService;
 
     // Manually inject the service to bypass DI issues
@@ -29,7 +28,7 @@ describe('OrchestratorWorkerController', () => {
     it('should implement feature and stream response', async () => {
       const featureRequest = 'Add user authentication with JWT tokens';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.implementFeature({ featureRequest }, mockResponse);
@@ -54,7 +53,7 @@ describe('OrchestratorWorkerController', () => {
       const featureRequest =
         'Implement real-time chat with WebSocket support and message persistence';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.implementFeature({ featureRequest }, mockResponse);
@@ -65,7 +64,7 @@ describe('OrchestratorWorkerController', () => {
     it('should handle simple feature request', async () => {
       const featureRequest = 'Add a dark mode toggle button';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.implementFeature({ featureRequest }, mockResponse);
@@ -76,7 +75,7 @@ describe('OrchestratorWorkerController', () => {
     it('should handle empty feature request', async () => {
       const featureRequest = '';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.implementFeature({ featureRequest }, mockResponse);
@@ -91,7 +90,7 @@ describe('OrchestratorWorkerController', () => {
       );
 
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await expect(
@@ -103,7 +102,7 @@ describe('OrchestratorWorkerController', () => {
       const featureRequest =
         'Add PostgreSQL database integration with migrations';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.implementFeature({ featureRequest }, mockResponse);

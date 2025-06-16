@@ -1,6 +1,5 @@
 import { ParallelProcessingController } from './parallel-processing.controller';
 import { ParallelProcessingService } from './parallel-processing.service';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { Response } from 'express';
 
 describe('ParallelProcessingController', () => {
@@ -8,12 +7,12 @@ describe('ParallelProcessingController', () => {
   let service: ParallelProcessingService;
 
   const mockStream = {
-    pipe: vi.fn(),
+    pipe: jest.fn(),
   } as unknown as NodeJS.ReadableStream;
 
   beforeEach(() => {
     const mockService = {
-      parallelCodeReview: vi.fn().mockResolvedValue(mockStream),
+      parallelCodeReview: jest.fn().mockResolvedValue(mockStream),
     } as unknown as ParallelProcessingService;
 
     // Manually inject the service to bypass DI issues
@@ -29,7 +28,7 @@ describe('ParallelProcessingController', () => {
     it('should review code and stream response', async () => {
       const code = 'function add(a, b) { return a + b; }';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.reviewCode({ code }, mockResponse);
@@ -60,7 +59,7 @@ describe('ParallelProcessingController', () => {
         }
       `;
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.reviewCode({ code }, mockResponse);
@@ -71,7 +70,7 @@ describe('ParallelProcessingController', () => {
     it('should handle empty code', async () => {
       const code = '';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.reviewCode({ code }, mockResponse);
@@ -86,7 +85,7 @@ describe('ParallelProcessingController', () => {
       );
 
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await expect(
@@ -97,7 +96,7 @@ describe('ParallelProcessingController', () => {
     it('should handle malformed code', async () => {
       const code = 'function broken() { return';
       const mockResponse = {
-        setHeader: vi.fn(),
+        setHeader: jest.fn(),
       } as any;
 
       await controller.reviewCode({ code }, mockResponse);

@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { App } from 'supertest/types';
+import * as request from 'supertest';
 import { SequentialProcessingController } from '../src/sequential-processing/sequential-processing.controller';
 import { SequentialProcessingService } from '../src/sequential-processing/sequential-processing.service';
 import { SequentialProcessingModule } from '../src/sequential-processing/sequential-processing.module';
@@ -9,32 +8,18 @@ import { Readable } from 'stream';
 import { vi } from 'vitest';
 
 describe('SequentialProcessingController (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: INestApplication;
 
-  beforeEach(async () => {
-    const mockStream = new Readable({
-      read() {
-        this.push('{"data": "mock response"}');
-        this.push(null);
-      }
-    });
-
-    const mockService = {
-      generateMarketingCopy: vi.fn().mockResolvedValue(mockStream),
-    };
-
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [SequentialProcessingModule],
-    })
-    .overrideProvider(SequentialProcessingService)
-    .useValue(mockService)
-    .compile();
+    }).compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
   });
 
