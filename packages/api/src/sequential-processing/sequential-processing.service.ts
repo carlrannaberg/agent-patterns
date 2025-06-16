@@ -38,7 +38,7 @@ export class SequentialProcessingService {
       finalCopy = improvedCopy;
     }
 
-    const result = await streamObject({
+    const result = streamObject({
       model,
       schema: z.object({
         originalCopy: z.string(),
@@ -53,6 +53,6 @@ export class SequentialProcessingService {
       prompt: `Return the following data as a structured object:\n\nOriginal copy: ${copy}\nFinal copy: ${finalCopy}\nQuality metrics: ${JSON.stringify(qualityMetrics)}\nWas improved: ${finalCopy !== copy}`,
     });
 
-    return result.toTextStreamResponse();
+    return result;
   }
 }

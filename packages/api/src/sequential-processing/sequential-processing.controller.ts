@@ -13,7 +13,7 @@ export class SequentialProcessingController {
     @Body() body: { input: string },
     @Res() res: Response,
   ) {
-    const stream = await this.sequentialProcessingService.generateMarketingCopy(
+    const result = await this.sequentialProcessingService.generateMarketingCopy(
       body.input,
     );
 
@@ -21,6 +21,7 @@ export class SequentialProcessingController {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    (stream as unknown as NodeJS.ReadableStream).pipe(res);
+    // For streamObject, use pipeTextStreamToResponse
+    result.pipeTextStreamToResponse(res);
   }
 }
