@@ -8,6 +8,7 @@ import {
   Typography,
 } from '@mui/material';
 import TextareaAutosize from 'react-textarea-autosize';
+import { useObject } from 'ai/react';
 
 interface AgentInteractionProps {
   apiEndpoint: string;
@@ -23,56 +24,17 @@ export default function AgentInteraction({
   placeholder = 'Enter your input here...',
 }: AgentInteractionProps) {
   const [input, setInput] = useState('');
-  const [object, setObject] = useState<Record<string, unknown> | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  
+  const { object, submit, isLoading, error } = useObject({
+    api: `http://localhost:3001/${apiEndpoint}`,
+    schema: undefined, // Let the backend define the schema
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-
-    setIsLoading(true);
-    setError(null);
     
-    try {
-      const response = await fetch(`http://localhost:3001/${apiEndpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ input: input.trim() }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('No response body reader available');
-      }
-
-      const decoder = new TextDecoder();
-      let result = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        result += decoder.decode(value, { stream: true });
-        
-        try {
-          const parsed = JSON.parse(result);
-          setObject(parsed);
-        } catch {
-          // Ignore partial JSON parsing errors during streaming
-        }
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('An error occurred'));
-    } finally {
-      setIsLoading(false);
-    }
+    await submit({ input: input.trim() });
   };
 
   return (
