@@ -3,18 +3,25 @@
 ## Project Context
 - **Architecture**: Monorepo with npm workspaces (`packages/api`, `packages/webapp`)
 - **Purpose**: AI agent patterns implementation using NestJS backend + React frontend
-- **AI SDK**: Vercel AI SDK with Google's Gemini models
+- **AI SDK**: Vercel AI SDK with Google's Gemini 2.5 models
 - **Communication**: Streaming JSON responses using `streamObject`/`useObject`
 
 ## Development Commands
 - `npm run lint` - ESLint checking
+- `npm run lint:fix` - ESLint checking with auto-fix
 - `npm run type-check` - TypeScript type checking
 - `npm run dev` - Start development servers for all packages
 - `npm run build` - Build all packages
 
+## Testing Commands (API)
+- `npm run test --workspace=api` - Run unit tests with Jest
+- `npm run test:e2e --workspace=api` - Run end-to-end tests
+- `npm run test:all --workspace=api` - Run both unit and E2E tests
+
 ## Project Scripts
 - `npm run issue` - Create new issues using scripts/create-issue.sh
 - `npm run claude` - Run Claude with context using scripts/claude-context.sh
+- `scripts/complete-task.sh` - Mark completed tasks
 
 ## Key Dependencies
 **Backend (NestJS)**:
@@ -24,7 +31,7 @@
 - `dotenv` - Environment variables
 
 **Frontend (React)**:
-- `ai/react` - AI SDK React hooks (`useObject`)
+- `@ai-sdk/react` - AI SDK React hooks (`useObject`)
 - `@mui/material` - Material-UI components
 - `react-router-dom` - Client-side routing
 - `react-textarea-autosize` - Auto-resizing textarea
@@ -42,3 +49,8 @@
 - Each pattern implemented as separate NestJS module with controller/service
 - Frontend uses `useObject` hook to consume streamed responses
 - Environment variables in `packages/api/.env` (GOOGLE_GENERATIVE_AI_API_KEY)
+- Testing framework: Jest for both unit and E2E tests (migrated from Vitest)
+- All 6 agent patterns now have comprehensive test coverage
+- Services use various Gemini 2.5 models:
+  - `gemini-2.5-pro-preview-06-05` - Used for complex tasks
+  - `gemini-2.5-flash-preview-05-20` - Used for faster responses
