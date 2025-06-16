@@ -5,24 +5,24 @@ import EditIcon from '@mui/icons-material/Edit';
 import CodeIcon from '@mui/icons-material/Code';
 
 interface FileInfo {
-  changeType: string;
-  filePath: string;
-  purpose: string;
+  changeType?: string;
+  filePath?: string;
+  purpose?: string;
 }
 
 interface Implementation {
-  code: string;
-  explanation: string;
+  code?: string;
+  explanation?: string;
 }
 
 interface Change {
-  file: FileInfo;
+  file?: FileInfo;
   implementation?: Implementation;
 }
 
 interface Plan {
-  estimatedComplexity: string;
-  files: FileInfo[];
+  estimatedComplexity?: string;
+  files?: FileInfo[];
 }
 
 interface OrchestratorWorkerResult {
@@ -34,7 +34,7 @@ interface OrchestratorWorkerDisplayProps {
   result: OrchestratorWorkerResult;
 }
 
-const getChangeTypeIcon = (changeType: string) => {
+const getChangeTypeIcon = (changeType: string | undefined) => {
   switch (changeType?.toLowerCase()) {
     case 'create':
       return <CreateIcon />;
@@ -46,7 +46,7 @@ const getChangeTypeIcon = (changeType: string) => {
   }
 };
 
-const getChangeTypeColor = (changeType: string) => {
+const getChangeTypeColor = (changeType: string | undefined) => {
   switch (changeType?.toLowerCase()) {
     case 'create':
       return 'success';
@@ -58,7 +58,7 @@ const getChangeTypeColor = (changeType: string) => {
   }
 };
 
-const getComplexityColor = (complexity: string) => {
+const getComplexityColor = (complexity: string | undefined) => {
   switch (complexity?.toLowerCase()) {
     case 'low':
     case 'simple':
@@ -77,9 +77,9 @@ const getComplexityColor = (complexity: string) => {
 export default function OrchestratorWorkerDisplay({ result }: OrchestratorWorkerDisplayProps) {
   const { changes, plan } = result;
 
-  // Group changes by type
-  const createChanges = changes?.filter(change => change.file.changeType.toLowerCase() === 'create') || [];
-  const modifyChanges = changes?.filter(change => change.file.changeType.toLowerCase() !== 'create') || [];
+  // Group changes by type, filtering out incomplete data
+  const createChanges = changes?.filter(change => change.file?.changeType?.toLowerCase() === 'create') || [];
+  const modifyChanges = changes?.filter(change => change.file?.changeType?.toLowerCase() !== 'create' && change.file?.changeType) || [];
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -91,13 +91,15 @@ export default function OrchestratorWorkerDisplay({ result }: OrchestratorWorker
               Implementation Plan
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+              {plan.estimatedComplexity && (
+                <Chip 
+                  label={`Complexity: ${plan.estimatedComplexity}`}
+                  color={getComplexityColor(plan.estimatedComplexity)}
+                  variant="outlined"
+                />
+              )}
               <Chip 
-                label={`Complexity: ${plan.estimatedComplexity}`}
-                color={getComplexityColor(plan.estimatedComplexity)}
-                variant="outlined"
-              />
-              <Chip 
-                label={`${plan.files.length} files affected`}
+                label={`${plan.files?.length || 0} files affected`}
                 color="info"
                 variant="outlined"
               />
@@ -125,57 +127,61 @@ export default function OrchestratorWorkerDisplay({ result }: OrchestratorWorker
               New Files ({createChanges.length})
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {createChanges.map((change, index) => (
-                <Accordion key={index}>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-                    {getChangeTypeIcon(change.file.changeType)}
-                    <Chip 
-                    label={change.file.changeType}
-                    color={getChangeTypeColor(change.file.changeType)}
-                      size="small"
-                    />
-                    <Typography variant="subtitle1" sx={{ fontFamily: 'monospace', flexGrow: 1 }}>
-                      {change.file.filePath}
-                      </Typography>
-                     </Box>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        <strong>Purpose:</strong> {change.file.purpose}
-                      </Typography>
-                      <Divider />
-                      {change.implementation && (
-                        <>
-                          <Typography variant="subtitle2" gutterBottom>
-                            Implementation:
-                          </Typography>
-                          <Box
-                            component="pre"
-                            sx={{
-                              backgroundColor: 'grey.50',
-                              p: 2,
-                              borderRadius: 1,
-                              overflow: 'auto',
-                              fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-                              fontSize: '12px',
-                              maxHeight: '400px',
-                              border: '1px solid',
-                              borderColor: 'grey.200'
-                            }}
-                          >
-                          {change.implementation!.code}
-                          </Box>
-                          <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
-                          <strong>Explanation:</strong> {change.implementation!.explanation}
-                          </Typography>
-                        </>
-                      )}
-                    </Box>
-                  </AccordionDetails>
-                </Accordion>
-              ))}
+              {createChanges.map((change, index) => 
+                change.file ? (
+                  <Accordion key={index}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                        {getChangeTypeIcon(change.file.changeType)}
+                        <Chip 
+                          label={change.file.changeType || 'unknown'}
+                          color={getChangeTypeColor(change.file.changeType)}
+                          size="small"
+                        />
+                        <Typography variant="subtitle1" sx={{ fontFamily: 'monospace', flexGrow: 1 }}>
+                          {change.file.filePath || 'Unknown file'}
+                        </Typography>
+                      </Box>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Purpose:</strong> {change.file.purpose || 'Not specified'}
+                        </Typography>
+                        <Divider />
+                        {change.implementation?.code && (
+                          <>
+                            <Typography variant="subtitle2" gutterBottom>
+                              Implementation:
+                            </Typography>
+                            <Box
+                              component="pre"
+                              sx={{
+                                backgroundColor: 'grey.50',
+                                p: 2,
+                                borderRadius: 1,
+                                overflow: 'auto',
+                                fontFamily: 'Monaco, Consolas, "Courier New", monospace',
+                                fontSize: '12px',
+                                maxHeight: '400px',
+                                border: '1px solid',
+                                borderColor: 'grey.200'
+                              }}
+                            >
+                              {change.implementation.code}
+                            </Box>
+                            {change.implementation.explanation && (
+                              <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
+                                <strong>Explanation:</strong> {change.implementation.explanation}
+                              </Typography>
+                            )}
+                          </>
+                        )}
+                      </Box>
+                    </AccordionDetails>
+                  </Accordion>
+                ) : null
+              )}
             </Box>
           </CardContent>
         </Card>
@@ -190,57 +196,61 @@ export default function OrchestratorWorkerDisplay({ result }: OrchestratorWorker
               Modified Files ({modifyChanges.length})
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {modifyChanges.map((change, index) => (
-                <Accordion key={index}>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
-                    {getChangeTypeIcon(change.file.changeType)}
-                    <Chip 
-                    label={change.file.changeType}
-                    color={getChangeTypeColor(change.file.changeType)}
-                      size="small"
-                    />
-                    <Typography variant="subtitle1" sx={{ fontFamily: 'monospace', flexGrow: 1 }}>
-                      {change.file.filePath}
-                      </Typography>
-                     </Box>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        <strong>Purpose:</strong> {change.file.purpose}
-                      </Typography>
-                      <Divider />
-                      {change.implementation && (
-                        <>
-                          <Typography variant="subtitle2" gutterBottom>
-                            Changes:
-                          </Typography>
-                          <Box
-                            component="pre"
-                            sx={{
-                              backgroundColor: 'grey.50',
-                              p: 2,
-                              borderRadius: 1,
-                              overflow: 'auto',
-                              fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-                              fontSize: '12px',
-                              maxHeight: '400px',
-                              border: '1px solid',
-                              borderColor: 'grey.200'
-                            }}
-                          >
-                          {change.implementation!.code}
-                          </Box>
-                          <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
-                          <strong>Explanation:</strong> {change.implementation!.explanation}
-                          </Typography>
-                        </>
-                      )}
-                    </Box>
-                  </AccordionDetails>
-                </Accordion>
-              ))}
+              {modifyChanges.map((change, index) => 
+                change.file ? (
+                  <Accordion key={index}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+                        {getChangeTypeIcon(change.file.changeType)}
+                        <Chip 
+                          label={change.file.changeType || 'unknown'}
+                          color={getChangeTypeColor(change.file.changeType)}
+                          size="small"
+                        />
+                        <Typography variant="subtitle1" sx={{ fontFamily: 'monospace', flexGrow: 1 }}>
+                          {change.file.filePath || 'Unknown file'}
+                        </Typography>
+                      </Box>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Purpose:</strong> {change.file.purpose || 'Not specified'}
+                        </Typography>
+                        <Divider />
+                        {change.implementation?.code && (
+                          <>
+                            <Typography variant="subtitle2" gutterBottom>
+                              Changes:
+                            </Typography>
+                            <Box
+                              component="pre"
+                              sx={{
+                                backgroundColor: 'grey.50',
+                                p: 2,
+                                borderRadius: 1,
+                                overflow: 'auto',
+                                fontFamily: 'Monaco, Consolas, "Courier New", monospace',
+                                fontSize: '12px',
+                                maxHeight: '400px',
+                                border: '1px solid',
+                                borderColor: 'grey.200'
+                              }}
+                            >
+                              {change.implementation.code}
+                            </Box>
+                            {change.implementation.explanation && (
+                              <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
+                                <strong>Explanation:</strong> {change.implementation.explanation}
+                              </Typography>
+                            )}
+                          </>
+                        )}
+                      </Box>
+                    </AccordionDetails>
+                  </Accordion>
+                ) : null
+              )}
             </Box>
           </CardContent>
         </Card>
@@ -251,7 +261,7 @@ export default function OrchestratorWorkerDisplay({ result }: OrchestratorWorker
         <Card>
           <CardContent>
             <Typography variant="body1" color="text.secondary" textAlign="center">
-              No implementation changes generated.
+              No implementation changes generated yet...
             </Typography>
           </CardContent>
         </Card>
