@@ -13,6 +13,7 @@ import { z } from 'zod';
 import SequentialProcessingDisplay from './SequentialProcessingDisplay';
 import RoutingDisplay from './RoutingDisplay';
 import ParallelProcessingDisplay from './ParallelProcessingDisplay';
+import OrchestratorWorkerDisplay from './OrchestratorWorkerDisplay';
 
 interface AgentInteractionProps {
   apiEndpoint: string;
@@ -105,6 +106,8 @@ export default function AgentInteraction({
             <RoutingDisplay result={object} />
           ) : apiEndpoint === 'parallel-processing' ? (
             <ParallelProcessingDisplay result={object} />
+          ) : apiEndpoint === 'orchestrator-worker' ? (
+            <OrchestratorWorkerDisplay result={object} />
           ) : (
             <Card>
               <CardContent>
