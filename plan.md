@@ -2,7 +2,7 @@
 
 ## Notes
 - **AI SDK Docs**: https://v5.ai-sdk.dev/docs/foundations/agents
-- **Monorepo**: Use `pnpm workspaces` to manage the `api` (backend) and `webapp` (frontend) packages.
+- **Monorepo**: Use `npm workspaces` to manage the `api` (backend) and `webapp` (frontend) packages.
 - **Backend**: A Nest.js application. Each agent pattern will be implemented in its own module.
 - **Frontend**: A React.js application built with Vite and Material UI. Each pattern will have its own page.
 - **Streaming & API Communication**:
@@ -33,7 +33,7 @@
   - [ ] 0.5 Bootstrap `todo.md` with links to all tasks in this plan.
 
 - [ ] 1.0 **Project & Developer Experience Setup**
-  - [ ] 1.1 Initialize a Git monorepo with `pnpm workspaces` (`packages/api`, `packages/webapp`).
+  - [ ] 1.1 Initialize a Git monorepo with `npm workspaces` (`packages/api`, `packages/webapp`).
   - [ ] 1.2 Create the Nest.js app in `packages/api` and the React/Vite app in `packages/webapp`.
   - [ ] 1.3 **Code Quality Tooling**: Install and configure ESLint, TypeScript, Husky, and lint-staged at the project root with corresponding scripts.
   - [ ] 1.4 **Dependencies**
