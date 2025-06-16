@@ -6,11 +6,11 @@
   "scripts": {
     "issue": "bash scripts/create-issue.sh",
     "claude": "bash scripts/claude-context.sh",
-    "dev": "pnpm --filter \"packages/*\" run dev",
-    "build": "pnpm --filter \"packages/*\" run build",
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "type-check": "pnpm --filter \"packages/*\" run type-check",
+    "type-check": "npm run type-check --workspaces --if-present",
     "prepare": "husky install"
   },
   "workspaces": [
@@ -25,5 +25,9 @@
     "lint-staged": "^13.3.0",
     "typescript": "^5.0.0"
   },
-  "packageManager": "pnpm@8.0.0"
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "npx eslint --fix"
+    ]
+  }
 }
