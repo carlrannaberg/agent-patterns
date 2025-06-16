@@ -17,8 +17,8 @@ export class EvaluatorOptimizerService {
       iteration: number;
     }> = [];
 
-    const translatorModel = google('models/gemini-1.5-flash-latest');
-    const evaluatorModel = google('models/gemini-1.5-pro-latest');
+    const translatorModel = google('models/gemini-2.5-flash-preview-05-20');
+    const evaluatorModel = google('models/gemini-2.5-pro-preview-06-05');
 
     const { text: translation } = await generateText({
       model: translatorModel,
@@ -61,7 +61,7 @@ export class EvaluatorOptimizerService {
 
       if (iterations < MAX_ITERATIONS - 1) {
         const { text: improvedTranslation } = await generateText({
-          model: google('models/gemini-1.5-pro-latest'),
+          model: google('models/gemini-2.5-pro-preview-06-05'),
           system:
             'You are an expert literary translator. Focus on addressing the specific feedback provided.',
           prompt: `Improve this translation based on the following feedback:\n\nSpecific Issues:\n${evaluation.specificIssues.join('\n')}\n\nImprovement Suggestions:\n${evaluation.improvementSuggestions.join('\n')}\n\nOriginal Text: ${text}\nCurrent Translation: ${currentTranslation}\n\nProvide an improved translation to ${targetLanguage}.`,

@@ -8,7 +8,7 @@ const google = createGoogleGenerativeAI();
 @Injectable()
 export class SequentialProcessingService {
   async generateMarketingCopy(input: string) {
-    const model = google('models/gemini-1.5-flash-latest');
+    const model = google('models/gemini-2.5-flash-preview-05-20');
 
     const { text: copy } = await generateText({
       model,

@@ -8,7 +8,7 @@ const google = createGoogleGenerativeAI();
 @Injectable()
 export class RoutingService {
   async handleCustomerQuery(query: string) {
-    const model = google('models/gemini-1.5-pro-latest');
+    const model = google('models/gemini-2.5-pro-preview-06-05');
 
     const { object: classification } = await generateObject({
       model,
@@ -22,8 +22,8 @@ export class RoutingService {
 
     const responseModel =
       classification.complexity === 'simple'
-        ? google('models/gemini-1.5-flash-latest')
-        : google('models/gemini-1.5-pro-latest');
+        ? google('models/gemini-2.5-flash-preview-05-20')
+        : google('models/gemini-2.5-pro-preview-06-05');
 
     const systemPrompts = {
       general:

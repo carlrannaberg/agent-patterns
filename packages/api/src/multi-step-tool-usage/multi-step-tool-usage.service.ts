@@ -9,7 +9,7 @@ const google = createGoogleGenerativeAI();
 @Injectable()
 export class MultiStepToolUsageService {
   async solveMathProblem(prompt: string) {
-    const model = google('models/gemini-1.5-pro-latest');
+    const model = google('models/gemini-2.5-pro-preview-06-05');
 
     const { toolCalls, text, toolResults } = await generateText({
       model,

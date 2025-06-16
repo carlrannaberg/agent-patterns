@@ -8,8 +8,8 @@ const google = createGoogleGenerativeAI();
 @Injectable()
 export class OrchestratorWorkerService {
   async implementFeature(featureRequest: string) {
-    const orchestratorModel = google('models/gemini-1.5-pro-latest');
-    const workerModel = google('models/gemini-1.5-pro-latest');
+    const orchestratorModel = google('models/gemini-2.5-pro-preview-06-05');
+    const workerModel = google('models/gemini-2.5-pro-preview-06-05');
 
     const { object: implementationPlan } = await generateObject({
       model: orchestratorModel,
