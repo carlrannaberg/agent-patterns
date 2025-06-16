@@ -10,7 +10,6 @@ export class ParallelProcessingController {
 
   @Post()
   async reviewCode(@Body() body: { input: string }, @Res() res: Response) {
-    console.log('body', body);
     const result = await this.parallelProcessingService.parallelCodeReview(
       body.input,
     );

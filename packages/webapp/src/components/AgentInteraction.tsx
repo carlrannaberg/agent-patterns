@@ -12,6 +12,7 @@ import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { z } from 'zod';
 import SequentialProcessingDisplay from './SequentialProcessingDisplay';
 import RoutingDisplay from './RoutingDisplay';
+import ParallelProcessingDisplay from './ParallelProcessingDisplay';
 
 interface AgentInteractionProps {
   apiEndpoint: string;
@@ -102,6 +103,8 @@ export default function AgentInteraction({
             <SequentialProcessingDisplay result={object} />
           ) : apiEndpoint === 'routing' ? (
             <RoutingDisplay result={object} />
+          ) : apiEndpoint === 'parallel-processing' ? (
+            <ParallelProcessingDisplay result={object} />
           ) : (
             <Card>
               <CardContent>
