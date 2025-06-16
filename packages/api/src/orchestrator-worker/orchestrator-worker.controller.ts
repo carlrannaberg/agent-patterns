@@ -10,25 +10,17 @@ export class OrchestratorWorkerController {
 
   @Post()
   async implementFeature(
-    @Body() body: { featureRequest: string },
+    @Body() body: { input: string },
     @Res() res: Response,
   ) {
     const result = await this.orchestratorWorkerService.implementFeature(
-      body.featureRequest,
-    );
-
-    console.log('All methods on result:', Object.getOwnPropertyNames(result));
-    console.log(
-      'All methods including prototype:',
-      Object.getOwnPropertyNames(Object.getPrototypeOf(result)),
+      body.input,
     );
 
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    // For streamObject, call toTextStreamResponse with the response object
-    // @ts-ignore
-    result.toTextStreamResponse(res);
+    result.pipeTextStreamToResponse(res);
   }
 }

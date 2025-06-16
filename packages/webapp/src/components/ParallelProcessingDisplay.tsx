@@ -256,6 +256,21 @@ export default function ParallelProcessingDisplay({ result }: ParallelProcessing
               '& hr': {
                 margin: '16px 0',
                 borderColor: 'divider'
+              },
+              '& code': {
+                backgroundColor: 'grey.100',
+                padding: '2px 4px',
+                borderRadius: '4px',
+                fontSize: '0.875rem',
+                fontFamily: 'Monaco, Consolas, "Courier New", monospace'
+              },
+              '& pre': {
+                backgroundColor: 'grey.50',
+                padding: '12px',
+                borderRadius: '4px',
+                overflow: 'auto',
+                fontSize: '0.875rem',
+                fontFamily: 'Monaco, Consolas, "Courier New", monospace'
               }
             }}>
               <ReactMarkdown>{summary}</ReactMarkdown>
