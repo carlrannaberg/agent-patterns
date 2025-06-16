@@ -1,1 +1,1 @@
-{"*.{ts,tsx,js,jsx}":["npx eslint --fix"]}
+{"*.{ts,tsx,js,jsx}":["npm run lint:fix --workspaces --if-present"]}

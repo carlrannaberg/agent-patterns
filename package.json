@@ -8,8 +8,8 @@
     "claude": "bash scripts/claude-context.sh",
     "dev": "npm run dev --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
     "type-check": "npm run type-check --workspaces --if-present",
     "prepare": "husky install"
   },
@@ -27,7 +27,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
-      "npx eslint --fix"
+      "npm run lint:fix --workspaces --if-present"
     ]
   }
 }
