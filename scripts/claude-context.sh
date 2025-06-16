@@ -25,67 +25,83 @@ format_claude_output() {
         # Store all lines for success detection (same as original)
         echo "$line" >> "$temp_file"
 
+        # Skip empty lines
+        [ -z "$line" ] && continue
+
         # Parse and format the JSON line for better readability
-        if echo "$line" | jq -e . > /dev/null 2>&1; then
-            TYPE=$(echo "$line" | jq -r '.type // empty')
-            SUBTYPE=$(echo "$line" | jq -r '.subtype // empty')
+        if echo "$line" | jq -e . >/dev/null 2>&1; then
+            TYPE=$(echo "$line" | jq -r '.type // empty' 2>/dev/null)
 
             case "$TYPE" in
                 "system")
+                    SUBTYPE=$(echo "$line" | jq -r '.subtype // empty' 2>/dev/null)
                     if [ "$SUBTYPE" = "init" ]; then
                         echo -e "${GRAY}🔧 System initialized${NC}"
-                        MODEL=$(echo "$line" | jq -r '.model // empty')
+                        MODEL=$(echo "$line" | jq -r '.model // empty' 2>/dev/null)
+                        TOOLS=$(echo "$line" | jq -r '.tools | length // 0' 2>/dev/null)
                         if [ "$MODEL" != "empty" ] && [ "$MODEL" != "" ]; then
-                            echo -e "${GRAY}   Using model: $MODEL${NC}"
+                            echo -e "${GRAY}   Model: $MODEL${NC}"
+                        fi
+                        if [ "$TOOLS" != "0" ]; then
+                            echo -e "${GRAY}   Tools available: $TOOLS${NC}"
                         fi
                         echo ""
                     fi
                     ;;
                 "assistant")
-                    MESSAGE=$(echo "$line" | jq -r '.message.content // empty')
-                    if [ "$MESSAGE" != "empty" ] && [ "$MESSAGE" != "" ]; then
-                        # Check if it's a tool use
-                        TOOL_USE=$(echo "$MESSAGE" | jq -r '.[0].type // empty' 2>/dev/null)
-                        if [ "$TOOL_USE" = "tool_use" ]; then
-                            TOOL_NAME=$(echo "$MESSAGE" | jq -r '.[0].name // empty' 2>/dev/null)
-                            echo -e "${BLUE}🔧 Using tool: ${WHITE}$TOOL_NAME${NC}"
-                        else
-                            # Extract text content
-                            TEXT_CONTENT=$(echo "$MESSAGE" | jq -r '.[0].text // empty' 2>/dev/null)
-                            if [ "$TEXT_CONTENT" != "empty" ] && [ "$TEXT_CONTENT" != "" ]; then
-                                echo -e "${WHITE}💭 Agent: ${NC}$TEXT_CONTENT"
-                                echo ""
-                            fi
+                    # Extract message content
+                    HAS_CONTENT=$(echo "$line" | jq -e '.message.content[]?' >/dev/null 2>&1 && echo "true" || echo "false")
+                    if [ "$HAS_CONTENT" = "true" ]; then
+                        # Check for tool use
+                        TOOL_USES=$(echo "$line" | jq -r '.message.content[] | select(.type == "tool_use") | .name' 2>/dev/null)
+                        if [ -n "$TOOL_USES" ]; then
+                            echo "$TOOL_USES" | while read -r tool; do
+                                [ -n "$tool" ] && echo -e "${BLUE}🔧 Using tool: ${WHITE}$tool${NC}"
+                            done
+                        fi
+
+                        # Check for text content
+                        TEXT_CONTENT=$(echo "$line" | jq -r '.message.content[] | select(.type == "text") | .text' 2>/dev/null)
+                        if [ -n "$TEXT_CONTENT" ]; then
+                            echo -e "${WHITE}💭 Agent: ${NC}$TEXT_CONTENT"
+                            echo ""
                         fi
                     fi
                     ;;
                 "user")
-                    CONTENT=$(echo "$line" | jq -r '.message.content[0].content // .message.content // empty' 2>/dev/null)
-                    if [ "$CONTENT" != "empty" ] && [ "$CONTENT" != "" ]; then
+                    # Extract tool results
+                    TOOL_RESULT=$(echo "$line" | jq -r '.message.content[]? | select(.type == "tool_result") | .content' 2>/dev/null)
+                    if [ -n "$TOOL_RESULT" ]; then
                         # Truncate very long tool results for readability
-                        if [ ${#CONTENT} -gt 200 ]; then
-                            CONTENT_PREVIEW="${CONTENT:0:200}..."
-                            echo -e "${GREEN}✅ Tool result: ${GRAY}$CONTENT_PREVIEW${NC}"
+                        if [ ${#TOOL_RESULT} -gt 300 ]; then
+                            RESULT_PREVIEW=$(echo "$TOOL_RESULT" | head -c 300)
+                            echo -e "${GREEN}✅ Tool result: ${GRAY}${RESULT_PREVIEW}...${NC}"
                         else
-                            echo -e "${GREEN}✅ Tool result: ${GRAY}$CONTENT${NC}"
+                            echo -e "${GREEN}✅ Tool result: ${GRAY}$TOOL_RESULT${NC}"
                         fi
                         echo ""
                     fi
                     ;;
                 "result")
-                    IS_ERROR=$(echo "$line" | jq -r '.is_error // empty')
+                    IS_ERROR=$(echo "$line" | jq -r '.is_error // empty' 2>/dev/null)
                     if [ "$IS_ERROR" = "false" ]; then
                         echo -e "${GREEN}✅ Task completed successfully!${NC}"
-                    else
+                    elif [ "$IS_ERROR" = "true" ]; then
                         echo -e "${RED}❌ Task failed${NC}"
                     fi
                     echo ""
                     ;;
+                *)
+                    # For any other types, show minimal info
+                    if [ "$TYPE" != "empty" ] && [ -n "$TYPE" ]; then
+                        echo -e "${GRAY}📄 $TYPE${NC}"
+                    fi
+                    ;;
             esac
         else
-            # If it's not JSON, it might be raw text output
-            if [ ! -z "$line" ]; then
-                echo -e "${GRAY}📝 Raw output: $line${NC}"
+            # If it's not JSON, might be other output
+            if [ -n "$line" ] && [[ ! "$line" =~ ^[[:space:]]*$ ]]; then
+                echo -e "${GRAY}📝 $line${NC}"
             fi
         fi
     done
