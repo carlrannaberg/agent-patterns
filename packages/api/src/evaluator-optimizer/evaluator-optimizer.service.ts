@@ -8,7 +8,11 @@ const google = createGoogleGenerativeAI();
 @Injectable()
 export class EvaluatorOptimizerService {
   private readonly logger = new Logger(EvaluatorOptimizerService.name);
-  async translateWithFeedback(text: string, targetLanguage: string) {
+  async translateWithFeedback(text?: string, targetLanguage?: string) {
+    if (!text || !targetLanguage) {
+      throw new Error('Text and target language are required');
+    }
+
     this.logger.verbose('Starting translation with iterative feedback process');
     this.logger.debug(`Text length: ${text.length} characters`);
     this.logger.debug(`Target language: ${targetLanguage}`);

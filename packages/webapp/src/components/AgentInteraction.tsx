@@ -14,6 +14,7 @@ import SequentialProcessingDisplay from './SequentialProcessingDisplay';
 import RoutingDisplay from './RoutingDisplay';
 import ParallelProcessingDisplay from './ParallelProcessingDisplay';
 import OrchestratorWorkerDisplay from './OrchestratorWorkerDisplay';
+import EvaluatorOptimizerDisplay from './EvaluatorOptimizerDisplay';
 
 interface AgentInteractionProps {
   apiEndpoint: string;
@@ -108,6 +109,8 @@ export default function AgentInteraction({
             <ParallelProcessingDisplay result={object} />
           ) : apiEndpoint === 'orchestrator-worker' ? (
             <OrchestratorWorkerDisplay result={object} />
+          ) : apiEndpoint === 'evaluator-optimizer' ? (
+            <EvaluatorOptimizerDisplay result={object} />
           ) : (
             <Card>
               <CardContent>

@@ -6,7 +6,7 @@ export default function EvaluatorOptimizerPage() {
       apiEndpoint="evaluator-optimizer"
       title="Evaluator-Optimizer"
       description="This pattern demonstrates iterative improvement where translations are evaluated and optimized through multiple rounds for enhanced quality."
-      placeholder="Enter text to translate with iterative quality improvement (specify target language if needed)..."
+      placeholder="Enter text to translate with iterative quality improvement. Use [target: language] to specify target language (default: Spanish)..."
     />
   );
 }
