@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { Readable } from 'stream';
 
 // Mock the AI SDK for Jest
 jest.mock('@ai-sdk/google', () => ({
@@ -12,36 +13,78 @@ jest.mock('@ai-sdk/google', () => ({
 }));
 
 jest.mock('ai', () => ({
-  generateText: jest.fn().mockResolvedValue({ text: 'mock generated text' }),
+  generateText: jest.fn().mockResolvedValue({ 
+    text: 'mock generated text',
+    toolCalls: [
+      {
+        toolName: 'calculate',
+        args: { expression: '2 + 2' }
+      },
+      {
+        toolName: 'answer',
+        args: { 
+          steps: [{ calculation: '2 + 2', reasoning: 'Simple addition' }],
+          answer: '4'
+        }
+      }
+    ],
+    toolResults: [
+      { result: '4', expression: '2 + 2' },
+      { steps: [{ calculation: '2 + 2', reasoning: 'Simple addition' }], answer: '4' }
+    ]
+  }),
   generateObject: jest.fn().mockResolvedValue({ 
     object: { 
+      // Sequential processing properties
       hasCallToAction: true,
       emotionalAppeal: 8,
       clarity: 9,
-      mockKey: 'mockValue',
+      
+      // Routing properties
       routingDecision: 'customer_service',
       category: 'general',
       priority: 'medium',
-      steps: [{ step: 'Mock step', description: 'Mock description' }],
-      tasks: [{ task: 'Mock task', assignee: 'developer', priority: 'high' }]
+      
+      // Orchestrator-worker properties
+      files: [{ 
+        purpose: 'Mock file purpose', 
+        filePath: '/mock/path.ts', 
+        changeType: 'create' 
+      }],
+      estimatedComplexity: 'medium',
+      
+      // Evaluator-optimizer properties
+      translatedText: 'Mock translated text',
+      qualityScore: 8,
+      preservesTone: true,
+      preservesNuance: true,
+      culturallyAccurate: true,
+      specificIssues: ['Mock specific issue 1', 'Mock specific issue 2'],
+      improvementSuggestions: ['Mock improvement 1', 'Mock improvement 2'],
+      feedbackPoints: ['Mock feedback point 1', 'Mock feedback point 2'],
+      
+      // Multi-step tool usage properties
+      needsMathCalculation: true,
+      mathExpression: '2 + 2',
+      result: 42,
+      
+      // Parallel processing properties
+      securityIssues: ['Mock security issue'],
+      performanceIssues: ['Mock performance issue'],
+      maintainabilityIssues: ['Mock maintainability issue']
     } 
   }),
   streamObject: jest.fn().mockReturnValue({
-    toTextStreamResponse: jest.fn().mockReturnValue({
-      // Mock a readable stream that can be piped
-      pipe: jest.fn((res) => {
-        // Immediately resolve with a mock response
-        process.nextTick(() => {
-          res.write('{"data": "mock stream response"}');
-          res.end();
-        });
-        return res;
-      }),
-      // Add other stream methods that might be called
-      on: jest.fn(),
-      once: jest.fn(),
-      emit: jest.fn(),
-    }),
+    toTextStreamResponse: jest.fn().mockReturnValue(
+      // Return a proper Node.js Readable stream
+      new Readable({
+        read() {
+          // Push mock JSON data and end the stream
+          this.push('{"data": "mock stream response", "status": "complete"}');
+          this.push(null); // End the stream
+        }
+      })
+    ),
   }),
   tool: jest.fn(() => ({
     description: 'Mock tool',
