@@ -11,6 +11,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { experimental_useObject as useObject } from '@ai-sdk/react';
 import { z } from 'zod';
 import SequentialProcessingDisplay from './SequentialProcessingDisplay';
+import RoutingDisplay from './RoutingDisplay';
 
 interface AgentInteractionProps {
   apiEndpoint: string;
@@ -99,6 +100,8 @@ export default function AgentInteraction({
         <>
           {apiEndpoint === 'sequential-processing' ? (
             <SequentialProcessingDisplay result={object} />
+          ) : apiEndpoint === 'routing' ? (
+            <RoutingDisplay result={object} />
           ) : (
             <Card>
               <CardContent>
