@@ -164,7 +164,7 @@ run_next_task() {
 
         echo -e "${BLUE}➡️ Marking task as complete in todo.md...${NC}"
         # Escape special regex characters in the task line for sed
-        ESCAPED_TASK_LINE=$(echo "$CURRENT_TASK_LINE" | sed 's/[[\]*.^$()+?{|\\]/\\&/g')
+        ESCAPED_TASK_LINE=$(echo "$CURRENT_TASK_LINE" | sed 's/[\[\]*.^$()+?{|\\]/\\&/g')
         COMPLETED_TASK_LINE="[x]${CURRENT_TASK_LINE:3}"
         sed -i.bak "s/$ESCAPED_TASK_LINE/$COMPLETED_TASK_LINE/" todo.md
         rm -f todo.md.bak
