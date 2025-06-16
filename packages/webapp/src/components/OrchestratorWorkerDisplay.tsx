@@ -17,7 +17,7 @@ interface Implementation {
 
 interface Change {
   file: FileInfo;
-  implementation: Implementation;
+  implementation?: Implementation;
 }
 
 interface Plan {
@@ -146,28 +146,32 @@ export default function OrchestratorWorkerDisplay({ result }: OrchestratorWorker
                         <strong>Purpose:</strong> {change.file.purpose}
                       </Typography>
                       <Divider />
-                      <Typography variant="subtitle2" gutterBottom>
-                        Implementation:
-                      </Typography>
-                      <Box
-                        component="pre"
-                        sx={{
-                          backgroundColor: 'grey.50',
-                          p: 2,
-                          borderRadius: 1,
-                          overflow: 'auto',
-                          fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-                          fontSize: '12px',
-                          maxHeight: '400px',
-                          border: '1px solid',
-                          borderColor: 'grey.200'
-                        }}
-                      >
-                        {change.implementation.code}
-                      </Box>
-                      <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
-                        <strong>Explanation:</strong> {change.implementation.explanation}
-                      </Typography>
+                      {change.implementation && (
+                        <>
+                          <Typography variant="subtitle2" gutterBottom>
+                            Implementation:
+                          </Typography>
+                          <Box
+                            component="pre"
+                            sx={{
+                              backgroundColor: 'grey.50',
+                              p: 2,
+                              borderRadius: 1,
+                              overflow: 'auto',
+                              fontFamily: 'Monaco, Consolas, "Courier New", monospace',
+                              fontSize: '12px',
+                              maxHeight: '400px',
+                              border: '1px solid',
+                              borderColor: 'grey.200'
+                            }}
+                          >
+                          {change.implementation!.code}
+                          </Box>
+                          <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
+                          <strong>Explanation:</strong> {change.implementation!.explanation}
+                          </Typography>
+                        </>
+                      )}
                     </Box>
                   </AccordionDetails>
                 </Accordion>
@@ -207,28 +211,32 @@ export default function OrchestratorWorkerDisplay({ result }: OrchestratorWorker
                         <strong>Purpose:</strong> {change.file.purpose}
                       </Typography>
                       <Divider />
-                      <Typography variant="subtitle2" gutterBottom>
-                        Changes:
-                      </Typography>
-                      <Box
-                        component="pre"
-                        sx={{
-                          backgroundColor: 'grey.50',
-                          p: 2,
-                          borderRadius: 1,
-                          overflow: 'auto',
-                          fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-                          fontSize: '12px',
-                          maxHeight: '400px',
-                          border: '1px solid',
-                          borderColor: 'grey.200'
-                        }}
-                      >
-                        {change.implementation.code}
-                      </Box>
-                      <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
-                        <strong>Explanation:</strong> {change.implementation.explanation}
-                      </Typography>
+                      {change.implementation && (
+                        <>
+                          <Typography variant="subtitle2" gutterBottom>
+                            Changes:
+                          </Typography>
+                          <Box
+                            component="pre"
+                            sx={{
+                              backgroundColor: 'grey.50',
+                              p: 2,
+                              borderRadius: 1,
+                              overflow: 'auto',
+                              fontFamily: 'Monaco, Consolas, "Courier New", monospace',
+                              fontSize: '12px',
+                              maxHeight: '400px',
+                              border: '1px solid',
+                              borderColor: 'grey.200'
+                            }}
+                          >
+                          {change.implementation!.code}
+                          </Box>
+                          <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
+                          <strong>Explanation:</strong> {change.implementation!.explanation}
+                          </Typography>
+                        </>
+                      )}
                     </Box>
                   </AccordionDetails>
                 </Accordion>
