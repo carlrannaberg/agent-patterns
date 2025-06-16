@@ -7,9 +7,15 @@ import { Readable } from 'stream';
 jest.mock('ai');
 jest.mock('@ai-sdk/google');
 
-const mockGenerateObject = generateObject as jest.MockedFunction<typeof generateObject>;
-const mockGenerateText = generateText as jest.MockedFunction<typeof generateText>;
-const mockStreamObject = streamObject as jest.MockedFunction<typeof streamObject>;
+const mockGenerateObject = generateObject as jest.MockedFunction<
+  typeof generateObject
+>;
+const mockGenerateText = generateText as jest.MockedFunction<
+  typeof generateText
+>;
+const mockStreamObject = streamObject as jest.MockedFunction<
+  typeof streamObject
+>;
 
 describe('RoutingService - Business Logic', () => {
   let service: RoutingService;
@@ -20,7 +26,7 @@ describe('RoutingService - Business Logic', () => {
     }).compile();
 
     service = module.get<RoutingService>(RoutingService);
-    
+
     // Reset mocks before each test
     jest.clearAllMocks();
   });
@@ -41,7 +47,9 @@ describe('RoutingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -50,7 +58,8 @@ describe('RoutingService - Business Logic', () => {
       // Assert: Should use refund-specific system prompt
       expect(mockGenerateText).toHaveBeenCalledWith({
         model: expect.any(Object),
-        system: 'You are a customer service agent specializing in refund requests. Follow company policy and collect necessary information.',
+        system:
+          'You are a customer service agent specializing in refund requests. Follow company policy and collect necessary information.',
         prompt: 'I want to return my order',
       });
     });
@@ -70,17 +79,20 @@ describe('RoutingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
-      await service.handleCustomerQuery('My device won\'t connect to WiFi');
+      await service.handleCustomerQuery("My device won't connect to WiFi");
 
       // Assert: Should use technical support system prompt
       expect(mockGenerateText).toHaveBeenCalledWith({
         model: expect.any(Object),
-        system: 'You are a technical support specialist with deep product knowledge. Focus on clear step-by-step troubleshooting.',
-        prompt: 'My device won\'t connect to WiFi',
+        system:
+          'You are a technical support specialist with deep product knowledge. Focus on clear step-by-step troubleshooting.',
+        prompt: "My device won't connect to WiFi",
       });
     });
 
@@ -99,7 +111,9 @@ describe('RoutingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -108,7 +122,8 @@ describe('RoutingService - Business Logic', () => {
       // Assert: Should use general customer service system prompt
       expect(mockGenerateText).toHaveBeenCalledWith({
         model: expect.any(Object),
-        system: 'You are an expert customer service agent handling general inquiries.',
+        system:
+          'You are an expert customer service agent handling general inquiries.',
         prompt: 'What are your store hours?',
       });
     });
@@ -130,7 +145,9 @@ describe('RoutingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -140,7 +157,8 @@ describe('RoutingService - Business Logic', () => {
       expect(mockGenerateText).toHaveBeenCalledTimes(1);
       expect(mockGenerateText).toHaveBeenCalledWith({
         model: expect.any(Object), // Model selection is tested indirectly via the complexity logic
-        system: 'You are an expert customer service agent handling general inquiries.',
+        system:
+          'You are an expert customer service agent handling general inquiries.',
         prompt: 'What are your hours?',
       });
     });
@@ -149,7 +167,8 @@ describe('RoutingService - Business Logic', () => {
       // Arrange: Mock complex query
       mockGenerateObject.mockResolvedValueOnce({
         object: {
-          reasoning: 'Complex technical issue requiring detailed troubleshooting',
+          reasoning:
+            'Complex technical issue requiring detailed troubleshooting',
           type: 'technical',
           complexity: 'complex',
         },
@@ -160,17 +179,22 @@ describe('RoutingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
-      await service.handleCustomerQuery('My device has multiple complex issues');
+      await service.handleCustomerQuery(
+        'My device has multiple complex issues',
+      );
 
       // Assert: Should call generateText once (complexity logic works)
       expect(mockGenerateText).toHaveBeenCalledTimes(1);
       expect(mockGenerateText).toHaveBeenCalledWith({
         model: expect.any(Object), // Model selection is tested indirectly via the complexity logic
-        system: 'You are a technical support specialist with deep product knowledge. Focus on clear step-by-step troubleshooting.',
+        system:
+          'You are a technical support specialist with deep product knowledge. Focus on clear step-by-step troubleshooting.',
         prompt: 'My device has multiple complex issues',
       });
     });
@@ -195,9 +219,10 @@ describe('RoutingService - Business Logic', () => {
       } as any);
 
       const mockStream = new Readable({ read() {} });
-      mockStreamObject.mockReturnValue({
+      const mockStreamObjectResult = {
         toTextStreamResponse: jest.fn().mockReturnValue(mockStream),
-      } as any);
+      };
+      mockStreamObject.mockReturnValue(mockStreamObjectResult as any);
 
       // Act
       const result = await service.handleCustomerQuery('test query');
@@ -212,22 +237,26 @@ describe('RoutingService - Business Logic', () => {
             modelUsed: expect.any(Object),
           }),
         }),
-        prompt: expect.stringContaining('Return the following data as a structured object'),
+        prompt: expect.stringContaining(
+          'Return the following data as a structured object',
+        ),
       });
 
-      expect(result).toBe(mockStream);
+      expect(result).toBe(mockStreamObjectResult);
     });
   });
 
   describe('Error Handling', () => {
     it('should handle classification failures gracefully', async () => {
       // Arrange: Mock classification failure
-      mockGenerateObject.mockRejectedValueOnce(new Error('Classification API Error'));
+      mockGenerateObject.mockRejectedValueOnce(
+        new Error('Classification API Error'),
+      );
 
       // Act & Assert: Should throw the error
-      await expect(
-        service.handleCustomerQuery('test query')
-      ).rejects.toThrow('Classification API Error');
+      await expect(service.handleCustomerQuery('test query')).rejects.toThrow(
+        'Classification API Error',
+      );
     });
 
     it('should handle response generation failures gracefully', async () => {
@@ -243,19 +272,21 @@ describe('RoutingService - Business Logic', () => {
       mockGenerateText.mockRejectedValueOnce(new Error('Response API Error'));
 
       // Act & Assert: Should throw the error
-      await expect(
-        service.handleCustomerQuery('test query')
-      ).rejects.toThrow('Response API Error');
+      await expect(service.handleCustomerQuery('test query')).rejects.toThrow(
+        'Response API Error',
+      );
     });
 
     it('should handle malformed classification responses', async () => {
       // Arrange: Mock malformed classification that will cause Zod validation to fail
-      mockGenerateObject.mockRejectedValueOnce(new Error('Zod validation error'));
+      mockGenerateObject.mockRejectedValueOnce(
+        new Error('Zod validation error'),
+      );
 
       // Act & Assert: Should throw validation error
-      await expect(
-        service.handleCustomerQuery('test query')
-      ).rejects.toThrow('Zod validation error');
+      await expect(service.handleCustomerQuery('test query')).rejects.toThrow(
+        'Zod validation error',
+      );
     });
   });
 
@@ -264,22 +295,25 @@ describe('RoutingService - Business Logic', () => {
       const testCases = [
         {
           type: 'general' as const,
-          expectedPrompt: 'You are an expert customer service agent handling general inquiries.',
+          expectedPrompt:
+            'You are an expert customer service agent handling general inquiries.',
         },
         {
           type: 'refund' as const,
-          expectedPrompt: 'You are a customer service agent specializing in refund requests. Follow company policy and collect necessary information.',
+          expectedPrompt:
+            'You are a customer service agent specializing in refund requests. Follow company policy and collect necessary information.',
         },
         {
           type: 'technical' as const,
-          expectedPrompt: 'You are a technical support specialist with deep product knowledge. Focus on clear step-by-step troubleshooting.',
+          expectedPrompt:
+            'You are a technical support specialist with deep product knowledge. Focus on clear step-by-step troubleshooting.',
         },
       ];
 
       for (const testCase of testCases) {
         // Reset mocks
         jest.clearAllMocks();
-        
+
         mockGenerateObject.mockResolvedValue({
           object: {
             reasoning: 'Test reasoning',
@@ -293,7 +327,9 @@ describe('RoutingService - Business Logic', () => {
         } as any);
 
         mockStreamObject.mockReturnValue({
-          toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+          toTextStreamResponse: jest
+            .fn()
+            .mockReturnValue(new Readable({ read() {} })),
         } as any);
 
         await service.handleCustomerQuery('test query');
@@ -315,7 +351,7 @@ describe('RoutingService - Business Logic', () => {
       for (const type of validTypes) {
         for (const complexity of validComplexities) {
           jest.clearAllMocks();
-          
+
           mockGenerateObject.mockResolvedValue({
             object: {
               reasoning: 'Test reasoning',
@@ -329,12 +365,14 @@ describe('RoutingService - Business Logic', () => {
           } as any);
 
           mockStreamObject.mockReturnValue({
-            toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+            toTextStreamResponse: jest
+              .fn()
+              .mockReturnValue(new Readable({ read() {} })),
           } as any);
 
           // Should not throw for valid combinations
           await expect(
-            service.handleCustomerQuery('test query')
+            service.handleCustomerQuery('test query'),
           ).resolves.toBeDefined();
         }
       }

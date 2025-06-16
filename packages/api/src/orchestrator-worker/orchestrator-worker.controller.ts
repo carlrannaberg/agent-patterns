@@ -13,7 +13,7 @@ export class OrchestratorWorkerController {
     @Body() body: { featureRequest: string },
     @Res() res: Response,
   ) {
-    const stream = await this.orchestratorWorkerService.implementFeature(
+    const result = await this.orchestratorWorkerService.implementFeature(
       body.featureRequest,
     );
 
@@ -21,6 +21,7 @@ export class OrchestratorWorkerController {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    (stream as unknown as NodeJS.ReadableStream).pipe(res);
+    // For streamObject, use pipeDataStreamToResponse
+    result.pipeDataStreamToResponse(res);
   }
 }

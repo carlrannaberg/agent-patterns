@@ -8,7 +8,7 @@ describe('SequentialProcessingController', () => {
   beforeEach(() => {
     const mockService = {
       generateMarketingCopy: jest.fn().mockResolvedValue({
-        pipe: jest.fn(),
+        pipeDataStreamToResponse: jest.fn(),
       }),
     } as unknown as SequentialProcessingService;
 
@@ -24,8 +24,8 @@ describe('SequentialProcessingController', () => {
   describe('generateMarketingCopy', () => {
     it('should call service and set proper headers', async () => {
       const input = 'AI-powered productivity app';
-      const mockStream = { pipe: jest.fn() };
-      (service.generateMarketingCopy as any).mockResolvedValue(mockStream);
+      const mockResult = { pipeTextStreamToResponse: jest.fn() };
+      (service.generateMarketingCopy as any).mockResolvedValue(mockResult);
 
       const mockResponse = {
         setHeader: jest.fn(),
@@ -46,13 +46,13 @@ describe('SequentialProcessingController', () => {
         'Connection',
         'keep-alive',
       );
-      expect(mockStream.pipe).toHaveBeenCalledWith(mockResponse);
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle empty input', async () => {
       const input = '';
-      const mockStream = { pipe: jest.fn() };
-      (service.generateMarketingCopy as any).mockResolvedValue(mockStream);
+      const mockResult = { pipeTextStreamToResponse: jest.fn() };
+      (service.generateMarketingCopy as any).mockResolvedValue(mockResult);
 
       const mockResponse = {
         setHeader: jest.fn(),

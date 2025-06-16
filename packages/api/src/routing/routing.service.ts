@@ -40,7 +40,7 @@ export class RoutingService {
       prompt: query,
     });
 
-    return streamObject({
+    const result = streamObject({
       model,
       schema: z.object({
         response: z.string(),
@@ -52,6 +52,8 @@ export class RoutingService {
         modelUsed: z.string(),
       }),
       prompt: `Return the following data as a structured object:\n\nResponse: ${response}\nClassification: ${JSON.stringify(classification)}\nModel used: ${responseModel.modelId}`,
-    }).toTextStreamResponse();
+    });
+
+    return result;
   }
 }

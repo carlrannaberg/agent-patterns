@@ -59,7 +59,7 @@ export class ParallelProcessingService {
       prompt: `Synthesize these code review results into a concise summary with key actions:\n${JSON.stringify(reviews, null, 2)}`,
     });
 
-    return streamObject({
+    const result = streamObject({
       model,
       schema: z.object({
         reviews: z.array(
@@ -79,6 +79,8 @@ export class ParallelProcessingService {
         summary: z.string(),
       }),
       prompt: `Return the following data as a structured object:\n\nReviews: ${JSON.stringify(reviews)}\nSummary: ${summary}`,
-    }).toTextStreamResponse();
+    });
+
+    return result;
   }
 }

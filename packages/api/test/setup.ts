@@ -13,46 +13,51 @@ jest.mock('@ai-sdk/google', () => ({
 }));
 
 jest.mock('ai', () => ({
-  generateText: jest.fn().mockResolvedValue({ 
+  generateText: jest.fn().mockResolvedValue({
     text: 'mock generated text',
     toolCalls: [
       {
         toolName: 'calculate',
-        args: { expression: '2 + 2' }
+        args: { expression: '2 + 2' },
       },
       {
         toolName: 'answer',
-        args: { 
+        args: {
           steps: [{ calculation: '2 + 2', reasoning: 'Simple addition' }],
-          answer: '4'
-        }
-      }
+          answer: '4',
+        },
+      },
     ],
     toolResults: [
       { result: '4', expression: '2 + 2' },
-      { steps: [{ calculation: '2 + 2', reasoning: 'Simple addition' }], answer: '4' }
-    ]
+      {
+        steps: [{ calculation: '2 + 2', reasoning: 'Simple addition' }],
+        answer: '4',
+      },
+    ],
   }),
-  generateObject: jest.fn().mockResolvedValue({ 
-    object: { 
+  generateObject: jest.fn().mockResolvedValue({
+    object: {
       // Sequential processing properties
       hasCallToAction: true,
       emotionalAppeal: 8,
       clarity: 9,
-      
+
       // Routing properties
       routingDecision: 'customer_service',
       category: 'general',
       priority: 'medium',
-      
+
       // Orchestrator-worker properties
-      files: [{ 
-        purpose: 'Mock file purpose', 
-        filePath: '/mock/path.ts', 
-        changeType: 'create' 
-      }],
+      files: [
+        {
+          purpose: 'Mock file purpose',
+          filePath: '/mock/path.ts',
+          changeType: 'create',
+        },
+      ],
       estimatedComplexity: 'medium',
-      
+
       // Evaluator-optimizer properties
       translatedText: 'Mock translated text',
       qualityScore: 8,
@@ -62,17 +67,17 @@ jest.mock('ai', () => ({
       specificIssues: ['Mock specific issue 1', 'Mock specific issue 2'],
       improvementSuggestions: ['Mock improvement 1', 'Mock improvement 2'],
       feedbackPoints: ['Mock feedback point 1', 'Mock feedback point 2'],
-      
+
       // Multi-step tool usage properties
       needsMathCalculation: true,
       mathExpression: '2 + 2',
       result: 42,
-      
+
       // Parallel processing properties
       securityIssues: ['Mock security issue'],
       performanceIssues: ['Mock performance issue'],
-      maintainabilityIssues: ['Mock maintainability issue']
-    } 
+      maintainabilityIssues: ['Mock maintainability issue'],
+    },
   }),
   streamObject: jest.fn().mockReturnValue({
     toTextStreamResponse: jest.fn().mockReturnValue(
@@ -82,14 +87,14 @@ jest.mock('ai', () => ({
           // Push mock JSON data and end the stream
           this.push('{"data": "mock stream response", "status": "complete"}');
           this.push(null); // End the stream
-        }
-      })
+        },
+      }),
     ),
   }),
   tool: jest.fn(() => ({
     description: 'Mock tool',
     parameters: jest.fn(),
-    execute: jest.fn().mockResolvedValue(42)
+    execute: jest.fn().mockResolvedValue(42),
   })),
 }));
 

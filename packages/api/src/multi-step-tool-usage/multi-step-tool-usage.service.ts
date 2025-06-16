@@ -82,7 +82,7 @@ export class MultiStepToolUsageService {
       };
     });
 
-    return streamObject({
+    const result = streamObject({
       model,
       schema: z.object({
         problem: z.string(),
@@ -103,6 +103,7 @@ export class MultiStepToolUsageService {
         workingSteps: z.string(),
       }),
       prompt: `Return the following data as a structured object:\n\nProblem: ${prompt}\nCalculations performed: ${JSON.stringify(calculationResults)}\nSteps: ${JSON.stringify((finalAnswer?.args as { steps?: unknown[] })?.steps || [])}\nFinal Answer: ${(finalAnswer?.args as { answer?: string })?.answer || 'No answer provided'}\nWorking Steps: ${text}`,
-    }).toTextStreamResponse();
+    });
+    return result;
   }
 }

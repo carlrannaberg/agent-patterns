@@ -7,9 +7,15 @@ import { Readable } from 'stream';
 jest.mock('ai');
 jest.mock('@ai-sdk/google');
 
-const mockGenerateText = generateText as jest.MockedFunction<typeof generateText>;
-const mockGenerateObject = generateObject as jest.MockedFunction<typeof generateObject>;
-const mockStreamObject = streamObject as jest.MockedFunction<typeof streamObject>;
+const mockGenerateText = generateText as jest.MockedFunction<
+  typeof generateText
+>;
+const mockGenerateObject = generateObject as jest.MockedFunction<
+  typeof generateObject
+>;
+const mockStreamObject = streamObject as jest.MockedFunction<
+  typeof streamObject
+>;
 
 describe('EvaluatorOptimizerService - Business Logic', () => {
   let service: EvaluatorOptimizerService;
@@ -20,7 +26,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
     }).compile();
 
     service = module.get<EvaluatorOptimizerService>(EvaluatorOptimizerService);
-    
+
     // Reset mocks before each test
     jest.clearAllMocks();
   });
@@ -44,7 +50,9 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -53,12 +61,12 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       // Assert: Should only call generateText once (no improvement needed)
       expect(mockGenerateText).toHaveBeenCalledTimes(1);
       expect(mockGenerateObject).toHaveBeenCalledTimes(1);
-      
+
       // Verify streaming response indicates 0 iterations
       expect(mockStreamObject).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: expect.stringContaining('Iterations Required: 0'),
-        })
+        }),
       );
     });
 
@@ -84,7 +92,9 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -92,17 +102,21 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
 
       // Assert: Should improve translation (2 generateText calls)
       expect(mockGenerateText).toHaveBeenCalledTimes(2);
-      
+
       // Verify improvement prompt includes feedback
-      expect(mockGenerateText).toHaveBeenNthCalledWith(2, 
+      expect(mockGenerateText).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
           prompt: expect.stringContaining('Translation is too literal'),
-        })
+        }),
       );
-      expect(mockGenerateText).toHaveBeenNthCalledWith(2,
+      expect(mockGenerateText).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
-          prompt: expect.stringContaining('Use more natural French expressions'),
-        })
+          prompt: expect.stringContaining(
+            'Use more natural French expressions',
+          ),
+        }),
       );
     });
 
@@ -128,7 +142,9 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -136,10 +152,13 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
 
       // Assert: Should improve due to tone preservation failure
       expect(mockGenerateText).toHaveBeenCalledTimes(2);
-      expect(mockGenerateText).toHaveBeenNthCalledWith(2,
+      expect(mockGenerateText).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
-          prompt: expect.stringContaining('Translation is too casual for formal context'),
-        })
+          prompt: expect.stringContaining(
+            'Translation is too casual for formal context',
+          ),
+        }),
       );
     });
 
@@ -165,7 +184,9 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -173,10 +194,11 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
 
       // Assert: Should improve for nuance preservation
       expect(mockGenerateText).toHaveBeenCalledTimes(2);
-      expect(mockGenerateText).toHaveBeenNthCalledWith(2,
+      expect(mockGenerateText).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
           prompt: expect.stringContaining('Translation loses emotional depth'),
-        })
+        }),
       );
     });
 
@@ -197,12 +219,16 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
           preservesNuance: true,
           culturallyAccurate: false, // Fails cultural accuracy
           specificIssues: ['Direct translation of cultural concept'],
-          improvementSuggestions: ['Use culturally appropriate French equivalent'],
+          improvementSuggestions: [
+            'Use culturally appropriate French equivalent',
+          ],
         },
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -210,19 +236,21 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
 
       // Assert: Should improve for cultural accuracy
       expect(mockGenerateText).toHaveBeenCalledTimes(2);
-      expect(mockGenerateText).toHaveBeenNthCalledWith(2,
+      expect(mockGenerateText).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
-          prompt: expect.stringContaining('Direct translation of cultural concept'),
-        })
+          prompt: expect.stringContaining(
+            'Direct translation of cultural concept',
+          ),
+        }),
       );
     });
 
     it('should respect maximum iteration limit', async () => {
       // Arrange: Mock persistent low quality that never improves
-      mockGenerateText
-        .mockResolvedValue({
-          text: 'Poor translation',
-        } as any);
+      mockGenerateText.mockResolvedValue({
+        text: 'Poor translation',
+      } as any);
 
       mockGenerateObject.mockResolvedValue({
         object: {
@@ -236,22 +264,24 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
       await service.translateWithFeedback('Complex text', 'French');
 
-      // Assert: Should stop at MAX_ITERATIONS (3) 
+      // Assert: Should stop at MAX_ITERATIONS (3)
       // Initial translation + 2 improvements = 3 generateText calls
       expect(mockGenerateText).toHaveBeenCalledTimes(3);
       expect(mockGenerateObject).toHaveBeenCalledTimes(3);
-      
+
       // Should have 3 iterations worth of results
       expect(mockStreamObject).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: expect.stringContaining('Iterations Required: 3'),
-        })
+        }),
       );
     });
   });
@@ -275,7 +305,9 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -285,13 +317,15 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       expect(mockGenerateText).toHaveBeenCalledWith(
         expect.objectContaining({
           system: expect.stringContaining('expert literary translator'),
-        })
+        }),
       );
 
       expect(mockGenerateObject).toHaveBeenCalledWith(
         expect.objectContaining({
-          system: expect.stringContaining('expert in evaluating literary translations'),
-        })
+          system: expect.stringContaining(
+            'expert in evaluating literary translations',
+          ),
+        }),
       );
     });
 
@@ -317,17 +351,22 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
       await service.translateWithFeedback('Test text', 'German');
 
       // Assert: Improvement should use pro model
-      expect(mockGenerateText).toHaveBeenNthCalledWith(2,
+      expect(mockGenerateText).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
-          system: expect.stringContaining('addressing the specific feedback provided'),
-        })
+          system: expect.stringContaining(
+            'addressing the specific feedback provided',
+          ),
+        }),
       );
     });
   });
@@ -359,12 +398,16 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       const mockStream = new Readable({ read() {} });
-      mockStreamObject.mockReturnValue({
+      const mockStreamObjectResult = {
         toTextStreamResponse: jest.fn().mockReturnValue(mockStream),
-      } as any);
+      };
+      mockStreamObject.mockReturnValue(mockStreamObjectResult as any);
 
       // Act
-      const result = await service.translateWithFeedback('Test text', 'Italian');
+      const result = await service.translateWithFeedback(
+        'Test text',
+        'Italian',
+      );
 
       // Assert: Verify streaming response structure
       expect(mockStreamObject).toHaveBeenCalledWith({
@@ -378,21 +421,25 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
             targetLanguage: expect.any(Object),
           }),
         }),
-        prompt: expect.stringContaining('Return the following data as a structured object'),
+        prompt: expect.stringContaining(
+          'Return the following data as a structured object',
+        ),
       });
 
-      expect(result).toBe(mockStream);
+      expect(result).toBe(mockStreamObjectResult);
     });
   });
 
   describe('Error Handling', () => {
     it('should handle initial translation failures gracefully', async () => {
       // Arrange: Mock initial translation failure
-      mockGenerateText.mockRejectedValueOnce(new Error('Translation API Error'));
+      mockGenerateText.mockRejectedValueOnce(
+        new Error('Translation API Error'),
+      );
 
       // Act & Assert: Should throw the error
       await expect(
-        service.translateWithFeedback('test text', 'French')
+        service.translateWithFeedback('test text', 'French'),
       ).rejects.toThrow('Translation API Error');
     });
 
@@ -402,11 +449,13 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
         text: 'Translated text',
       } as any);
 
-      mockGenerateObject.mockRejectedValueOnce(new Error('Evaluation API Error'));
+      mockGenerateObject.mockRejectedValueOnce(
+        new Error('Evaluation API Error'),
+      );
 
       // Act & Assert: Should throw the error
       await expect(
-        service.translateWithFeedback('test text', 'French')
+        service.translateWithFeedback('test text', 'French'),
       ).rejects.toThrow('Evaluation API Error');
     });
 
@@ -431,7 +480,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
 
       // Act & Assert: Should throw the error
       await expect(
-        service.translateWithFeedback('test text', 'French')
+        service.translateWithFeedback('test text', 'French'),
       ).rejects.toThrow('Improvement API Error');
     });
   });
@@ -441,12 +490,14 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       // Test just one case to verify the business rule logic
       // Reset mocks
       jest.clearAllMocks();
-      
+
       // Mock initial translation
-      mockGenerateText.mockResolvedValueOnce({ text: 'initial translation' } as any);
-      
+      mockGenerateText.mockResolvedValueOnce({
+        text: 'initial translation',
+      } as any);
+
       // Mock evaluation that meets all quality criteria (should stop)
-      mockGenerateObject.mockResolvedValueOnce({ 
+      mockGenerateObject.mockResolvedValueOnce({
         object: {
           qualityScore: 8,
           preservesTone: true,
@@ -454,11 +505,13 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
           culturallyAccurate: true,
           specificIssues: [],
           improvementSuggestions: [],
-        }
+        },
       } as any);
-      
+
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       await service.translateWithFeedback('test', 'French');
@@ -466,18 +519,20 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       // Should only call generateText once (no improvement needed)
       expect(mockGenerateText).toHaveBeenCalledTimes(1);
       expect(mockGenerateObject).toHaveBeenCalledTimes(1);
-      
+
       // Should indicate 0 iterations in the streaming response
       expect(mockStreamObject).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: expect.stringContaining('Iterations Required: 0'),
-        })
+        }),
       );
     });
 
     it('should include correct data in final streaming response', async () => {
       // Arrange: Mock high-quality translation that doesn't need improvement
-      mockGenerateText.mockResolvedValueOnce({ text: 'Excellent translation' } as any);
+      mockGenerateText.mockResolvedValueOnce({
+        text: 'Excellent translation',
+      } as any);
 
       mockGenerateObject.mockResolvedValueOnce({
         object: {
@@ -491,7 +546,9 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -499,14 +556,18 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
 
       // Assert: Streaming response should include all required data
       const streamCall = mockStreamObject.mock.calls[0][0];
-      expect(streamCall.prompt).toContain('Final Translation: Excellent translation');
+      expect(streamCall.prompt).toContain(
+        'Final Translation: Excellent translation',
+      );
       expect(streamCall.prompt).toContain('Iterations Required: 0');
       expect(streamCall.prompt).toContain('Original Text: Hello world');
       expect(streamCall.prompt).toContain('Target Language: French');
-      
+
       // Verify streamObject was called with proper structure
       expect(streamCall.model).toBeDefined();
-      expect(streamCall.prompt).toContain('Return the following data as a structured object');
+      expect(streamCall.prompt).toContain(
+        'Return the following data as a structured object',
+      );
     });
   });
 });

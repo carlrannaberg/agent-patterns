@@ -53,7 +53,7 @@ export class OrchestratorWorkerService {
       }),
     );
 
-    return streamObject({
+    const result = streamObject({
       model: orchestratorModel,
       schema: z.object({
         plan: z.object({
@@ -81,6 +81,7 @@ export class OrchestratorWorkerService {
         ),
       }),
       prompt: `Return the following data as a structured object:\n\nPlan: ${JSON.stringify(implementationPlan)}\nChanges: ${JSON.stringify(fileChanges)}`,
-    }).toTextStreamResponse();
+    });
+    return result;
   }
 }

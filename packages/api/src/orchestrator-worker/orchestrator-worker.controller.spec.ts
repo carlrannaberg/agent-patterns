@@ -6,13 +6,13 @@ describe('OrchestratorWorkerController', () => {
   let controller: OrchestratorWorkerController;
   let service: OrchestratorWorkerService;
 
-  const mockStream = {
-    pipe: jest.fn(),
-  } as unknown as NodeJS.ReadableStream;
+  const mockResult = {
+    pipeDataStreamToResponse: jest.fn(),
+  };
 
   beforeEach(() => {
     const mockService = {
-      implementFeature: jest.fn().mockResolvedValue(mockStream),
+      implementFeature: jest.fn().mockResolvedValue(mockResult),
     } as unknown as OrchestratorWorkerService;
 
     // Manually inject the service to bypass DI issues
@@ -46,7 +46,7 @@ describe('OrchestratorWorkerController', () => {
         'Connection',
         'keep-alive',
       );
-      expect(mockStream.pipe).toHaveBeenCalledWith(mockResponse);
+      expect(mockResult.pipeDataStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle complex feature request', async () => {

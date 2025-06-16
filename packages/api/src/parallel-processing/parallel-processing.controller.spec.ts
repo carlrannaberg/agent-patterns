@@ -6,13 +6,13 @@ describe('ParallelProcessingController', () => {
   let controller: ParallelProcessingController;
   let service: ParallelProcessingService;
 
-  const mockStream = {
-    pipe: jest.fn(),
-  } as unknown as NodeJS.ReadableStream;
+  const mockResult = {
+    pipeTextStreamToResponse: jest.fn(),
+  };
 
   beforeEach(() => {
     const mockService = {
-      parallelCodeReview: jest.fn().mockResolvedValue(mockStream),
+      parallelCodeReview: jest.fn().mockResolvedValue(mockResult),
     } as unknown as ParallelProcessingService;
 
     // Manually inject the service to bypass DI issues
@@ -46,7 +46,7 @@ describe('ParallelProcessingController', () => {
         'Connection',
         'keep-alive',
       );
-      expect(mockStream.pipe).toHaveBeenCalledWith(mockResponse);
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle complex code snippet', async () => {

@@ -20,12 +20,12 @@ describe('ParallelProcessingController (e2e)', () => {
   });
 
   it('/parallel-processing (POST) should perform code review', async () => {
-    const inputData = { 
+    const inputData = {
       code: `
         function calculateSum(a, b) {
           return a + b;
         }
-      ` 
+      `,
     };
 
     const response = await request(app.getHttpServer())
@@ -41,7 +41,7 @@ describe('ParallelProcessingController (e2e)', () => {
   });
 
   it('/parallel-processing (POST) should handle complex code', async () => {
-    const inputData = { 
+    const inputData = {
       code: `
         class DatabaseConnection {
           connect() {
@@ -49,7 +49,7 @@ describe('ParallelProcessingController (e2e)', () => {
             return true;
           }
         }
-      ` 
+      `,
     };
 
     const response = await request(app.getHttpServer())

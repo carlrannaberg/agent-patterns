@@ -6,13 +6,13 @@ describe('RoutingController', () => {
   let controller: RoutingController;
   let service: RoutingService;
 
-  const mockStream = {
-    pipe: jest.fn(),
-  } as unknown as NodeJS.ReadableStream;
+  const mockResult = {
+    pipeTextStreamToResponse: jest.fn(),
+  };
 
   beforeEach(() => {
     const mockService = {
-      handleCustomerQuery: jest.fn().mockResolvedValue(mockStream),
+      handleCustomerQuery: jest.fn().mockResolvedValue(mockResult),
     } as unknown as RoutingService;
 
     // Manually inject the service to bypass DI issues
@@ -46,7 +46,7 @@ describe('RoutingController', () => {
         'Connection',
         'keep-alive',
       );
-      expect(mockStream.pipe).toHaveBeenCalledWith(mockResponse);
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle technical support query', async () => {

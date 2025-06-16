@@ -72,7 +72,7 @@ export class EvaluatorOptimizerService {
       iterations++;
     }
 
-    return streamObject({
+    const result = streamObject({
       model: evaluatorModel,
       schema: z.object({
         finalTranslation: z.string(),
@@ -95,6 +95,7 @@ export class EvaluatorOptimizerService {
         targetLanguage: z.string(),
       }),
       prompt: `Return the following data as a structured object:\n\nFinal Translation: ${currentTranslation}\nIterations Required: ${iterations}\nIteration Results: ${JSON.stringify(iterationResults)}\nOriginal Text: ${text}\nTarget Language: ${targetLanguage}`,
-    }).toTextStreamResponse();
+    });
+    return result;
   }
 }

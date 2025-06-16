@@ -7,8 +7,12 @@ import { Readable } from 'stream';
 jest.mock('ai');
 jest.mock('@ai-sdk/google');
 
-const mockGenerateObject = generateObject as jest.MockedFunction<typeof generateObject>;
-const mockStreamObject = streamObject as jest.MockedFunction<typeof streamObject>;
+const mockGenerateObject = generateObject as jest.MockedFunction<
+  typeof generateObject
+>;
+const mockStreamObject = streamObject as jest.MockedFunction<
+  typeof streamObject
+>;
 
 describe('OrchestratorWorkerService - Business Logic', () => {
   let service: OrchestratorWorkerService;
@@ -19,7 +23,7 @@ describe('OrchestratorWorkerService - Business Logic', () => {
     }).compile();
 
     service = module.get<OrchestratorWorkerService>(OrchestratorWorkerService);
-    
+
     // Reset mocks before each test
     jest.clearAllMocks();
   });
@@ -48,18 +52,23 @@ describe('OrchestratorWorkerService - Business Logic', () => {
         } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
       await service.implementFeature('Add user login functionality');
 
       // Assert: Orchestrator should be called for planning
-      expect(mockGenerateObject).toHaveBeenNthCalledWith(1,
+      expect(mockGenerateObject).toHaveBeenNthCalledWith(
+        1,
         expect.objectContaining({
-          system: expect.stringContaining('senior software architect planning feature implementations'),
+          system: expect.stringContaining(
+            'senior software architect planning feature implementations',
+          ),
           prompt: expect.stringContaining('Add user login functionality'),
-        })
+        }),
       );
     });
 
@@ -101,19 +110,25 @@ describe('OrchestratorWorkerService - Business Logic', () => {
         } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
-      await service.implementFeature('Build complete authentication system with JWT, password hashing, and role-based access control');
+      await service.implementFeature(
+        'Build complete authentication system with JWT, password hashing, and role-based access control',
+      );
 
       // Assert: Should identify high complexity and multiple files
       expect(mockGenerateObject).toHaveBeenCalledTimes(5); // 1 orchestrator + 4 workers
-      
+
       // Verify orchestrator call
       const orchestratorCall = mockGenerateObject.mock.calls[0][0];
       expect(orchestratorCall.system).toContain('senior software architect');
-      expect(orchestratorCall.prompt).toContain('complete authentication system');
+      expect(orchestratorCall.prompt).toContain(
+        'complete authentication system',
+      );
     });
 
     it('should handle different change types correctly', async () => {
@@ -149,7 +164,9 @@ describe('OrchestratorWorkerService - Business Logic', () => {
         } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -157,26 +174,29 @@ describe('OrchestratorWorkerService - Business Logic', () => {
 
       // Assert: Should call worker for each file with appropriate system prompt
       expect(mockGenerateObject).toHaveBeenCalledTimes(4); // 1 orchestrator + 3 workers
-      
+
       // Verify create worker prompt
-      expect(mockGenerateObject).toHaveBeenNthCalledWith(2,
+      expect(mockGenerateObject).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
           system: expect.stringContaining('creating new files'),
-        })
+        }),
       );
-      
+
       // Verify modify worker prompt
-      expect(mockGenerateObject).toHaveBeenNthCalledWith(3,
+      expect(mockGenerateObject).toHaveBeenNthCalledWith(
+        3,
         expect.objectContaining({
           system: expect.stringContaining('modifying existing files'),
-        })
+        }),
       );
-      
+
       // Verify delete worker prompt
-      expect(mockGenerateObject).toHaveBeenNthCalledWith(4,
+      expect(mockGenerateObject).toHaveBeenNthCalledWith(
+        4,
         expect.objectContaining({
           system: expect.stringContaining('removing files'),
-        })
+        }),
       );
     });
   });
@@ -206,7 +226,7 @@ describe('OrchestratorWorkerService - Business Logic', () => {
       mockGenerateObject
         .mockResolvedValueOnce({ object: implementationPlan } as any)
         .mockImplementationOnce(async () => {
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise((resolve) => setTimeout(resolve, 10));
           worker1Called = true;
           return {
             object: {
@@ -216,7 +236,7 @@ describe('OrchestratorWorkerService - Business Logic', () => {
           } as any;
         })
         .mockImplementationOnce(async () => {
-          await new Promise(resolve => setTimeout(resolve, 20));
+          await new Promise((resolve) => setTimeout(resolve, 20));
           worker2Called = true;
           return {
             object: {
@@ -227,7 +247,9 @@ describe('OrchestratorWorkerService - Business Logic', () => {
         });
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -262,17 +284,23 @@ describe('OrchestratorWorkerService - Business Logic', () => {
         } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
-      await service.implementFeature('Add user registration with email validation');
+      await service.implementFeature(
+        'Add user registration with email validation',
+      );
 
       // Assert: Worker should receive file context and overall feature context
       const workerCall = mockGenerateObject.mock.calls[1][0];
       expect(workerCall.prompt).toContain('User registration validation');
       expect(workerCall.prompt).toContain('src/validators/user.validator.ts');
-      expect(workerCall.prompt).toContain('Add user registration with email validation');
+      expect(workerCall.prompt).toContain(
+        'Add user registration with email validation',
+      );
     });
 
     it('should use appropriate worker system prompts for each change type', async () => {
@@ -316,7 +344,9 @@ describe('OrchestratorWorkerService - Business Logic', () => {
           } as any);
 
         mockStreamObject.mockReturnValue({
-          toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+          toTextStreamResponse: jest
+            .fn()
+            .mockReturnValue(new Readable({ read() {} })),
         } as any);
 
         await service.implementFeature(`Test ${testCase.changeType} operation`);
@@ -351,9 +381,10 @@ describe('OrchestratorWorkerService - Business Logic', () => {
         .mockResolvedValueOnce({ object: workerImplementation } as any);
 
       const mockStream = new Readable({ read() {} });
-      mockStreamObject.mockReturnValue({
+      const mockStreamObjectResult = {
         toTextStreamResponse: jest.fn().mockReturnValue(mockStream),
-      } as any);
+      };
+      mockStreamObject.mockReturnValue(mockStreamObjectResult as any);
 
       // Act
       const result = await service.implementFeature('Create main component');
@@ -367,16 +398,20 @@ describe('OrchestratorWorkerService - Business Logic', () => {
             changes: expect.any(Object),
           }),
         }),
-        prompt: expect.stringContaining('Return the following data as a structured object'),
+        prompt: expect.stringContaining(
+          'Return the following data as a structured object',
+        ),
       });
 
       // Verify plan and changes data is included
       const streamCall = mockStreamObject.mock.calls[0][0];
       expect(streamCall.prompt).toContain('Main component');
       expect(streamCall.prompt).toContain('src/components/main.tsx');
-      expect(streamCall.prompt).toContain('Creates the main component with proper props');
+      expect(streamCall.prompt).toContain(
+        'Creates the main component with proper props',
+      );
 
-      expect(result).toBe(mockStream);
+      expect(result).toBe(mockStreamObjectResult);
     });
 
     it('should include all file changes in response', async () => {
@@ -413,11 +448,15 @@ describe('OrchestratorWorkerService - Business Logic', () => {
         } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
-      await service.implementFeature('Create feature with service and controller');
+      await service.implementFeature(
+        'Create feature with service and controller',
+      );
 
       // Assert: All implementations should be included in streaming response
       const streamCall = mockStreamObject.mock.calls[0][0];
@@ -434,9 +473,9 @@ describe('OrchestratorWorkerService - Business Logic', () => {
       mockGenerateObject.mockRejectedValueOnce(new Error('Planning API Error'));
 
       // Act & Assert: Should throw the error
-      await expect(
-        service.implementFeature('test feature')
-      ).rejects.toThrow('Planning API Error');
+      await expect(service.implementFeature('test feature')).rejects.toThrow(
+        'Planning API Error',
+      );
     });
 
     it('should handle individual worker failures gracefully', async () => {
@@ -457,9 +496,9 @@ describe('OrchestratorWorkerService - Business Logic', () => {
         .mockRejectedValueOnce(new Error('Worker API Error'));
 
       // Act & Assert: Should throw worker error (Promise.all will reject)
-      await expect(
-        service.implementFeature('test feature')
-      ).rejects.toThrow('Worker API Error');
+      await expect(service.implementFeature('test feature')).rejects.toThrow(
+        'Worker API Error',
+      );
     });
 
     it('should handle multiple worker failures gracefully', async () => {
@@ -486,9 +525,9 @@ describe('OrchestratorWorkerService - Business Logic', () => {
         .mockRejectedValueOnce(new Error('Second Worker Error'));
 
       // Act & Assert: Should throw first error that rejects (Promise.all behavior)
-      await expect(
-        service.implementFeature('test feature')
-      ).rejects.toThrow(/Worker Error/);
+      await expect(service.implementFeature('test feature')).rejects.toThrow(
+        /Worker Error/,
+      );
     });
 
     it('should handle streaming response failures gracefully', async () => {
@@ -518,9 +557,9 @@ describe('OrchestratorWorkerService - Business Logic', () => {
       });
 
       // Act & Assert: Should throw streaming error
-      await expect(
-        service.implementFeature('test feature')
-      ).rejects.toThrow('Streaming Error');
+      await expect(service.implementFeature('test feature')).rejects.toThrow(
+        'Streaming Error',
+      );
     });
   });
 
@@ -553,12 +592,16 @@ describe('OrchestratorWorkerService - Business Logic', () => {
           } as any);
 
         mockStreamObject.mockReturnValue({
-          toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+          toTextStreamResponse: jest
+            .fn()
+            .mockReturnValue(new Readable({ read() {} })),
         } as any);
 
         // Should not throw for valid complexity levels
         await expect(
-          service.implementFeature(`test feature with ${complexity} complexity`)
+          service.implementFeature(
+            `test feature with ${complexity} complexity`,
+          ),
         ).resolves.toBeDefined();
       }
     });
@@ -591,12 +634,14 @@ describe('OrchestratorWorkerService - Business Logic', () => {
           } as any);
 
         mockStreamObject.mockReturnValue({
-          toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+          toTextStreamResponse: jest
+            .fn()
+            .mockReturnValue(new Readable({ read() {} })),
         } as any);
 
         // Should not throw for valid change types
         await expect(
-          service.implementFeature(`test feature with ${changeType} operation`)
+          service.implementFeature(`test feature with ${changeType} operation`),
         ).resolves.toBeDefined();
       }
     });
@@ -625,7 +670,9 @@ describe('OrchestratorWorkerService - Business Logic', () => {
         } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -661,7 +708,9 @@ describe('OrchestratorWorkerService - Business Logic', () => {
         } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -669,15 +718,19 @@ describe('OrchestratorWorkerService - Business Logic', () => {
 
       // Assert: Verify orchestrator-worker handoff
       expect(mockGenerateObject).toHaveBeenCalledTimes(2);
-      
+
       // Orchestrator call should be for planning
       const orchestratorCall = mockGenerateObject.mock.calls[0][0];
       expect(orchestratorCall.system).toContain('senior software architect');
-      expect(orchestratorCall.prompt).toContain('create an implementation plan');
-      
+      expect(orchestratorCall.prompt).toContain(
+        'create an implementation plan',
+      );
+
       // Worker call should be for implementation
       const workerCall = mockGenerateObject.mock.calls[1][0];
-      expect(workerCall.system).toContain('software developer creating new files');
+      expect(workerCall.system).toContain(
+        'software developer creating new files',
+      );
       expect(workerCall.prompt).toContain('Implement the changes');
     });
   });

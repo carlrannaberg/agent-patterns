@@ -11,12 +11,13 @@ export class RoutingController {
     @Body() body: { query: string },
     @Res() res: Response,
   ) {
-    const stream = await this.routingService.handleCustomerQuery(body.query);
+    const result = await this.routingService.handleCustomerQuery(body.query);
 
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    (stream as unknown as NodeJS.ReadableStream).pipe(res);
+    // For streamObject, use pipeDataStreamToResponse
+    result.pipeDataStreamToResponse(res);
   }
 }

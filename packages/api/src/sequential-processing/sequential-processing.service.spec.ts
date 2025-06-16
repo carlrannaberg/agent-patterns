@@ -7,9 +7,15 @@ import { Readable } from 'stream';
 jest.mock('ai');
 jest.mock('@ai-sdk/google');
 
-const mockGenerateText = generateText as jest.MockedFunction<typeof generateText>;
-const mockGenerateObject = generateObject as jest.MockedFunction<typeof generateObject>;
-const mockStreamObject = streamObject as jest.MockedFunction<typeof streamObject>;
+const mockGenerateText = generateText as jest.MockedFunction<
+  typeof generateText
+>;
+const mockGenerateObject = generateObject as jest.MockedFunction<
+  typeof generateObject
+>;
+const mockStreamObject = streamObject as jest.MockedFunction<
+  typeof streamObject
+>;
 
 describe('SequentialProcessingService - Business Logic', () => {
   let service: SequentialProcessingService;
@@ -19,8 +25,10 @@ describe('SequentialProcessingService - Business Logic', () => {
       providers: [SequentialProcessingService],
     }).compile();
 
-    service = module.get<SequentialProcessingService>(SequentialProcessingService);
-    
+    service = module.get<SequentialProcessingService>(
+      SequentialProcessingService,
+    );
+
     // Reset mocks before each test
     jest.clearAllMocks();
   });
@@ -31,7 +39,7 @@ describe('SequentialProcessingService - Business Logic', () => {
       mockGenerateText.mockResolvedValueOnce({
         text: 'Revolutionary eco-friendly water bottle - Buy now and save the planet!',
       } as any);
-      
+
       mockGenerateObject.mockResolvedValueOnce({
         object: {
           hasCallToAction: true,
@@ -41,7 +49,9 @@ describe('SequentialProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -52,7 +62,7 @@ describe('SequentialProcessingService - Business Logic', () => {
       expect(mockStreamObject).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: expect.stringContaining('Was improved: false'),
-        })
+        }),
       );
     });
 
@@ -65,7 +75,7 @@ describe('SequentialProcessingService - Business Logic', () => {
         .mockResolvedValueOnce({
           text: 'Revolutionary eco-friendly water bottle - Order yours today!',
         } as any);
-      
+
       mockGenerateObject.mockResolvedValueOnce({
         object: {
           hasCallToAction: false, // Missing call to action
@@ -75,7 +85,9 @@ describe('SequentialProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -83,18 +95,19 @@ describe('SequentialProcessingService - Business Logic', () => {
 
       // Assert: Should call generateText twice (original + improvement)
       expect(mockGenerateText).toHaveBeenCalledTimes(2);
-      
+
       // Verify improvement prompt mentions call to action
-      expect(mockGenerateText).toHaveBeenNthCalledWith(2, 
+      expect(mockGenerateText).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
           prompt: expect.stringContaining('A clear call to action'),
-        })
+        }),
       );
 
       expect(mockStreamObject).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: expect.stringContaining('Was improved: true'),
-        })
+        }),
       );
     });
 
@@ -107,7 +120,7 @@ describe('SequentialProcessingService - Business Logic', () => {
         .mockResolvedValueOnce({
           text: 'Transform your hydration experience with our revolutionary eco-bottle!',
         } as any);
-      
+
       mockGenerateObject.mockResolvedValueOnce({
         object: {
           hasCallToAction: true,
@@ -117,7 +130,9 @@ describe('SequentialProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -125,10 +140,11 @@ describe('SequentialProcessingService - Business Logic', () => {
 
       // Assert: Should improve for emotional appeal
       expect(mockGenerateText).toHaveBeenCalledTimes(2);
-      expect(mockGenerateText).toHaveBeenNthCalledWith(2,
+      expect(mockGenerateText).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
           prompt: expect.stringContaining('Stronger emotional appeal'),
-        })
+        }),
       );
     });
 
@@ -141,7 +157,7 @@ describe('SequentialProcessingService - Business Logic', () => {
         .mockResolvedValueOnce({
           text: 'Crystal-clear hydration with our premium eco-friendly water bottle!',
         } as any);
-      
+
       mockGenerateObject.mockResolvedValueOnce({
         object: {
           hasCallToAction: true,
@@ -151,7 +167,9 @@ describe('SequentialProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -159,10 +177,11 @@ describe('SequentialProcessingService - Business Logic', () => {
 
       // Assert: Should improve for clarity
       expect(mockGenerateText).toHaveBeenCalledTimes(2);
-      expect(mockGenerateText).toHaveBeenNthCalledWith(2,
+      expect(mockGenerateText).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
           prompt: expect.stringContaining('Improved clarity and directness'),
-        })
+        }),
       );
     });
 
@@ -175,7 +194,7 @@ describe('SequentialProcessingService - Business Logic', () => {
         .mockResolvedValueOnce({
           text: 'Revolutionary eco-bottle transforms your life - Order now for 50% off!',
         } as any);
-      
+
       mockGenerateObject.mockResolvedValueOnce({
         object: {
           hasCallToAction: false,
@@ -185,7 +204,9 @@ describe('SequentialProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -196,7 +217,9 @@ describe('SequentialProcessingService - Business Logic', () => {
       const improvementCall = mockGenerateText.mock.calls[1][0];
       expect(improvementCall.prompt).toContain('A clear call to action');
       expect(improvementCall.prompt).toContain('Stronger emotional appeal');
-      expect(improvementCall.prompt).toContain('Improved clarity and directness');
+      expect(improvementCall.prompt).toContain(
+        'Improved clarity and directness',
+      );
     });
   });
 
@@ -214,7 +237,7 @@ describe('SequentialProcessingService - Business Logic', () => {
       mockGenerateText
         .mockResolvedValueOnce({ text: originalCopy } as any)
         .mockResolvedValueOnce({ text: finalCopy } as any);
-      
+
       mockGenerateObject.mockResolvedValueOnce({
         object: {
           hasCallToAction: false, // Will trigger improvement
@@ -224,9 +247,10 @@ describe('SequentialProcessingService - Business Logic', () => {
       } as any);
 
       const mockStream = new Readable({ read() {} });
-      mockStreamObject.mockReturnValue({
+      const mockStreamObjectResult = {
         toTextStreamResponse: jest.fn().mockReturnValue(mockStream),
-      } as any);
+      };
+      mockStreamObject.mockReturnValue(mockStreamObjectResult as any);
 
       // Act
       const result = await service.generateMarketingCopy('test input');
@@ -242,10 +266,12 @@ describe('SequentialProcessingService - Business Logic', () => {
             wasImproved: expect.any(Object),
           }),
         }),
-        prompt: expect.stringContaining('Return the following data as a structured object'),
+        prompt: expect.stringContaining(
+          'Return the following data as a structured object',
+        ),
       });
 
-      expect(result).toBe(mockStream);
+      expect(result).toBe(mockStreamObjectResult);
     });
   });
 
@@ -255,9 +281,9 @@ describe('SequentialProcessingService - Business Logic', () => {
       mockGenerateText.mockRejectedValueOnce(new Error('AI API Error'));
 
       // Act & Assert: Should throw the error (or handle gracefully based on requirements)
-      await expect(
-        service.generateMarketingCopy('test input')
-      ).rejects.toThrow('AI API Error');
+      await expect(service.generateMarketingCopy('test input')).rejects.toThrow(
+        'AI API Error',
+      );
     });
 
     it('should handle malformed AI responses gracefully', async () => {
@@ -265,7 +291,7 @@ describe('SequentialProcessingService - Business Logic', () => {
       mockGenerateText.mockResolvedValueOnce({
         text: 'Valid marketing copy',
       } as any);
-      
+
       mockGenerateObject.mockResolvedValueOnce({
         object: {
           // Missing required fields - but service handles this gracefully
@@ -276,7 +302,9 @@ describe('SequentialProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act - Service should handle gracefully and not crash
@@ -292,20 +320,42 @@ describe('SequentialProcessingService - Business Logic', () => {
     it('should use correct quality thresholds for improvement decision', async () => {
       // Test the business rule: improve if emotionalAppeal < 7 OR clarity < 7 OR !hasCallToAction
       const testCases = [
-        { hasCallToAction: true, emotionalAppeal: 7, clarity: 7, shouldImprove: false },
-        { hasCallToAction: true, emotionalAppeal: 6, clarity: 7, shouldImprove: true },
-        { hasCallToAction: true, emotionalAppeal: 7, clarity: 6, shouldImprove: true },
-        { hasCallToAction: false, emotionalAppeal: 9, clarity: 9, shouldImprove: true },
+        {
+          hasCallToAction: true,
+          emotionalAppeal: 7,
+          clarity: 7,
+          shouldImprove: false,
+        },
+        {
+          hasCallToAction: true,
+          emotionalAppeal: 6,
+          clarity: 7,
+          shouldImprove: true,
+        },
+        {
+          hasCallToAction: true,
+          emotionalAppeal: 7,
+          clarity: 6,
+          shouldImprove: true,
+        },
+        {
+          hasCallToAction: false,
+          emotionalAppeal: 9,
+          clarity: 9,
+          shouldImprove: true,
+        },
       ];
 
       for (const testCase of testCases) {
         // Reset mocks
         jest.clearAllMocks();
-        
+
         mockGenerateText.mockResolvedValue({ text: 'test copy' } as any);
         mockGenerateObject.mockResolvedValue({ object: testCase } as any);
         mockStreamObject.mockReturnValue({
-          toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+          toTextStreamResponse: jest
+            .fn()
+            .mockReturnValue(new Readable({ read() {} })),
         } as any);
 
         await service.generateMarketingCopy('test');

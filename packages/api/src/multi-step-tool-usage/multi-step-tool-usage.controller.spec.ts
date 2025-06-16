@@ -6,13 +6,13 @@ describe('MultiStepToolUsageController', () => {
   let controller: MultiStepToolUsageController;
   let service: MultiStepToolUsageService;
 
-  const mockStream = {
-    pipe: jest.fn(),
-  } as unknown as NodeJS.ReadableStream;
+  const mockResult = {
+    pipeDataStreamToResponse: jest.fn(),
+  };
 
   beforeEach(() => {
     const mockService = {
-      solveMathProblem: jest.fn().mockResolvedValue(mockStream),
+      solveMathProblem: jest.fn().mockResolvedValue(mockResult),
     } as unknown as MultiStepToolUsageService;
 
     // Manually inject the service to bypass DI issues
@@ -46,7 +46,7 @@ describe('MultiStepToolUsageController', () => {
         'Connection',
         'keep-alive',
       );
-      expect(mockStream.pipe).toHaveBeenCalledWith(mockResponse);
+      expect(mockResult.pipeDataStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle complex math problem', async () => {

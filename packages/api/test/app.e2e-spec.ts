@@ -22,9 +22,8 @@ describe('AppController (e2e)', () => {
   });
 
   it('/ (GET)', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/');
-    
+    const response = await request(app.getHttpServer()).get('/');
+
     // Should return 200 with "Hello World!" if DI works properly
     expect(response.status).toBe(200);
     expect(response.text).toBe('Hello World!');

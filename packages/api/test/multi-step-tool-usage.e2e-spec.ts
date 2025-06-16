@@ -20,8 +20,8 @@ describe('MultiStepToolUsageController (e2e)', () => {
   });
 
   it('/multi-step-tool-usage (POST) should solve math problem', async () => {
-    const inputData = { 
-      prompt: 'Calculate the area of a circle with radius 5 meters' 
+    const inputData = {
+      prompt: 'Calculate the area of a circle with radius 5 meters',
     };
 
     const response = await request(app.getHttpServer())
@@ -37,8 +37,8 @@ describe('MultiStepToolUsageController (e2e)', () => {
   });
 
   it('/multi-step-tool-usage (POST) should handle complex math', async () => {
-    const inputData = { 
-      prompt: 'What is the derivative of x^2 + 3x + 2?' 
+    const inputData = {
+      prompt: 'What is the derivative of x^2 + 3x + 2?',
     };
 
     const response = await request(app.getHttpServer())
@@ -53,8 +53,8 @@ describe('MultiStepToolUsageController (e2e)', () => {
   });
 
   it('/multi-step-tool-usage (POST) should handle word problems', async () => {
-    const inputData = { 
-      prompt: 'If a train travels 60 mph for 3 hours, how far does it go?' 
+    const inputData = {
+      prompt: 'If a train travels 60 mph for 3 hours, how far does it go?',
     };
 
     const response = await request(app.getHttpServer())

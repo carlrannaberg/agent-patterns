@@ -13,7 +13,7 @@ export class EvaluatorOptimizerController {
     @Body() body: { text: string; targetLanguage: string },
     @Res() res: Response,
   ) {
-    const stream = await this.evaluatorOptimizerService.translateWithFeedback(
+    const result = await this.evaluatorOptimizerService.translateWithFeedback(
       body.text,
       body.targetLanguage,
     );
@@ -22,6 +22,7 @@ export class EvaluatorOptimizerController {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    (stream as unknown as NodeJS.ReadableStream).pipe(res);
+    // For streamObject, use pipeDataStreamToResponse
+    result.pipeDataStreamToResponse(res);
   }
 }

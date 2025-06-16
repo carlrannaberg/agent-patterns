@@ -13,7 +13,7 @@ export class MultiStepToolUsageController {
     @Body() body: { prompt: string },
     @Res() res: Response,
   ) {
-    const stream = await this.multiStepToolUsageService.solveMathProblem(
+    const result = await this.multiStepToolUsageService.solveMathProblem(
       body.prompt,
     );
 
@@ -21,6 +21,7 @@ export class MultiStepToolUsageController {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    (stream as unknown as NodeJS.ReadableStream).pipe(res);
+    // For streamObject, use pipeDataStreamToResponse
+    result.pipeDataStreamToResponse(res);
   }
 }

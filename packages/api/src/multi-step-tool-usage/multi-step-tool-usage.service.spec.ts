@@ -8,8 +8,12 @@ jest.mock('ai');
 jest.mock('@ai-sdk/google');
 jest.mock('mathjs');
 
-const mockGenerateText = generateText as jest.MockedFunction<typeof generateText>;
-const mockStreamObject = streamObject as jest.MockedFunction<typeof streamObject>;
+const mockGenerateText = generateText as jest.MockedFunction<
+  typeof generateText
+>;
+const mockStreamObject = streamObject as jest.MockedFunction<
+  typeof streamObject
+>;
 
 // Mock mathjs
 const mockMathjs = require('mathjs');
@@ -23,7 +27,7 @@ describe('MultiStepToolUsageService - Business Logic', () => {
     }).compile();
 
     service = module.get<MultiStepToolUsageService>(MultiStepToolUsageService);
-    
+
     // Reset mocks before each test
     jest.clearAllMocks();
   });
@@ -61,7 +65,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       mockMathjs.evaluate.mockReturnValueOnce(40);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -77,7 +83,7 @@ describe('MultiStepToolUsageService - Business Logic', () => {
           toolChoice: 'required',
           system: expect.stringContaining('solving math problems step by step'),
           prompt: 'What is 15 + 25?',
-        })
+        }),
       );
     });
 
@@ -102,7 +108,10 @@ describe('MultiStepToolUsageService - Business Logic', () => {
             args: {
               steps: [
                 { calculation: '5 * 3', reasoning: 'Multiply 5 by 3' },
-                { calculation: '15 + 10', reasoning: 'Add 10 to previous result' },
+                {
+                  calculation: '15 + 10',
+                  reasoning: 'Add 10 to previous result',
+                },
               ],
               answer: '25',
             },
@@ -120,12 +129,12 @@ describe('MultiStepToolUsageService - Business Logic', () => {
         ],
       } as any);
 
-      mockMathjs.evaluate
-        .mockReturnValueOnce(15)
-        .mockReturnValueOnce(25);
+      mockMathjs.evaluate.mockReturnValueOnce(15).mockReturnValueOnce(25);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -133,7 +142,7 @@ describe('MultiStepToolUsageService - Business Logic', () => {
 
       // Assert: Should process multiple calculations in sequence
       expect(mockGenerateText).toHaveBeenCalledTimes(1);
-      
+
       // Verify streaming response includes all calculation steps
       const streamCall = mockStreamObject.mock.calls[0][0];
       expect(streamCall.prompt).toContain('5 * 3');
@@ -161,8 +170,14 @@ describe('MultiStepToolUsageService - Business Logic', () => {
             toolName: 'answer',
             args: {
               steps: [
-                { calculation: '(-4 + sqrt(64)) / 4', reasoning: 'Calculate positive root' },
-                { calculation: '(-4 - sqrt(64)) / 4', reasoning: 'Calculate negative root' },
+                {
+                  calculation: '(-4 + sqrt(64)) / 4',
+                  reasoning: 'Calculate positive root',
+                },
+                {
+                  calculation: '(-4 - sqrt(64)) / 4',
+                  reasoning: 'Calculate negative root',
+                },
               ],
               answer: 'x = 1 or x = -3',
             },
@@ -180,12 +195,12 @@ describe('MultiStepToolUsageService - Business Logic', () => {
         ],
       } as any);
 
-      mockMathjs.evaluate
-        .mockReturnValueOnce(1)
-        .mockReturnValueOnce(-3);
+      mockMathjs.evaluate.mockReturnValueOnce(1).mockReturnValueOnce(-3);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -195,7 +210,7 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       expect(mockGenerateText).toHaveBeenCalledWith(
         expect.objectContaining({
           prompt: 'Solve x^2 + 3x - 4 = 0',
-        })
+        }),
       );
 
       const streamCall = mockStreamObject.mock.calls[0][0];
@@ -216,9 +231,7 @@ describe('MultiStepToolUsageService - Business Logic', () => {
             toolCallId: 'answer-1',
             toolName: 'answer',
             args: {
-              steps: [
-                { calculation: 'pi * 5^2', reasoning: 'Area = π * r²' },
-              ],
+              steps: [{ calculation: 'pi * 5^2', reasoning: 'Area = π * r²' }],
               answer: '78.54',
             },
           },
@@ -234,11 +247,15 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       mockMathjs.evaluate.mockReturnValueOnce(78.53981633974483);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
-      await service.solveMathProblem('What is the area of a circle with radius 5?');
+      await service.solveMathProblem(
+        'What is the area of a circle with radius 5?',
+      );
 
       // Assert: Should include calculation results in streaming response
       const streamCall = mockStreamObject.mock.calls[0][0];
@@ -252,7 +269,7 @@ describe('MultiStepToolUsageService - Business Logic', () => {
     it('should execute calculation tool with mathjs correctly', async () => {
       // This test verifies the actual tool execution logic
       // Since we're mocking mathjs, we test the tool wrapper logic
-      
+
       // Arrange: Mock a simple calculation
       mockGenerateText.mockResolvedValueOnce({
         text: 'Calculating 2 + 2',
@@ -282,7 +299,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       mockMathjs.evaluate.mockReturnValueOnce(4);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -308,7 +327,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
             toolCallId: 'answer-1',
             toolName: 'answer',
             args: {
-              steps: [{ calculation: '1/0', reasoning: 'Division by zero test' }],
+              steps: [
+                { calculation: '1/0', reasoning: 'Division by zero test' },
+              ],
               answer: 'Error: Division by zero',
             },
           },
@@ -316,9 +337,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
         toolResults: [
           {
             toolCallId: 'calc-1',
-            result: { 
+            result: {
               error: 'Error evaluating expression: Division by zero',
-              expression: '1/0'
+              expression: '1/0',
             },
           },
         ],
@@ -329,12 +350,14 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       });
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act & Assert: Should handle error gracefully
       await expect(
-        service.solveMathProblem('What is 1 divided by 0?')
+        service.solveMathProblem('What is 1 divided by 0?'),
       ).resolves.toBeDefined();
 
       // Verify error is included in response
@@ -365,7 +388,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -391,7 +416,10 @@ describe('MultiStepToolUsageService - Business Logic', () => {
             toolName: 'answer',
             args: {
               steps: [
-                { calculation: '150 * 0.20', reasoning: 'Calculate 20% of 150' },
+                {
+                  calculation: '150 * 0.20',
+                  reasoning: 'Calculate 20% of 150',
+                },
               ],
               answer: '30',
             },
@@ -408,7 +436,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       mockMathjs.evaluate.mockReturnValueOnce(30);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -436,9 +466,7 @@ describe('MultiStepToolUsageService - Business Logic', () => {
             toolCallId: 'answer-1',
             toolName: 'answer',
             args: {
-              steps: [
-                { calculation: '12 * 8', reasoning: 'Multiply 12 by 8' },
-              ],
+              steps: [{ calculation: '12 * 8', reasoning: 'Multiply 12 by 8' }],
               answer: '96',
             },
           },
@@ -454,9 +482,10 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       mockMathjs.evaluate.mockReturnValueOnce(96);
 
       const mockStream = new Readable({ read() {} });
-      mockStreamObject.mockReturnValue({
+      const mockStreamObjectResult = {
         toTextStreamResponse: jest.fn().mockReturnValue(mockStream),
-      } as any);
+      };
+      mockStreamObject.mockReturnValue(mockStreamObjectResult as any);
 
       // Act
       const result = await service.solveMathProblem('Calculate 12 times 8');
@@ -473,7 +502,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
             workingSteps: expect.any(Object),
           }),
         }),
-        prompt: expect.stringContaining('Return the following data as a structured object'),
+        prompt: expect.stringContaining(
+          'Return the following data as a structured object',
+        ),
       });
 
       // Verify all required data is included
@@ -483,7 +514,7 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       expect(streamCall.prompt).toContain('Final Answer: 96');
       expect(streamCall.prompt).toContain('Step-by-step solution');
 
-      expect(result).toBe(mockStream);
+      expect(result).toBe(mockStreamObjectResult);
     });
 
     it('should include all calculation steps in response', async () => {
@@ -541,7 +572,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
         .mockReturnValueOnce(25);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -564,9 +597,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       mockGenerateText.mockRejectedValueOnce(new Error('AI API Error'));
 
       // Act & Assert: Should throw the error
-      await expect(
-        service.solveMathProblem('test problem')
-      ).rejects.toThrow('AI API Error');
+      await expect(service.solveMathProblem('test problem')).rejects.toThrow(
+        'AI API Error',
+      );
     });
 
     it('should handle streaming response failures gracefully', async () => {
@@ -591,9 +624,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       });
 
       // Act & Assert: Should throw streaming error
-      await expect(
-        service.solveMathProblem('test problem')
-      ).rejects.toThrow('Streaming Error');
+      await expect(service.solveMathProblem('test problem')).rejects.toThrow(
+        'Streaming Error',
+      );
     });
 
     it('should handle malformed tool responses gracefully', async () => {
@@ -611,7 +644,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act: Should handle gracefully
@@ -633,7 +668,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -642,7 +679,7 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       // Assert: Should enforce tool usage requirement
       const generateTextCall = mockGenerateText.mock.calls[0][0];
       expect(generateTextCall.toolChoice).toBe('required');
-      
+
       // Should include fallback values when no tools used
       const streamCall = mockStreamObject.mock.calls[0][0];
       expect(streamCall.prompt).toContain('No answer provided');
@@ -666,7 +703,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -674,9 +713,15 @@ describe('MultiStepToolUsageService - Business Logic', () => {
 
       // Assert: Should use appropriate system prompt
       const generateTextCall = mockGenerateText.mock.calls[0][0];
-      expect(generateTextCall.system).toContain('solving math problems step by step');
-      expect(generateTextCall.system).toContain('calculate tool for any mathematical operations');
-      expect(generateTextCall.system).toContain('provide the final answer with the answer tool');
+      expect(generateTextCall.system).toContain(
+        'solving math problems step by step',
+      );
+      expect(generateTextCall.system).toContain(
+        'calculate tool for any mathematical operations',
+      );
+      expect(generateTextCall.system).toContain(
+        'provide the final answer with the answer tool',
+      );
     });
 
     it('should properly structure calculation results', async () => {
@@ -693,9 +738,7 @@ describe('MultiStepToolUsageService - Business Logic', () => {
             toolCallId: 'answer-1',
             toolName: 'answer',
             args: {
-              steps: [
-                { calculation: '7 * 6', reasoning: 'Multiply 7 by 6' },
-              ],
+              steps: [{ calculation: '7 * 6', reasoning: 'Multiply 7 by 6' }],
               answer: '42',
             },
           },
@@ -711,7 +754,9 @@ describe('MultiStepToolUsageService - Business Logic', () => {
       mockMathjs.evaluate.mockReturnValueOnce(42);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest
+          .fn()
+          .mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act

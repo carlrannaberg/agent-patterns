@@ -20,8 +20,8 @@ describe('OrchestratorWorkerController (e2e)', () => {
   });
 
   it('/orchestrator-worker (POST) should implement feature', async () => {
-    const inputData = { 
-      featureRequest: 'Add user authentication with JWT tokens' 
+    const inputData = {
+      featureRequest: 'Add user authentication with JWT tokens',
     };
 
     const response = await request(app.getHttpServer())
@@ -37,8 +37,9 @@ describe('OrchestratorWorkerController (e2e)', () => {
   });
 
   it('/orchestrator-worker (POST) should handle complex feature request', async () => {
-    const inputData = { 
-      featureRequest: 'Create a real-time chat system with websockets and message persistence' 
+    const inputData = {
+      featureRequest:
+        'Create a real-time chat system with websockets and message persistence',
     };
 
     const response = await request(app.getHttpServer())

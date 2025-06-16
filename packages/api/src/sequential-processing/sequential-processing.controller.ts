@@ -21,7 +21,7 @@ export class SequentialProcessingController {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    // For streamObject, use pipeTextStreamToResponse
-    result.pipeTextStreamToResponse(res);
+    // For streamObject, use pipeDataStreamToResponse
+    result.pipeDataStreamToResponse(res);
   }
 }

@@ -6,13 +6,13 @@ describe('EvaluatorOptimizerController', () => {
   let controller: EvaluatorOptimizerController;
   let service: EvaluatorOptimizerService;
 
-  const mockStream = {
-    pipe: jest.fn(),
-  } as unknown as NodeJS.ReadableStream;
+  const mockResult = {
+    pipeDataStreamToResponse: jest.fn(),
+  };
 
   beforeEach(() => {
     const mockService = {
-      translateWithFeedback: jest.fn().mockResolvedValue(mockStream),
+      translateWithFeedback: jest.fn().mockResolvedValue(mockResult),
     } as unknown as EvaluatorOptimizerService;
 
     // Manually inject the service to bypass DI issues
@@ -53,7 +53,7 @@ describe('EvaluatorOptimizerController', () => {
         'Connection',
         'keep-alive',
       );
-      expect(mockStream.pipe).toHaveBeenCalledWith(mockResponse);
+      expect(mockResult.pipeDataStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle different target languages', async () => {

@@ -20,9 +20,9 @@ describe('EvaluatorOptimizerController (e2e)', () => {
   });
 
   it('/evaluator-optimizer (POST) should translate with feedback', async () => {
-    const inputData = { 
+    const inputData = {
       text: 'Hello, how are you?',
-      targetLanguage: 'Spanish'
+      targetLanguage: 'Spanish',
     };
 
     const response = await request(app.getHttpServer())
@@ -38,9 +38,9 @@ describe('EvaluatorOptimizerController (e2e)', () => {
   });
 
   it('/evaluator-optimizer (POST) should handle different languages', async () => {
-    const inputData = { 
+    const inputData = {
       text: 'The weather is beautiful today.',
-      targetLanguage: 'French'
+      targetLanguage: 'French',
     };
 
     const response = await request(app.getHttpServer())
@@ -55,8 +55,8 @@ describe('EvaluatorOptimizerController (e2e)', () => {
   });
 
   it('/evaluator-optimizer (POST) should handle missing text', async () => {
-    const inputData = { 
-      targetLanguage: 'German'
+    const inputData = {
+      targetLanguage: 'German',
     };
 
     const response = await request(app.getHttpServer())
@@ -71,8 +71,8 @@ describe('EvaluatorOptimizerController (e2e)', () => {
   });
 
   it('/evaluator-optimizer (POST) should handle missing target language', async () => {
-    const inputData = { 
-      text: 'Hello world'
+    const inputData = {
+      text: 'Hello world',
     };
 
     const response = await request(app.getHttpServer())
@@ -87,9 +87,9 @@ describe('EvaluatorOptimizerController (e2e)', () => {
   });
 
   it('/evaluator-optimizer (POST) should handle empty values', async () => {
-    const inputData = { 
+    const inputData = {
       text: '',
-      targetLanguage: ''
+      targetLanguage: '',
     };
 
     const response = await request(app.getHttpServer())
