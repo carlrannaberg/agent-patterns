@@ -18,7 +18,10 @@ export class OrchestratorWorkerController {
     );
 
     console.log('All methods on result:', Object.getOwnPropertyNames(result));
-    console.log('All methods including prototype:', Object.getOwnPropertyNames(Object.getPrototypeOf(result)));
+    console.log(
+      'All methods including prototype:',
+      Object.getOwnPropertyNames(Object.getPrototypeOf(result)),
+    );
 
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-cache');

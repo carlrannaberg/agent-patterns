@@ -46,7 +46,9 @@ describe('ParallelProcessingController', () => {
         'Connection',
         'keep-alive',
       );
-      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(
+        mockResponse,
+      );
     });
 
     it('should handle complex code snippet', async () => {

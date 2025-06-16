@@ -46,7 +46,9 @@ describe('RoutingController', () => {
         'Connection',
         'keep-alive',
       );
-      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(
+        mockResponse,
+      );
     });
 
     it('should handle technical support query', async () => {

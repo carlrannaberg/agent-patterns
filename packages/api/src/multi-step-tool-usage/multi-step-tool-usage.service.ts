@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText, tool, streamObject } from 'ai';
 import * as mathjs from 'mathjs';
@@ -8,8 +8,14 @@ const google = createGoogleGenerativeAI();
 
 @Injectable()
 export class MultiStepToolUsageService {
+  private readonly logger = new Logger(MultiStepToolUsageService.name);
   async solveMathProblem(prompt: string) {
+    this.logger.log('Starting multi-step math problem solving process');
+    this.logger.debug(`Problem: ${prompt}`);
+
     const model = google('models/gemini-2.5-pro-preview-06-05');
+
+    this.logger.log('Initiating tool-assisted problem solving');
 
     const { toolCalls, text, toolResults } = await generateText({
       model,
@@ -23,10 +29,17 @@ export class MultiStepToolUsageService {
               .describe('The mathematical expression to evaluate'),
           }),
           execute: async ({ expression }) => {
+            this.logger.debug(`Calculating expression: ${expression}`);
             try {
               const result = mathjs.evaluate(expression) as number | string;
+              this.logger.debug(
+                `Calculation result: ${expression} = ${result}`,
+              );
               return Promise.resolve({ result: String(result), expression });
             } catch (error: unknown) {
+              this.logger.warn(
+                `Calculation error for expression '${expression}': ${error instanceof Error ? error.message : 'Unknown error'}`,
+              );
               return Promise.resolve({
                 error: `Error evaluating expression: ${error instanceof Error ? error.message : 'Unknown error'}`,
                 expression,
@@ -56,9 +69,19 @@ export class MultiStepToolUsageService {
       prompt: prompt,
     });
 
+    this.logger.log('Tool execution completed');
+    this.logger.debug(`Total tool calls made: ${toolCalls.length}`);
+
     const finalAnswer = toolCalls.find((call) => call.toolName === 'answer');
     const calculations = toolCalls.filter(
       (call) => call.toolName === 'calculate',
+    );
+
+    this.logger.debug(
+      `Number of calculations performed: ${calculations.length}`,
+    );
+    this.logger.debug(
+      `Final answer tool called: ${finalAnswer ? 'Yes' : 'No'}`,
     );
 
     const calculationResults = calculations.map((calc, index) => {
@@ -82,6 +105,14 @@ export class MultiStepToolUsageService {
       };
     });
 
+    this.logger.log(
+      'Processing calculation results and generating structured response',
+    );
+    this.logger.debug(
+      `Successfully processed ${calculationResults.length} calculation steps`,
+    );
+    this.logger.log('Starting final streaming result generation');
+
     const result = streamObject({
       model,
       schema: z.object({
@@ -104,6 +135,10 @@ export class MultiStepToolUsageService {
       }),
       prompt: `Return the following data as a structured object:\n\nProblem: ${prompt}\nCalculations performed: ${JSON.stringify(calculationResults)}\nSteps: ${JSON.stringify((finalAnswer?.args as { steps?: unknown[] })?.steps || [])}\nFinal Answer: ${(finalAnswer?.args as { answer?: string })?.answer || 'No answer provided'}\nWorking Steps: ${text}`,
     });
+
+    this.logger.log(
+      'Multi-step math problem solving completed - streaming results',
+    );
     return result;
   }
 }

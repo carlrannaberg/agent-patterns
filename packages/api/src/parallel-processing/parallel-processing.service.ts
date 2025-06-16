@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { generateText, generateObject, streamObject } from 'ai';
 import { z } from 'zod';
@@ -7,8 +7,16 @@ const google = createGoogleGenerativeAI();
 
 @Injectable()
 export class ParallelProcessingService {
+  private readonly logger = new Logger(ParallelProcessingService.name);
   async parallelCodeReview(code: string) {
+    this.logger.log('Starting parallel code review process');
+    this.logger.debug(`Code length: ${code.length} characters`);
+
     const model = google('models/gemini-2.5-pro-preview-06-05');
+
+    this.logger.log(
+      'Initiating parallel reviews: security, performance, and maintainability',
+    );
 
     const [securityReview, performanceReview, maintainabilityReview] =
       await Promise.all([
@@ -47,17 +55,32 @@ export class ParallelProcessingService {
         }),
       ]);
 
+    this.logger.log('Parallel reviews completed successfully');
+    this.logger.debug(
+      `Security risk level: ${securityReview.object.riskLevel}`,
+    );
+    this.logger.debug(`Performance impact: ${performanceReview.object.impact}`);
+    this.logger.debug(
+      `Maintainability quality score: ${maintainabilityReview.object.qualityScore}`,
+    );
+
     const reviews = [
       { ...securityReview.object, type: 'security' },
       { ...performanceReview.object, type: 'performance' },
       { ...maintainabilityReview.object, type: 'maintainability' },
     ];
 
+    this.logger.log('Generating comprehensive summary from all reviews');
+
     const { text: summary } = await generateText({
       model,
       system: 'You are a technical lead summarizing multiple code reviews.',
       prompt: `Synthesize these code review results into a concise summary with key actions:\n${JSON.stringify(reviews, null, 2)}`,
     });
+
+    this.logger.log('Summary generation completed');
+    this.logger.debug(`Summary length: ${summary.length} characters`);
+    this.logger.log('Starting final streaming result generation');
 
     const result = streamObject({
       model,
@@ -81,6 +104,9 @@ export class ParallelProcessingService {
       prompt: `Return the following data as a structured object:\n\nReviews: ${JSON.stringify(reviews)}\nSummary: ${summary}`,
     });
 
+    this.logger.log(
+      'Parallel code review process completed - streaming results',
+    );
     return result;
   }
 }
