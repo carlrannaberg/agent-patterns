@@ -11,11 +11,11 @@ describe('SequentialProcessingController', () => {
       generateMarketingCopy: vi.fn().mockResolvedValue({
         pipe: vi.fn(),
       }),
-    };
+    } as unknown as SequentialProcessingService;
 
     // Manually inject the service to bypass DI issues
-    controller = new SequentialProcessingController(mockService as any);
-    service = mockService as any;
+    controller = new SequentialProcessingController(mockService);
+    service = mockService;
   });
 
   it('should be defined', () => {
@@ -26,13 +26,13 @@ describe('SequentialProcessingController', () => {
     it('should call service and set proper headers', async () => {
       const input = 'AI-powered productivity app';
       const mockStream = { pipe: vi.fn() };
-      vi.mocked(service.generateMarketingCopy).mockResolvedValue(mockStream);
+      (service.generateMarketingCopy as any).mockResolvedValue(mockStream);
 
       const mockResponse = {
         setHeader: vi.fn(),
-      };
+      } as any;
 
-      await controller.generateMarketingCopy({ input }, mockResponse as any);
+      await controller.generateMarketingCopy({ input }, mockResponse);
 
       expect(service.generateMarketingCopy).toHaveBeenCalledWith(input);
       expect(mockResponse.setHeader).toHaveBeenCalledWith(
@@ -53,29 +53,29 @@ describe('SequentialProcessingController', () => {
     it('should handle empty input', async () => {
       const input = '';
       const mockStream = { pipe: vi.fn() };
-      vi.mocked(service.generateMarketingCopy).mockResolvedValue(mockStream);
+      (service.generateMarketingCopy as any).mockResolvedValue(mockStream);
 
       const mockResponse = {
         setHeader: vi.fn(),
-      };
+      } as any;
 
-      await controller.generateMarketingCopy({ input }, mockResponse as any);
+      await controller.generateMarketingCopy({ input }, mockResponse);
 
       expect(service.generateMarketingCopy).toHaveBeenCalledWith(input);
     });
 
     it('should handle service errors', async () => {
       const input = 'Test product';
-      vi.mocked(service.generateMarketingCopy).mockRejectedValue(
+      (service.generateMarketingCopy as any).mockRejectedValue(
         new Error('Service error'),
       );
 
       const mockResponse = {
         setHeader: vi.fn(),
-      };
+      } as any;
 
       await expect(
-        controller.generateMarketingCopy({ input }, mockResponse as any),
+        controller.generateMarketingCopy({ input }, mockResponse),
       ).rejects.toThrow('Service error');
     });
   });

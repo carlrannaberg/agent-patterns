@@ -14,11 +14,11 @@ describe('MultiStepToolUsageController', () => {
   beforeEach(() => {
     const mockService = {
       solveMathProblem: vi.fn().mockResolvedValue(mockStream),
-    };
+    } as unknown as MultiStepToolUsageService;
 
     // Manually inject the service to bypass DI issues
-    controller = new MultiStepToolUsageController(mockService as any);
-    service = mockService as any;
+    controller = new MultiStepToolUsageController(mockService);
+    service = mockService;
   });
 
   it('should be defined', () => {
@@ -30,7 +30,7 @@ describe('MultiStepToolUsageController', () => {
       const prompt = 'What is the area of a circle with radius 5?';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.solveMathProblem({ prompt }, mockResponse);
 
@@ -54,7 +54,7 @@ describe('MultiStepToolUsageController', () => {
       const prompt = 'Calculate the derivative of x^3 + 2x^2 - 5x + 1';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.solveMathProblem({ prompt }, mockResponse);
 
@@ -66,7 +66,7 @@ describe('MultiStepToolUsageController', () => {
         'If a train travels 120 miles in 2 hours, what is its average speed?';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.solveMathProblem({ prompt }, mockResponse);
 
@@ -77,7 +77,7 @@ describe('MultiStepToolUsageController', () => {
       const prompt = 'Solve for x: 2x + 3 = 11';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.solveMathProblem({ prompt }, mockResponse);
 
@@ -88,7 +88,7 @@ describe('MultiStepToolUsageController', () => {
       const prompt = '';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.solveMathProblem({ prompt }, mockResponse);
 
@@ -97,13 +97,13 @@ describe('MultiStepToolUsageController', () => {
 
     it('should handle service errors', async () => {
       const prompt = 'Calculate sqrt(-1)';
-      vi.mocked(service.solveMathProblem).mockRejectedValue(
+      (service.solveMathProblem as any).mockRejectedValue(
         new Error('Service error'),
       );
 
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await expect(
         controller.solveMathProblem({ prompt }, mockResponse),
@@ -115,7 +115,7 @@ describe('MultiStepToolUsageController', () => {
         'Calculate the mean, median, and mode of: 1, 2, 3, 3, 4, 5, 5, 5, 6';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.solveMathProblem({ prompt }, mockResponse);
 

@@ -14,11 +14,11 @@ describe('ParallelProcessingController', () => {
   beforeEach(() => {
     const mockService = {
       parallelCodeReview: vi.fn().mockResolvedValue(mockStream),
-    };
+    } as unknown as ParallelProcessingService;
 
     // Manually inject the service to bypass DI issues
-    controller = new ParallelProcessingController(mockService as any);
-    service = mockService as any;
+    controller = new ParallelProcessingController(mockService);
+    service = mockService;
   });
 
   it('should be defined', () => {
@@ -30,7 +30,7 @@ describe('ParallelProcessingController', () => {
       const code = 'function add(a, b) { return a + b; }';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.reviewCode({ code }, mockResponse);
 
@@ -61,7 +61,7 @@ describe('ParallelProcessingController', () => {
       `;
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.reviewCode({ code }, mockResponse);
 
@@ -72,7 +72,7 @@ describe('ParallelProcessingController', () => {
       const code = '';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.reviewCode({ code }, mockResponse);
 
@@ -81,13 +81,13 @@ describe('ParallelProcessingController', () => {
 
     it('should handle service errors', async () => {
       const code = 'function test() {}';
-      vi.mocked(service.parallelCodeReview).mockRejectedValue(
+      (service.parallelCodeReview as any).mockRejectedValue(
         new Error('Service error'),
       );
 
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await expect(
         controller.reviewCode({ code }, mockResponse),
@@ -98,7 +98,7 @@ describe('ParallelProcessingController', () => {
       const code = 'function broken() { return';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.reviewCode({ code }, mockResponse);
 

@@ -8,12 +8,12 @@ describe('AppController', () => {
 
   const mockAppService = {
     getHello: vi.fn().mockReturnValue('Hello World!'),
-  };
+  } as unknown as AppService;
 
   beforeEach(() => {
     // Manually inject the service to bypass DI issues
-    appController = new AppController(mockAppService as any);
-    appService = mockAppService as any;
+    appController = new AppController(mockAppService);
+    appService = mockAppService;
   });
 
   describe('root', () => {

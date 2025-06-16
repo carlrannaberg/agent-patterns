@@ -14,11 +14,11 @@ describe('EvaluatorOptimizerController', () => {
   beforeEach(() => {
     const mockService = {
       translateWithFeedback: vi.fn().mockResolvedValue(mockStream),
-    };
+    } as unknown as EvaluatorOptimizerService;
 
     // Manually inject the service to bypass DI issues
-    controller = new EvaluatorOptimizerController(mockService as any);
-    service = mockService as any;
+    controller = new EvaluatorOptimizerController(mockService);
+    service = mockService;
   });
 
   it('should be defined', () => {
@@ -31,7 +31,7 @@ describe('EvaluatorOptimizerController', () => {
       const targetLanguage = 'Spanish';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.translateWithFeedback(
         { text, targetLanguage },
@@ -62,7 +62,7 @@ describe('EvaluatorOptimizerController', () => {
       const targetLanguage = 'French';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.translateWithFeedback(
         { text, targetLanguage },
@@ -81,7 +81,7 @@ describe('EvaluatorOptimizerController', () => {
       const targetLanguage = 'German';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.translateWithFeedback(
         { text, targetLanguage },
@@ -99,7 +99,7 @@ describe('EvaluatorOptimizerController', () => {
       const targetLanguage = 'Italian';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.translateWithFeedback(
         { text, targetLanguage },
@@ -115,13 +115,13 @@ describe('EvaluatorOptimizerController', () => {
     it('should handle service errors', async () => {
       const text = 'Test text';
       const targetLanguage = 'Spanish';
-      vi.mocked(service.translateWithFeedback).mockRejectedValue(
+      (service.translateWithFeedback as any).mockRejectedValue(
         new Error('Service error'),
       );
 
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await expect(
         controller.translateWithFeedback(
@@ -137,7 +137,7 @@ describe('EvaluatorOptimizerController', () => {
       const targetLanguage = 'Japanese';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.translateWithFeedback(
         { text, targetLanguage },

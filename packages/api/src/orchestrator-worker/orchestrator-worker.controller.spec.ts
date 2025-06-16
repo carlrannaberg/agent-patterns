@@ -14,11 +14,11 @@ describe('OrchestratorWorkerController', () => {
   beforeEach(() => {
     const mockService = {
       implementFeature: vi.fn().mockResolvedValue(mockStream),
-    };
+    } as unknown as OrchestratorWorkerService;
 
     // Manually inject the service to bypass DI issues
-    controller = new OrchestratorWorkerController(mockService as any);
-    service = mockService as any;
+    controller = new OrchestratorWorkerController(mockService);
+    service = mockService;
   });
 
   it('should be defined', () => {
@@ -30,7 +30,7 @@ describe('OrchestratorWorkerController', () => {
       const featureRequest = 'Add user authentication with JWT tokens';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.implementFeature({ featureRequest }, mockResponse);
 
@@ -55,7 +55,7 @@ describe('OrchestratorWorkerController', () => {
         'Implement real-time chat with WebSocket support and message persistence';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.implementFeature({ featureRequest }, mockResponse);
 
@@ -66,7 +66,7 @@ describe('OrchestratorWorkerController', () => {
       const featureRequest = 'Add a dark mode toggle button';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.implementFeature({ featureRequest }, mockResponse);
 
@@ -77,7 +77,7 @@ describe('OrchestratorWorkerController', () => {
       const featureRequest = '';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.implementFeature({ featureRequest }, mockResponse);
 
@@ -86,13 +86,13 @@ describe('OrchestratorWorkerController', () => {
 
     it('should handle service errors', async () => {
       const featureRequest = 'Add payment processing';
-      vi.mocked(service.implementFeature).mockRejectedValue(
+      (service.implementFeature as any).mockRejectedValue(
         new Error('Service error'),
       );
 
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await expect(
         controller.implementFeature({ featureRequest }, mockResponse),
@@ -104,7 +104,7 @@ describe('OrchestratorWorkerController', () => {
         'Add PostgreSQL database integration with migrations';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.implementFeature({ featureRequest }, mockResponse);
 

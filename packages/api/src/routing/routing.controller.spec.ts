@@ -14,11 +14,11 @@ describe('RoutingController', () => {
   beforeEach(() => {
     const mockService = {
       handleCustomerQuery: vi.fn().mockResolvedValue(mockStream),
-    };
+    } as unknown as RoutingService;
 
     // Manually inject the service to bypass DI issues
-    controller = new RoutingController(mockService as any);
-    service = mockService as any;
+    controller = new RoutingController(mockService);
+    service = mockService;
   });
 
   it('should be defined', () => {
@@ -30,7 +30,7 @@ describe('RoutingController', () => {
       const query = 'How do I cancel my subscription?';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.handleCustomerQuery({ query }, mockResponse);
 
@@ -54,7 +54,7 @@ describe('RoutingController', () => {
       const query = 'My app crashes when I click the export button';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.handleCustomerQuery({ query }, mockResponse);
 
@@ -65,7 +65,7 @@ describe('RoutingController', () => {
       const query = '';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.handleCustomerQuery({ query }, mockResponse);
 
@@ -74,13 +74,13 @@ describe('RoutingController', () => {
 
     it('should handle service errors', async () => {
       const query = 'Test query';
-      vi.mocked(service.handleCustomerQuery).mockRejectedValue(
+      (service.handleCustomerQuery as any).mockRejectedValue(
         new Error('Service error'),
       );
 
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await expect(
         controller.handleCustomerQuery({ query }, mockResponse),
@@ -91,7 +91,7 @@ describe('RoutingController', () => {
       const query = 'I was charged twice this month';
       const mockResponse = {
         setHeader: vi.fn(),
-      } as unknown as Response;
+      } as any;
 
       await controller.handleCustomerQuery({ query }, mockResponse);
 
