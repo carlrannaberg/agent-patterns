@@ -4,18 +4,11 @@ import { MultiStepToolUsageService } from './multi-step-tool-usage.service';
 
 @Controller('multi-step-tool-usage')
 export class MultiStepToolUsageController {
-  constructor(
-    private readonly multiStepToolUsageService: MultiStepToolUsageService,
-  ) {}
+  constructor(private readonly multiStepToolUsageService: MultiStepToolUsageService) {}
 
   @Post()
-  async solveMathProblem(
-    @Body() body: { prompt: string },
-    @Res() res: Response,
-  ) {
-    const result = await this.multiStepToolUsageService.solveMathProblem(
-      body.prompt,
-    );
+  async solveMathProblem(@Body() body: { input: string }, @Res() res: Response) {
+    const result = await this.multiStepToolUsageService.solveMathProblem(body.input);
 
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-cache');

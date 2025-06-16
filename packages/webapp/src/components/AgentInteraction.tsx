@@ -15,6 +15,7 @@ import RoutingDisplay from './RoutingDisplay';
 import ParallelProcessingDisplay from './ParallelProcessingDisplay';
 import OrchestratorWorkerDisplay from './OrchestratorWorkerDisplay';
 import EvaluatorOptimizerDisplay from './EvaluatorOptimizerDisplay';
+import MultiStepToolUsageDisplay from './MultiStepToolUsageDisplay';
 
 interface AgentInteractionProps {
   apiEndpoint: string;
@@ -111,6 +112,8 @@ export default function AgentInteraction({
             <OrchestratorWorkerDisplay result={object} />
           ) : apiEndpoint === 'evaluator-optimizer' ? (
             <EvaluatorOptimizerDisplay result={object} />
+          ) : apiEndpoint === 'multi-step-tool-usage' ? (
+            <MultiStepToolUsageDisplay result={object} />
           ) : (
             <Card>
               <CardContent>
