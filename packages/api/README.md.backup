@@ -25,11 +25,7 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-This package is part of the agent-patterns monorepo.
-
 ## Project setup
-
-This package is part of a monorepo. Dependencies are managed from the root level:
 
 ```bash
 $ npm install
