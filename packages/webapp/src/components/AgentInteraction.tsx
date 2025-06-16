@@ -8,7 +8,8 @@ import {
   Typography,
 } from '@mui/material';
 import TextareaAutosize from 'react-textarea-autosize';
-import { useObject } from 'ai/react';
+import { experimental_useObject as useObject } from '@ai-sdk/react';
+import { z } from 'zod';
 
 interface AgentInteractionProps {
   apiEndpoint: string;
@@ -27,7 +28,7 @@ export default function AgentInteraction({
   
   const { object, submit, isLoading, error } = useObject({
     api: `http://localhost:3001/${apiEndpoint}`,
-    schema: undefined, // Let the backend define the schema
+    schema: z.any(), // Generic schema for any object structure
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
