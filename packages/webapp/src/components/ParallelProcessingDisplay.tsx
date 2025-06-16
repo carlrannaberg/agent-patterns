@@ -2,6 +2,7 @@ import { Box, Typography, Card, CardContent, Chip, Divider, List, ListItem, List
 import SecurityIcon from '@mui/icons-material/Security';
 import SpeedIcon from '@mui/icons-material/Speed';
 import BuildIcon from '@mui/icons-material/Build';
+import ReactMarkdown from 'react-markdown';
 
 interface SecurityReview {
   type: 'security';
@@ -229,18 +230,36 @@ export default function ParallelProcessingDisplay({ result }: ParallelProcessing
               Code Review Summary
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            <Typography 
-              variant="body1" 
-              sx={{ 
-                lineHeight: 1.6,
-                whiteSpace: 'pre-wrap',
-                '& strong': {
-                  fontWeight: 600
-                }
-              }}
-            >
-              {summary}
-            </Typography>
+            <Box sx={{ 
+              '& h1, & h2, & h3, & h4, & h5, & h6': { 
+                marginTop: 2, 
+                marginBottom: 1
+              },
+              '& p': { 
+                marginBottom: 1.5, 
+                lineHeight: 1.6 
+              },
+              '& ul, & ol': { 
+                paddingLeft: 2,
+                marginBottom: 1.5
+              },
+              '& li': {
+                marginBottom: 0.5
+              },
+              '& strong': {
+                fontWeight: 600
+              },
+              '& em': {
+                fontStyle: 'italic',
+                color: 'text.secondary'
+              },
+              '& hr': {
+                margin: '16px 0',
+                borderColor: 'divider'
+              }
+            }}>
+              <ReactMarkdown>{summary}</ReactMarkdown>
+            </Box>
           </CardContent>
         </Card>
       )}
