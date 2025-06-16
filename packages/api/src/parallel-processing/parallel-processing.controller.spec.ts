@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { ParallelProcessingController } from './parallel-processing.controller';
 import { ParallelProcessingService } from './parallel-processing.service';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -12,23 +11,14 @@ describe('ParallelProcessingController', () => {
     pipe: vi.fn(),
   } as unknown as NodeJS.ReadableStream;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [ParallelProcessingController],
-      providers: [
-        {
-          provide: ParallelProcessingService,
-          useValue: {
-            parallelCodeReview: vi.fn().mockResolvedValue(mockStream),
-          },
-        },
-      ],
-    }).compile();
+  beforeEach(() => {
+    const mockService = {
+      parallelCodeReview: vi.fn().mockResolvedValue(mockStream),
+    };
 
-    controller = module.get<ParallelProcessingController>(
-      ParallelProcessingController,
-    );
-    service = module.get<ParallelProcessingService>(ParallelProcessingService);
+    // Manually inject the service to bypass DI issues
+    controller = new ParallelProcessingController(mockService as any);
+    service = mockService as any;
   });
 
   it('should be defined', () => {
@@ -80,6 +70,32 @@ describe('ParallelProcessingController', () => {
 
     it('should handle empty code', async () => {
       const code = '';
+      const mockResponse = {
+        setHeader: vi.fn(),
+      } as unknown as Response;
+
+      await controller.reviewCode({ code }, mockResponse);
+
+      expect(service.parallelCodeReview).toHaveBeenCalledWith(code);
+    });
+
+    it('should handle service errors', async () => {
+      const code = 'function test() {}';
+      vi.mocked(service.parallelCodeReview).mockRejectedValue(
+        new Error('Service error'),
+      );
+
+      const mockResponse = {
+        setHeader: vi.fn(),
+      } as unknown as Response;
+
+      await expect(
+        controller.reviewCode({ code }, mockResponse),
+      ).rejects.toThrow('Service error');
+    });
+
+    it('should handle malformed code', async () => {
+      const code = 'function broken() { return';
       const mockResponse = {
         setHeader: vi.fn(),
       } as unknown as Response;

@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { EvaluatorOptimizerController } from './evaluator-optimizer.controller';
 import { EvaluatorOptimizerService } from './evaluator-optimizer.service';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -12,23 +11,14 @@ describe('EvaluatorOptimizerController', () => {
     pipe: vi.fn(),
   } as unknown as NodeJS.ReadableStream;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [EvaluatorOptimizerController],
-      providers: [
-        {
-          provide: EvaluatorOptimizerService,
-          useValue: {
-            translateWithFeedback: vi.fn().mockResolvedValue(mockStream),
-          },
-        },
-      ],
-    }).compile();
+  beforeEach(() => {
+    const mockService = {
+      translateWithFeedback: vi.fn().mockResolvedValue(mockStream),
+    };
 
-    controller = module.get<EvaluatorOptimizerController>(
-      EvaluatorOptimizerController,
-    );
-    service = module.get<EvaluatorOptimizerService>(EvaluatorOptimizerService);
+    // Manually inject the service to bypass DI issues
+    controller = new EvaluatorOptimizerController(mockService as any);
+    service = mockService as any;
   });
 
   it('should be defined', () => {
@@ -107,6 +97,44 @@ describe('EvaluatorOptimizerController', () => {
     it('should handle empty text', async () => {
       const text = '';
       const targetLanguage = 'Italian';
+      const mockResponse = {
+        setHeader: vi.fn(),
+      } as unknown as Response;
+
+      await controller.translateWithFeedback(
+        { text, targetLanguage },
+        mockResponse,
+      );
+
+      expect(service.translateWithFeedback).toHaveBeenCalledWith(
+        text,
+        targetLanguage,
+      );
+    });
+
+    it('should handle service errors', async () => {
+      const text = 'Test text';
+      const targetLanguage = 'Spanish';
+      vi.mocked(service.translateWithFeedback).mockRejectedValue(
+        new Error('Service error'),
+      );
+
+      const mockResponse = {
+        setHeader: vi.fn(),
+      } as unknown as Response;
+
+      await expect(
+        controller.translateWithFeedback(
+          { text, targetLanguage },
+          mockResponse,
+        ),
+      ).rejects.toThrow('Service error');
+    });
+
+    it('should handle technical text translation', async () => {
+      const text =
+        'Machine learning algorithms process large datasets to identify patterns.';
+      const targetLanguage = 'Japanese';
       const mockResponse = {
         setHeader: vi.fn(),
       } as unknown as Response;

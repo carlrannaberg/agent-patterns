@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 
 // Mock the AI SDK
 vi.mock('@ai-sdk/google', () => ({
-  createGoogleGenerativeAI: vi.fn(() => vi.fn(() => ({}))),
+  createGoogleGenerativeAI: vi.fn(() => vi.fn(() => 'mock-model')),
 }));
 
 vi.mock('ai', () => ({

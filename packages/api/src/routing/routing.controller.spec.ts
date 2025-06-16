@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { RoutingController } from './routing.controller';
 import { RoutingService } from './routing.service';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -12,21 +11,14 @@ describe('RoutingController', () => {
     pipe: vi.fn(),
   } as unknown as NodeJS.ReadableStream;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [RoutingController],
-      providers: [
-        {
-          provide: RoutingService,
-          useValue: {
-            handleCustomerQuery: vi.fn().mockResolvedValue(mockStream),
-          },
-        },
-      ],
-    }).compile();
+  beforeEach(() => {
+    const mockService = {
+      handleCustomerQuery: vi.fn().mockResolvedValue(mockStream),
+    };
 
-    controller = module.get<RoutingController>(RoutingController);
-    service = module.get<RoutingService>(RoutingService);
+    // Manually inject the service to bypass DI issues
+    controller = new RoutingController(mockService as any);
+    service = mockService as any;
   });
 
   it('should be defined', () => {
@@ -71,6 +63,32 @@ describe('RoutingController', () => {
 
     it('should handle empty query', async () => {
       const query = '';
+      const mockResponse = {
+        setHeader: vi.fn(),
+      } as unknown as Response;
+
+      await controller.handleCustomerQuery({ query }, mockResponse);
+
+      expect(service.handleCustomerQuery).toHaveBeenCalledWith(query);
+    });
+
+    it('should handle service errors', async () => {
+      const query = 'Test query';
+      vi.mocked(service.handleCustomerQuery).mockRejectedValue(
+        new Error('Service error'),
+      );
+
+      const mockResponse = {
+        setHeader: vi.fn(),
+      } as unknown as Response;
+
+      await expect(
+        controller.handleCustomerQuery({ query }, mockResponse),
+      ).rejects.toThrow('Service error');
+    });
+
+    it('should handle billing queries', async () => {
+      const query = 'I was charged twice this month';
       const mockResponse = {
         setHeader: vi.fn(),
       } as unknown as Response;

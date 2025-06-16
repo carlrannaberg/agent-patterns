@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { OrchestratorWorkerController } from './orchestrator-worker.controller';
 import { OrchestratorWorkerService } from './orchestrator-worker.service';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -12,23 +11,14 @@ describe('OrchestratorWorkerController', () => {
     pipe: vi.fn(),
   } as unknown as NodeJS.ReadableStream;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [OrchestratorWorkerController],
-      providers: [
-        {
-          provide: OrchestratorWorkerService,
-          useValue: {
-            implementFeature: vi.fn().mockResolvedValue(mockStream),
-          },
-        },
-      ],
-    }).compile();
+  beforeEach(() => {
+    const mockService = {
+      implementFeature: vi.fn().mockResolvedValue(mockStream),
+    };
 
-    controller = module.get<OrchestratorWorkerController>(
-      OrchestratorWorkerController,
-    );
-    service = module.get<OrchestratorWorkerService>(OrchestratorWorkerService);
+    // Manually inject the service to bypass DI issues
+    controller = new OrchestratorWorkerController(mockService as any);
+    service = mockService as any;
   });
 
   it('should be defined', () => {
@@ -85,6 +75,33 @@ describe('OrchestratorWorkerController', () => {
 
     it('should handle empty feature request', async () => {
       const featureRequest = '';
+      const mockResponse = {
+        setHeader: vi.fn(),
+      } as unknown as Response;
+
+      await controller.implementFeature({ featureRequest }, mockResponse);
+
+      expect(service.implementFeature).toHaveBeenCalledWith(featureRequest);
+    });
+
+    it('should handle service errors', async () => {
+      const featureRequest = 'Add payment processing';
+      vi.mocked(service.implementFeature).mockRejectedValue(
+        new Error('Service error'),
+      );
+
+      const mockResponse = {
+        setHeader: vi.fn(),
+      } as unknown as Response;
+
+      await expect(
+        controller.implementFeature({ featureRequest }, mockResponse),
+      ).rejects.toThrow('Service error');
+    });
+
+    it('should handle database feature request', async () => {
+      const featureRequest =
+        'Add PostgreSQL database integration with migrations';
       const mockResponse = {
         setHeader: vi.fn(),
       } as unknown as Response;

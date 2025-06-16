@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -11,19 +10,10 @@ describe('AppController', () => {
     getHello: vi.fn().mockReturnValue('Hello World!'),
   };
 
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      controllers: [AppController],
-      providers: [
-        {
-          provide: AppService,
-          useValue: mockAppService,
-        },
-      ],
-    }).compile();
-
-    appController = app.get<AppController>(AppController);
-    appService = app.get<AppService>(AppService);
+  beforeEach(() => {
+    // Manually inject the service to bypass DI issues
+    appController = new AppController(mockAppService as any);
+    appService = mockAppService as any;
   });
 
   describe('root', () => {

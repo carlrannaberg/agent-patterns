@@ -1,4 +1,3 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { MultiStepToolUsageController } from './multi-step-tool-usage.controller';
 import { MultiStepToolUsageService } from './multi-step-tool-usage.service';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
@@ -12,23 +11,14 @@ describe('MultiStepToolUsageController', () => {
     pipe: vi.fn(),
   } as unknown as NodeJS.ReadableStream;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [MultiStepToolUsageController],
-      providers: [
-        {
-          provide: MultiStepToolUsageService,
-          useValue: {
-            solveMathProblem: vi.fn().mockResolvedValue(mockStream),
-          },
-        },
-      ],
-    }).compile();
+  beforeEach(() => {
+    const mockService = {
+      solveMathProblem: vi.fn().mockResolvedValue(mockStream),
+    };
 
-    controller = module.get<MultiStepToolUsageController>(
-      MultiStepToolUsageController,
-    );
-    service = module.get<MultiStepToolUsageService>(MultiStepToolUsageService);
+    // Manually inject the service to bypass DI issues
+    controller = new MultiStepToolUsageController(mockService as any);
+    service = mockService as any;
   });
 
   it('should be defined', () => {
@@ -96,6 +86,33 @@ describe('MultiStepToolUsageController', () => {
 
     it('should handle empty prompt', async () => {
       const prompt = '';
+      const mockResponse = {
+        setHeader: vi.fn(),
+      } as unknown as Response;
+
+      await controller.solveMathProblem({ prompt }, mockResponse);
+
+      expect(service.solveMathProblem).toHaveBeenCalledWith(prompt);
+    });
+
+    it('should handle service errors', async () => {
+      const prompt = 'Calculate sqrt(-1)';
+      vi.mocked(service.solveMathProblem).mockRejectedValue(
+        new Error('Service error'),
+      );
+
+      const mockResponse = {
+        setHeader: vi.fn(),
+      } as unknown as Response;
+
+      await expect(
+        controller.solveMathProblem({ prompt }, mockResponse),
+      ).rejects.toThrow('Service error');
+    });
+
+    it('should handle statistics problem', async () => {
+      const prompt =
+        'Calculate the mean, median, and mode of: 1, 2, 3, 3, 4, 5, 5, 5, 6';
       const mockResponse = {
         setHeader: vi.fn(),
       } as unknown as Response;
