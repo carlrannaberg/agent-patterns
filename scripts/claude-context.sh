@@ -163,8 +163,11 @@ run_next_task() {
         echo -e "${GREEN}✅ Agent task completed successfully (verified via JSON stream).${NC}"
 
         echo -e "${BLUE}➡️ Marking task as complete in todo.md...${NC}"
-        sed -i.bak "s/${CURRENT_TASK_LINE}/[x]${CURRENT_TASK_LINE:3}/" todo.md
-        rm todo.md.bak
+        # Escape special regex characters in the task line for sed
+        ESCAPED_TASK_LINE=$(echo "$CURRENT_TASK_LINE" | sed 's/[[\]*.^$()+?{|\\]/\\&/g')
+        COMPLETED_TASK_LINE="[x]${CURRENT_TASK_LINE:3}"
+        sed -i.bak "s/$ESCAPED_TASK_LINE/$COMPLETED_TASK_LINE/" todo.md
+        rm -f todo.md.bak
 
         echo -e "${BLUE}📦 Committing changes...${NC}"
         COMMIT_MSG="feat: Complete task from ${ISSUE_FILE}"
