@@ -10,21 +10,10 @@ jest.mock('@ai-sdk/google', () => ({
 }));
 
 jest.mock('ai', () => ({
-  generateObject: jest.fn().mockResolvedValue({
-    object: {
-      metricScores: [
-        {
-          metric: 'quality',
-          score: 8,
-          reasoning: 'Good quality output',
-          confidence: 0.9,
-        },
-      ],
-      chainOfThought: ['Step 1', 'Step 2'],
-      overallAssessment: 'Good performance',
-    },
-  }),
+  generateObject: jest.fn(),
 }));
+
+const { generateObject } = require('ai');
 
 describe('LlmJudgeService', () => {
   let service: LlmJudgeService;
@@ -35,6 +24,9 @@ describe('LlmJudgeService', () => {
     }).compile();
 
     service = module.get<LlmJudgeService>(LlmJudgeService);
+
+    // Reset mocks
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -62,6 +54,21 @@ describe('LlmJudgeService', () => {
     };
 
     it('should evaluate a test case successfully', async () => {
+      generateObject.mockResolvedValueOnce({
+        object: {
+          metricScores: [
+            {
+              metric: 'quality',
+              score: 8,
+              reasoning: 'Good quality output',
+              confidence: 0.9,
+            },
+          ],
+          chainOfThought: ['Step 1', 'Step 2'],
+          overallAssessment: 'Good performance',
+        },
+      });
+
       const actualOutput = { content: 'Actual output' };
       const result = await service.evaluate(mockTestCase, actualOutput, mockConfig);
 
@@ -78,6 +85,21 @@ describe('LlmJudgeService', () => {
     });
 
     it('should normalize scores correctly', async () => {
+      generateObject.mockResolvedValueOnce({
+        object: {
+          metricScores: [
+            {
+              metric: 'quality',
+              score: 8,
+              reasoning: 'Good quality output',
+              confidence: 0.9,
+            },
+          ],
+          chainOfThought: ['Step 1', 'Step 2'],
+          overallAssessment: 'Good performance',
+        },
+      });
+
       const actualOutput = { content: 'Test' };
       const result = await service.evaluate(mockTestCase, actualOutput, mockConfig);
 
@@ -101,6 +123,21 @@ describe('LlmJudgeService', () => {
         ],
       };
 
+      generateObject.mockResolvedValueOnce({
+        object: {
+          metricScores: [
+            {
+              metric: 'has_cta',
+              score: 1,
+              reasoning: 'Contains call to action',
+              confidence: 1.0,
+            },
+          ],
+          chainOfThought: ['Found Buy now! CTA'],
+          overallAssessment: 'Has clear CTA',
+        },
+      });
+
       const result = await service.evaluate(mockTestCase, { content: 'Buy now!' }, binaryConfig);
 
       expect(result.metricScores[0].normalizedScore).toBe(1);
@@ -109,6 +146,18 @@ describe('LlmJudgeService', () => {
 
   describe('evaluateWithRubric', () => {
     it('should evaluate with rubric steps', async () => {
+      // Mock generateObject to return rubric step results
+      generateObject
+        .mockResolvedValueOnce({
+          object: { evaluation: 'Step 1 evaluation', score: 8 },
+        })
+        .mockResolvedValueOnce({
+          object: { evaluation: 'Step 2 evaluation', score: 7 },
+        })
+        .mockResolvedValueOnce({
+          object: { evaluation: 'Step 3 evaluation', score: 9 },
+        });
+
       const mockTestCase: TestCase = {
         id: 'test-1',
         pattern: AgentPattern.SEQUENTIAL_PROCESSING,
@@ -123,8 +172,8 @@ describe('LlmJudgeService', () => {
         metrics: [],
       };
 
-      // Mock the generateObject for rubric evaluation
-      const { generateObject } = require('ai');
+      // Reset the mock for rubric evaluation
+      generateObject.mockReset();
       generateObject.mockImplementation(async () => ({
         object: {
           evaluation: 'Good performance on this step',

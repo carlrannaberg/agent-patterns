@@ -13,10 +13,7 @@ export class EvaluationConfigService {
     this.defaultConfigs = this.initializeDefaultConfigs();
   }
 
-  getConfig(
-    pattern: AgentPattern,
-    overrides?: Partial<EvaluationConfig>,
-  ): EvaluationConfig {
+  getConfig(pattern: AgentPattern, overrides?: Partial<EvaluationConfig>): EvaluationConfig {
     // Get pattern-specific default config
     const defaultConfig = this.defaultConfigs.get(pattern);
     if (!defaultConfig) {
@@ -305,7 +302,7 @@ export class EvaluationConfigService {
         metric.scoreRange.length !== 2 ||
         metric.scoreRange[0] >= metric.scoreRange[1]
       ) {
-        throw new Error(`Invalid score range for metric ${metric.name}: ${metric.scoreRange}`);
+        throw new Error(`Invalid score range for metric ${metric.name}: ${metric.scoreRange.join(',')}`); 
       }
 
       if (metric.weight !== undefined && metric.weight <= 0) {

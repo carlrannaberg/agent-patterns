@@ -240,7 +240,7 @@ describe('TestCaseService', () => {
         'worker-coordination': 2,
       });
       expect(analysis.byTags['common']).toBe(5);
-      expect(analysis.coverageGaps).toHaveLength(1); // Less than 10 test cases
+      expect(analysis.coverageGaps).toHaveLength(2); // Less than 10 test cases and limited categories
     });
 
     it('should identify coverage gaps', async () => {

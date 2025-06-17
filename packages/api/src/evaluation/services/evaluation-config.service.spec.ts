@@ -30,7 +30,7 @@ describe('EvaluationConfigService', () => {
   });
 
   describe('getConfig', () => {
-    it('should return default config for pattern', async () => {
+    it('should return default config for pattern', () => {
       const config = service.getConfig(AgentPattern.SEQUENTIAL_PROCESSING);
 
       expect(config).toBeDefined();
@@ -41,7 +41,7 @@ describe('EvaluationConfigService', () => {
       expect(config.enableReliabilityChecks).toBe(true);
     });
 
-    it('should merge environment variables', async () => {
+    it('should merge environment variables', () => {
       configService.get.mockImplementation((key: string) => {
         const envMap: Record<string, any> = {
           EVALUATION_JUDGE_MODEL: JudgeModel.GPT_4O,
@@ -58,7 +58,7 @@ describe('EvaluationConfigService', () => {
       expect(config.timeoutMs).toBe(60000);
     });
 
-    it('should apply overrides', async () => {
+    it('should apply overrides', () => {
       const overrides = {
         temperature: 0.5,
         maxRetries: 5,
@@ -72,17 +72,17 @@ describe('EvaluationConfigService', () => {
       expect(config.enableBiasmitigaation).toBe(false);
     });
 
-    it('should validate configuration', async () => {
+    it('should validate configuration', () => {
       const invalidOverrides = {
         temperature: 3, // Invalid: > 2
       };
 
-      expect(() =>
-        service.getConfig(AgentPattern.ORCHESTRATOR_WORKER, invalidOverrides),
-      ).toThrow('Invalid temperature: 3');
+      expect(() => service.getConfig(AgentPattern.ORCHESTRATOR_WORKER, invalidOverrides)).toThrow(
+        'Invalid temperature: 3',
+      );
     });
 
-    it('should throw error for unknown pattern', async () => {
+    it('should throw error for unknown pattern', () => {
       expect(() => service.getConfig('unknown-pattern' as AgentPattern)).toThrow(
         'No default configuration for pattern: unknown-pattern',
       );
@@ -90,7 +90,7 @@ describe('EvaluationConfigService', () => {
   });
 
   describe('pattern-specific configurations', () => {
-    it('should have routing pattern optimized for accuracy', async () => {
+    it('should have routing pattern optimized for accuracy', () => {
       const config = service.getConfig(AgentPattern.ROUTING);
 
       expect(config.temperature).toBe(0.0); // Deterministic
@@ -99,7 +99,7 @@ describe('EvaluationConfigService', () => {
       expect(config.metrics[0].weight).toBe(3); // High weight
     });
 
-    it('should have evaluator-optimizer pattern focused on optimization', async () => {
+    it('should have evaluator-optimizer pattern focused on optimization', () => {
       const config = service.getConfig(AgentPattern.EVALUATOR_OPTIMIZER);
 
       expect(config.metrics.find((m) => m.name === 'optimization_effectiveness')).toBeDefined();
@@ -107,7 +107,7 @@ describe('EvaluationConfigService', () => {
       expect(config.metrics.find((m) => m.name === 'final_output_quality')?.weight).toBe(3);
     });
 
-    it('should have multi-step tool usage with high accuracy requirements', async () => {
+    it('should have multi-step tool usage with high accuracy requirements', () => {
       const config = service.getConfig(AgentPattern.MULTI_STEP_TOOL_USAGE);
 
       expect(config.temperature).toBe(0.0); // Deterministic
@@ -165,7 +165,7 @@ describe('EvaluationConfigService', () => {
   });
 
   describe('config validation', () => {
-    it('should validate metrics', async () => {
+    it('should validate metrics', () => {
       const invalidOverrides = {
         metrics: [
           {
@@ -176,12 +176,12 @@ describe('EvaluationConfigService', () => {
         ],
       };
 
-      expect(() =>
-        service.getConfig(AgentPattern.SEQUENTIAL_PROCESSING, invalidOverrides),
-      ).toThrow('Metric must have name and description');
+      expect(() => service.getConfig(AgentPattern.SEQUENTIAL_PROCESSING, invalidOverrides)).toThrow(
+        'Metric must have name and description',
+      );
     });
 
-    it('should validate score ranges', async () => {
+    it('should validate score ranges', () => {
       const invalidOverrides = {
         metrics: [
           {
@@ -192,12 +192,12 @@ describe('EvaluationConfigService', () => {
         ],
       };
 
-      expect(() =>
-        service.getConfig(AgentPattern.SEQUENTIAL_PROCESSING, invalidOverrides),
-      ).toThrow('Invalid score range');
+      expect(() => service.getConfig(AgentPattern.SEQUENTIAL_PROCESSING, invalidOverrides)).toThrow(
+        'Invalid score range',
+      );
     });
 
-    it('should validate numeric parameters', async () => {
+    it('should validate numeric parameters', () => {
       const testCases = [
         { maxRetries: 0, error: 'Invalid maxRetries: 0' },
         { timeoutMs: 500, error: 'Invalid timeoutMs: 500' },
@@ -205,9 +205,9 @@ describe('EvaluationConfigService', () => {
       ];
 
       for (const testCase of testCases) {
-        expect(() =>
-          service.getConfig(AgentPattern.SEQUENTIAL_PROCESSING, testCase),
-        ).toThrow(testCase.error);
+        expect(() => service.getConfig(AgentPattern.SEQUENTIAL_PROCESSING, testCase)).toThrow(
+          testCase.error,
+        );
       }
     });
   });

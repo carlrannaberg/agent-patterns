@@ -29,7 +29,6 @@ const GEvalScoreSchema = z.object({
 
 @Injectable()
 export class GEvalService extends LlmJudgeService {
-
   async evaluateWithGEval(
     testCase: TestCase,
     actualOutput: any,

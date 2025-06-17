@@ -326,10 +326,78 @@ const result = await evaluationService.evaluateSingle(
 );
 ```
 
+## Extending the Framework
+
+### Adding New Judge Models
+
+1. Add the model to `enums/judge-model.enum.ts`:
+```typescript
+export enum JudgeModel {
+  // ... existing models
+  YOUR_MODEL = 'your-model-id',
+}
+```
+
+2. Update provider mapping:
+```typescript
+export const JUDGE_MODEL_PROVIDERS: Record<JudgeModel, string> = {
+  // ... existing mappings
+  [JudgeModel.YOUR_MODEL]: 'your-provider',
+};
+```
+
+3. Implement model initialization in `LlmJudgeService`:
+```typescript
+protected getJudgeModel(judgeModel: JudgeModel): any {
+  switch (provider) {
+    case 'your-provider':
+      return yourProviderSDK(judgeModel);
+    // ... other cases
+  }
+}
+```
+
+### Custom Evaluation Strategies
+
+Create a custom evaluation service:
+
+```typescript
+@Injectable()
+export class CustomEvaluationService extends LlmJudgeService {
+  async evaluateWithCustomLogic(
+    testCase: TestCase,
+    actualOutput: any,
+    config: EvaluationConfig
+  ): Promise<MetricScore[]> {
+    // Custom evaluation logic
+    const baseScores = await super.evaluate(testCase, actualOutput, config);
+    
+    // Apply custom transformations
+    return this.applyCustomScoring(baseScores);
+  }
+}
+```
+
+### Custom Reliability Metrics
+
+Extend the reliability service:
+
+```typescript
+@Injectable()
+export class ExtendedReliabilityService extends ReliabilityService {
+  calculateCustomMetric(results: EvaluationResult[]): number {
+    // Implement custom statistical measure
+    return customCalculation(results);
+  }
+}
+```
+
 ## API Reference
 
 See the TypeScript interfaces and service documentation for detailed API information:
 
 - [EvaluationService](./services/evaluation.service.ts)
 - [TestCaseService](./services/test-case.service.ts)
+- [ReliabilityService](./services/reliability.service.ts)
 - [Interfaces](./interfaces/evaluation.interface.ts)
+- [Enums](./enums/)

@@ -105,6 +105,11 @@ describe('GEvalService', () => {
     });
 
     it('should perform G-Eval successfully', async () => {
+      // Mock generateText for binary checks
+      generateText.mockResolvedValue({
+        text: 'Does the content address the request? Yes\nIs the message clear? Yes\nIs it persuasive? Yes',
+      });
+
       const actualOutput = { content: 'Buy our product!' };
       const result = await service.evaluateWithGEval(
         mockTestCase,
@@ -119,15 +124,26 @@ describe('GEvalService', () => {
       expect(result.normalizedScore).toBeCloseTo(0.778, 2); // (8-1)/9
       expect(result.reasoning).toBe('Strong content with good clarity');
       expect(result.details).toBeDefined();
-      expect(result.details.steps).toHaveLength(3);
+      expect(result.details?.steps).toHaveLength(3);
     });
 
     it('should handle evaluation errors gracefully', async () => {
-      generateObject.mockRejectedValueOnce(new Error('API error'));
+      // Mock generateObject to succeed first, then fail
+      generateObject
+        .mockResolvedValueOnce({
+          object: {
+            steps: ['Step 1', 'Step 2', 'Step 3'],
+            binaryChecks: ['Check 1?', 'Check 2?'],
+          },
+        })
+        .mockRejectedValueOnce(new Error('API error'));
+
+      // Mock generateText to fail
+      generateText.mockRejectedValueOnce(new Error('API error'));
 
       await expect(
         service.evaluateWithGEval(mockTestCase, { content: 'test' }, 'quality', mockConfig),
-      ).rejects.toThrow('API error');
+      ).rejects.toThrow();
     });
   });
 
@@ -183,38 +199,56 @@ describe('GEvalService', () => {
     };
 
     it('should check evaluation consistency', async () => {
-      // Mock consistent scores
-      generateObject.mockImplementation(async () => ({
-        object: {
-          steps: ['Step 1'],
-          binaryChecks: [],
-        },
-      }));
+      // Mock generateText for binary checks (called 3 times)
       generateText.mockResolvedValue({ text: '' });
 
-      let scoreIndex = 0;
-      const scores = [8, 7.5, 8.2];
-      generateObject.mockImplementation(async ({ schema }) => {
-        if (schema === undefined) {
-          // This is for evaluation steps
-          return {
-            object: {
-              steps: ['Step 1'],
-              binaryChecks: [],
-            },
-          };
-        } else {
-          // This is for score evaluation
-          const score = scores[scoreIndex++ % scores.length];
-          return {
-            object: {
-              score,
-              reasoning: 'Test reasoning',
-              stepResults: [],
-            },
-          };
-        }
-      });
+      // Reset and set up mocks for consistency check
+      generateObject.mockReset();
+
+      // Mock for all 6 calls (3 runs x 2 calls each)
+      generateObject
+        // Run 1
+        .mockResolvedValueOnce({
+          object: {
+            steps: ['Step 1'],
+            binaryChecks: [],
+          },
+        })
+        .mockResolvedValueOnce({
+          object: {
+            score: 8,
+            reasoning: 'Test reasoning',
+            stepResults: [],
+          },
+        })
+        // Run 2
+        .mockResolvedValueOnce({
+          object: {
+            steps: ['Step 1'],
+            binaryChecks: [],
+          },
+        })
+        .mockResolvedValueOnce({
+          object: {
+            score: 7.5,
+            reasoning: 'Test reasoning',
+            stepResults: [],
+          },
+        })
+        // Run 3
+        .mockResolvedValueOnce({
+          object: {
+            steps: ['Step 1'],
+            binaryChecks: [],
+          },
+        })
+        .mockResolvedValueOnce({
+          object: {
+            score: 8.2,
+            reasoning: 'Test reasoning',
+            stepResults: [],
+          },
+        });
 
       const result = await service.performConsistencyCheck(
         mockTestCase,

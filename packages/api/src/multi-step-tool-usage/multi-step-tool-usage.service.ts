@@ -24,17 +24,13 @@ export class MultiStepToolUsageService {
           description:
             'A tool for evaluating mathematical expressions. Use this for any calculations needed to solve the problem.',
           parameters: z.object({
-            expression: z
-              .string()
-              .describe('The mathematical expression to evaluate'),
+            expression: z.string().describe('The mathematical expression to evaluate'),
           }),
           execute: async ({ expression }) => {
             this.logger.debug(`Calculating expression: ${expression}`);
             try {
               const result = mathjs.evaluate(expression) as number | string;
-              this.logger.debug(
-                `Calculation result: ${expression} = ${result}`,
-              );
+              this.logger.debug(`Calculation result: ${expression} = ${result}`);
               return Promise.resolve({ result: String(result), expression });
             } catch (error: unknown) {
               this.logger.warn(
@@ -54,9 +50,7 @@ export class MultiStepToolUsageService {
             steps: z.array(
               z.object({
                 calculation: z.string().describe('The calculation performed'),
-                reasoning: z
-                  .string()
-                  .describe('The reasoning behind this step'),
+                reasoning: z.string().describe('The reasoning behind this step'),
               }),
             ),
             answer: z.string().describe('The final answer to the problem'),
@@ -73,21 +67,14 @@ export class MultiStepToolUsageService {
     this.logger.debug(`Total tool calls made: ${toolCalls.length}`);
 
     const finalAnswer = toolCalls.find((call) => call.toolName === 'answer');
-    const calculations = toolCalls.filter(
-      (call) => call.toolName === 'calculate',
-    );
+    const calculations = toolCalls.filter((call) => call.toolName === 'calculate');
 
-    this.logger.debug(
-      `Number of calculations performed: ${calculations.length}`,
-    );
-    this.logger.debug(
-      `Final answer tool called: ${finalAnswer ? 'Yes' : 'No'}`,
-    );
+    this.logger.debug(`Number of calculations performed: ${calculations.length}`);
+    this.logger.debug(`Final answer tool called: ${finalAnswer ? 'Yes' : 'No'}`);
 
     const calculationResults = calculations.map((calc, index) => {
       const toolResult = toolResults.find(
-        (r: { toolCallId: string; result: unknown }) =>
-          r.toolCallId === calc.toolCallId,
+        (r: { toolCallId: string; result: unknown }) => r.toolCallId === calc.toolCallId,
       );
       const resultValue =
         toolResult &&
@@ -97,20 +84,14 @@ export class MultiStepToolUsageService {
           ? (toolResult.result as { result?: string }).result
           : 'Error';
       return {
-        expression: String(
-          (calc.args as { expression?: string })?.expression || '',
-        ),
+        expression: String((calc.args as { expression?: string })?.expression || ''),
         result: resultValue || 'Error',
         step: index + 1,
       };
     });
 
-    this.logger.verbose(
-      'Processing calculation results and generating structured response',
-    );
-    this.logger.debug(
-      `Successfully processed ${calculationResults.length} calculation steps`,
-    );
+    this.logger.verbose('Processing calculation results and generating structured response');
+    this.logger.debug(`Successfully processed ${calculationResults.length} calculation steps`);
     this.logger.verbose('Starting final streaming result generation');
 
     const result = streamObject({
@@ -136,9 +117,7 @@ export class MultiStepToolUsageService {
       prompt: `Return the following data as a structured object:\n\nProblem: ${prompt}\nCalculations performed: ${JSON.stringify(calculationResults)}\nSteps: ${JSON.stringify((finalAnswer?.args as { steps?: unknown[] })?.steps || [])}\nFinal Answer: ${(finalAnswer?.args as { answer?: string })?.answer || 'No answer provided'}\nWorking Steps: ${text}`,
     });
 
-    this.logger.verbose(
-      'Multi-step math problem solving completed - streaming results',
-    );
+    this.logger.verbose('Multi-step math problem solving completed - streaming results');
     return result;
   }
 }

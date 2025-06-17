@@ -10,9 +10,7 @@ export class OrchestratorWorkerService {
   private readonly logger = new Logger(OrchestratorWorkerService.name);
   async implementFeature(featureRequest: string) {
     this.logger.verbose('Starting feature implementation planning process');
-    this.logger.debug(
-      `Feature request: ${featureRequest.substring(0, 100)}...`,
-    );
+    this.logger.debug(`Feature request: ${featureRequest.substring(0, 100)}...`);
 
     const orchestratorModel = google('models/gemini-2.5-pro-preview-06-05');
     const workerModel = google('models/gemini-2.5-pro-preview-06-05');
@@ -31,16 +29,13 @@ export class OrchestratorWorkerService {
         ),
         estimatedComplexity: z.enum(['low', 'medium', 'high']),
       }),
-      system:
-        'You are a senior software architect planning feature implementations.',
+      system: 'You are a senior software architect planning feature implementations.',
       prompt: `Analyze this feature request and create an implementation plan:\n${featureRequest}`,
     });
 
     this.logger.verbose('Implementation plan generated successfully');
     this.logger.debug(`Files to change: ${implementationPlan.files.length}`);
-    this.logger.debug(
-      `Estimated complexity: ${implementationPlan.estimatedComplexity}`,
-    );
+    this.logger.debug(`Estimated complexity: ${implementationPlan.estimatedComplexity}`);
     this.logger.verbose('Starting worker execution for each file change');
 
     const fileChanges = await Promise.all(
@@ -54,13 +49,10 @@ export class OrchestratorWorkerService {
             'You are a software developer creating new files. Write complete, production-ready code.',
           modify:
             'You are a software developer modifying existing files. Provide clear, targeted changes.',
-          delete:
-            'You are a software developer removing files. Explain the deletion rationale.',
+          delete: 'You are a software developer removing files. Explain the deletion rationale.',
         };
 
-        this.logger.debug(
-          `Generating ${file.changeType} implementation for ${file.filePath}`,
-        );
+        this.logger.debug(`Generating ${file.changeType} implementation for ${file.filePath}`);
 
         const { object: change } = await generateObject({
           model: workerModel,
@@ -111,9 +103,7 @@ export class OrchestratorWorkerService {
       prompt: `Return the following data as a structured object:\n\nPlan: ${JSON.stringify(implementationPlan)}\nChanges: ${JSON.stringify(fileChanges)}`,
     });
 
-    this.logger.verbose(
-      'Feature implementation process completed - streaming results',
-    );
+    this.logger.verbose('Feature implementation process completed - streaming results');
     return result;
   }
 }

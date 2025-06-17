@@ -41,18 +41,12 @@ export class EvaluatorOptimizerService {
     currentTranslation = translation;
 
     this.logger.verbose('Initial translation completed');
-    this.logger.debug(
-      `Initial translation length: ${currentTranslation.length} characters`,
-    );
+    this.logger.debug(`Initial translation length: ${currentTranslation.length} characters`);
     this.logger.verbose('Starting evaluation-optimization loop');
 
     while (iterations < MAX_ITERATIONS) {
-      this.logger.debug(
-        `Starting iteration ${iterations + 1}/${MAX_ITERATIONS}`,
-      );
-      this.logger.verbose(
-        `Evaluating translation quality - iteration ${iterations + 1}`,
-      );
+      this.logger.debug(`Starting iteration ${iterations + 1}/${MAX_ITERATIONS}`);
+      this.logger.verbose(`Evaluating translation quality - iteration ${iterations + 1}`);
 
       const { object: evaluation } = await generateObject({
         model: evaluatorModel,
@@ -64,14 +58,11 @@ export class EvaluatorOptimizerService {
           specificIssues: z.array(z.string()),
           improvementSuggestions: z.array(z.string()),
         }),
-        system:
-          'You are an expert in evaluating literary translations. Be thorough and critical.',
+        system: 'You are an expert in evaluating literary translations. Be thorough and critical.',
         prompt: `Evaluate this translation from the original to ${targetLanguage}:\n\nOriginal: ${text}\nTranslation: ${currentTranslation}\n\nAssess quality, tone preservation, nuance, and cultural accuracy.`,
       });
 
-      this.logger.debug(
-        `Evaluation completed - Quality score: ${evaluation.qualityScore}/10`,
-      );
+      this.logger.debug(`Evaluation completed - Quality score: ${evaluation.qualityScore}/10`);
       this.logger.debug(`Issues found: ${evaluation.specificIssues.length}`);
 
       iterationResults.push({
@@ -112,9 +103,7 @@ export class EvaluatorOptimizerService {
       iterations++;
     }
 
-    this.logger.verbose(
-      `Translation optimization completed after ${iterations} iterations`,
-    );
+    this.logger.verbose(`Translation optimization completed after ${iterations} iterations`);
     this.logger.verbose('Starting final streaming result generation');
 
     const result = streamObject({
@@ -142,9 +131,7 @@ export class EvaluatorOptimizerService {
       prompt: `Return the following data as a structured object:\n\nFinal Translation: ${currentTranslation}\nIterations Required: ${iterations}\nIteration Results: ${JSON.stringify(iterationResults)}\nOriginal Text: ${text}\nTarget Language: ${targetLanguage}`,
     });
 
-    this.logger.verbose(
-      'Translation with feedback process completed - streaming results',
-    );
+    this.logger.verbose('Translation with feedback process completed - streaming results');
     return result;
   }
 }

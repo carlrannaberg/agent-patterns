@@ -270,8 +270,8 @@ describe('EvaluationService', () => {
         { ...mockTestCase, id: 'test-2' },
       ]);
 
-      mockExecutionFunction.mockImplementation(async (input) => ({
-        content: `Processed: ${input.prompt}`,
+      mockExecutionFunction.mockImplementation(async (input: any) => ({
+        content: `Processed: ${(input as { prompt: string }).prompt}`,
       }));
     });
 
