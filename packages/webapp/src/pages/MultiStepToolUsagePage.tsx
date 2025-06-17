@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Card, Typography, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Box, Card, Typography, Accordion, AccordionSummary, AccordionDetails, Container } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CodeIcon from '@mui/icons-material/Code';
 import AgentInteraction from '../components/AgentInteraction';
@@ -56,7 +56,7 @@ export default function MultiStepToolUsagePage() {
   const [codeExpanded, setCodeExpanded] = useState(false);
 
   return (
-    <Box sx={{ maxWidth: '100%', mx: 'auto', p: 2, mt: 0 }}>
+    <Container maxWidth="lg" sx={{ py: 2 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         Multi-Step Tool Usage
       </Typography>
@@ -65,8 +65,15 @@ export default function MultiStepToolUsagePage() {
         This pattern demonstrates multi-step tool usage where complex math problems are solved using calculation tools across multiple steps.
       </Typography>
 
+      <AgentInteraction
+        apiEndpoint="multi-step-tool-usage"
+        title=""
+        description=""
+        placeholder="Enter a complex math problem that requires multiple calculation steps..."
+      />
+
       {/* Code Example */}
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mt: 3 }}>
         <Accordion expanded={codeExpanded} onChange={() => setCodeExpanded(!codeExpanded)}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -93,13 +100,6 @@ export default function MultiStepToolUsagePage() {
           </AccordionDetails>
         </Accordion>
       </Card>
-
-      <AgentInteraction
-        apiEndpoint="multi-step-tool-usage"
-        title=""
-        description=""
-        placeholder="Enter a complex math problem that requires multiple calculation steps..."
-      />
-    </Box>
+    </Container>
   );
 }

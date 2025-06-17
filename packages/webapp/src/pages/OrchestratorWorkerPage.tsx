@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Card, Typography, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Box, Card, Typography, Accordion, AccordionSummary, AccordionDetails, Container } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CodeIcon from '@mui/icons-material/Code';
 import AgentInteraction from '../components/AgentInteraction';
@@ -73,7 +73,7 @@ export default function OrchestratorWorkerPage() {
   const [codeExpanded, setCodeExpanded] = useState(false);
 
   return (
-    <Box sx={{ maxWidth: '100%', mx: 'auto', p: 2, mt: 0 }}>
+    <Container maxWidth="lg" sx={{ py: 2 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         Orchestrator-Worker
       </Typography>
@@ -82,8 +82,15 @@ export default function OrchestratorWorkerPage() {
         This pattern demonstrates an orchestrator managing multiple workers. The orchestrator plans feature implementation and coordinates specialized workers for different tasks.
       </Typography>
 
+      <AgentInteraction
+        apiEndpoint="orchestrator-worker"
+        title=""
+        description=""
+        placeholder="Describe a feature you'd like to implement (e.g., 'Add user authentication', 'Create a dashboard', 'Implement file upload')..."
+      />
+
       {/* Code Example */}
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mt: 3 }}>
         <Accordion expanded={codeExpanded} onChange={() => setCodeExpanded(!codeExpanded)}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -93,7 +100,7 @@ export default function OrchestratorWorkerPage() {
           </AccordionSummary>
           <AccordionDetails sx={{ p: 0 }}>
             <Editor
-              height="650px"
+              height="600px"
               defaultLanguage="typescript"
               value={exampleCode}
               options={{
@@ -110,13 +117,6 @@ export default function OrchestratorWorkerPage() {
           </AccordionDetails>
         </Accordion>
       </Card>
-
-      <AgentInteraction
-        apiEndpoint="orchestrator-worker"
-        title=""
-        description=""
-        placeholder="Describe a feature you'd like to implement (e.g., 'Add user authentication', 'Create a dashboard', 'Implement file upload')..."
-      />
-    </Box>
+    </Container>
   );
 }

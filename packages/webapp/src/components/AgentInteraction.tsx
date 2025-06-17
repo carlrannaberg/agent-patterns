@@ -6,6 +6,7 @@ import {
   CardContent,
   CircularProgress,
   Typography,
+  Container,
 } from '@mui/material';
 import TextareaAutosize from 'react-textarea-autosize';
 import { experimental_useObject as useObject } from '@ai-sdk/react';
@@ -45,7 +46,7 @@ export default function AgentInteraction({
   };
 
   return (
-    <Box sx={{ maxWidth: '100%', mx: 'auto', p: 2, mt: 0 }}>
+    <Container maxWidth="lg" sx={{ py: 2 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         {title}
       </Typography>
@@ -140,6 +141,6 @@ export default function AgentInteraction({
           )}
         </>
       )}
-    </Box>
+    </Container>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Card, Typography, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Box, Card, Typography, Accordion, AccordionSummary, AccordionDetails, Container } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CodeIcon from '@mui/icons-material/Code';
 import AgentInteraction from '../components/AgentInteraction';
@@ -86,7 +86,7 @@ export default function EvaluatorOptimizerPage() {
   const [codeExpanded, setCodeExpanded] = useState(false);
 
   return (
-    <Box sx={{ maxWidth: '100%', mx: 'auto', p: 2, mt: 0 }}>
+    <Container maxWidth="lg" sx={{ py: 2 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         Evaluator-Optimizer
       </Typography>
@@ -95,8 +95,15 @@ export default function EvaluatorOptimizerPage() {
         This pattern demonstrates iterative improvement where translations are evaluated and optimized through multiple rounds for enhanced quality.
       </Typography>
 
+      <AgentInteraction
+        apiEndpoint="evaluator-optimizer"
+        title=""
+        description=""
+        placeholder="Enter text to translate with iterative quality improvement. Use [target: language] to specify target language (default: Spanish)..."
+      />
+
       {/* Code Example */}
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mt: 3 }}>
         <Accordion expanded={codeExpanded} onChange={() => setCodeExpanded(!codeExpanded)}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -106,7 +113,7 @@ export default function EvaluatorOptimizerPage() {
           </AccordionSummary>
           <AccordionDetails sx={{ p: 0 }}>
             <Editor
-              height="500px"
+              height="600px"
               defaultLanguage="typescript"
               value={exampleCode}
               options={{
@@ -123,13 +130,6 @@ export default function EvaluatorOptimizerPage() {
           </AccordionDetails>
         </Accordion>
       </Card>
-
-      <AgentInteraction
-        apiEndpoint="evaluator-optimizer"
-        title=""
-        description=""
-        placeholder="Enter text to translate with iterative quality improvement. Use [target: language] to specify target language (default: Spanish)..."
-      />
-    </Box>
+    </Container>
   );
 }

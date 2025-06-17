@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Card, Typography, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Box, Card, Typography, Accordion, AccordionSummary, AccordionDetails, Container } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CodeIcon from '@mui/icons-material/Code';
 import AgentInteraction from '../components/AgentInteraction';
@@ -54,7 +54,7 @@ export default function RoutingPage() {
   const [codeExpanded, setCodeExpanded] = useState(false);
 
   return (
-    <Box sx={{ maxWidth: '100%', mx: 'auto', p: 2, mt: 0 }}>
+    <Container maxWidth="lg" sx={{ py: 2 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         Routing
       </Typography>
@@ -63,8 +63,15 @@ export default function RoutingPage() {
         This pattern demonstrates intelligent routing where customer queries are classified and routed to specialized handlers for appropriate responses.
       </Typography>
 
+      <AgentInteraction
+        apiEndpoint="routing"
+        title=""
+        description=""
+        placeholder="Enter a customer query (e.g., 'I want to return my product', 'How do I use feature X?', 'What are your pricing plans?')..."
+      />
+
       {/* Code Example */}
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mt: 3 }}>
         <Accordion expanded={codeExpanded} onChange={() => setCodeExpanded(!codeExpanded)}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -74,7 +81,7 @@ export default function RoutingPage() {
           </AccordionSummary>
           <AccordionDetails sx={{ p: 0 }}>
             <Editor
-              height="500px"
+              height="600px"
               defaultLanguage="typescript"
               value={exampleCode}
               options={{
@@ -91,13 +98,6 @@ export default function RoutingPage() {
           </AccordionDetails>
         </Accordion>
       </Card>
-
-      <AgentInteraction
-        apiEndpoint="routing"
-        title=""
-        description=""
-        placeholder="Enter a customer query (e.g., 'I want to return my product', 'How do I use feature X?', 'What are your pricing plans?')..."
-      />
-    </Box>
+    </Container>
   );
 }
