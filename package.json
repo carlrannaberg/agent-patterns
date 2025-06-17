@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "issue": "bash scripts/create-issue.sh",
+    "issue:editor": "bash scripts/create-issue.sh --editor",
     "claude": "bash scripts/claude-context.sh",
     "dev": "concurrently \"npm run dev --workspace=api\" \"npm run dev --workspace=webapp\"",
     "build": "npm run build --workspaces --if-present",

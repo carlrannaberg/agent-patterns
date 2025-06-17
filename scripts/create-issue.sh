@@ -1,6 +1,20 @@
 #!/bin/bash
 set -e
 
+# Parse command line arguments
+OPEN_EDITOR=false
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --editor)
+      OPEN_EDITOR=true
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
 # Find the next issue number by reliably finding the max ID
 LAST_ID=0
 for f in issues/[0-9]*-*.md; do
@@ -18,7 +32,8 @@ NEXT_ID=$((LAST_ID + 1))
 
 # Get the issue title from the first argument
 if [ -z "$1" ]; then
-  echo "Usage: $0 \"<issue-title>\""
+  echo "Usage: $0 [--editor] \"<issue-title>\""
+  echo "  --editor: Open the created issue file in \$EDITOR"
   exit 1
 fi
 TITLE_SLUG=$(echo "$1" | tr '[:upper:]' '[:lower:]' | tr -s '[:punct:][:space:]' '-' | sed 's/[^a-z0-9-]*//g' | sed 's/--*//g')
@@ -54,7 +69,7 @@ echo "  - ${ISSUE_FILE}"
 echo "  - ${PLAN_FILE}"
 echo "Updated todo.md"
 
-# Open issue file in editor
-if [ -n "$EDITOR" ]; then
+# Open issue file in editor (only if --editor flag is used)
+if [ "$OPEN_EDITOR" = true ] && [ -n "$EDITOR" ]; then
   $EDITOR "$ISSUE_FILE"
 fi
