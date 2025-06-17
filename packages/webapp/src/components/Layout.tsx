@@ -13,7 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 
 const drawerWidth = 280;
 
@@ -29,6 +29,7 @@ const navigationItems = [
 
 export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -44,7 +45,20 @@ export default function Layout() {
       <List>
         {navigationItems.map((item) => (
           <ListItem key={item.path} disablePadding>
-            <ListItemButton component={Link} to={item.path}>
+            <ListItemButton 
+              component={Link} 
+              to={item.path}
+              selected={location.pathname === item.path}
+              sx={{
+                '&.Mui-selected': {
+                  backgroundColor: 'primary.main',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: 'primary.dark',
+                  },
+                },
+              }}
+            >
               <ListItemText primary={item.label} />
             </ListItemButton>
           </ListItem>
