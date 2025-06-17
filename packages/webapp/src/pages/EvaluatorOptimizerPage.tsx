@@ -87,18 +87,10 @@ export default function EvaluatorOptimizerPage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 2 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Evaluator-Optimizer
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: '960px' }}>
-        This pattern demonstrates iterative improvement where translations are evaluated and optimized through multiple rounds for enhanced quality.
-      </Typography>
-
       <AgentInteraction
-        apiEndpoint="evaluator-optimizer"
-        title=""
-        description=""
+      apiEndpoint="evaluator-optimizer"
+        title="Evaluator-Optimizer"
+        description="This pattern demonstrates iterative improvement where translations are evaluated and optimized through multiple rounds for enhanced quality."
         placeholder="Enter text to translate with iterative quality improvement. Use [target: language] to specify target language (default: Spanish)..."
       />
 
@@ -108,7 +100,7 @@ export default function EvaluatorOptimizerPage() {
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CodeIcon />
-              <Typography variant="h6">Pattern Implementation Example</Typography>
+              <Typography variant="h6">Code Example</Typography>
             </Box>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 0 }}>

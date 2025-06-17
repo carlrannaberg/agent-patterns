@@ -57,18 +57,10 @@ export default function MultiStepToolUsagePage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 2 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Multi-Step Tool Usage
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: '960px' }}>
-        This pattern demonstrates multi-step tool usage where complex math problems are solved using calculation tools across multiple steps.
-      </Typography>
-
       <AgentInteraction
         apiEndpoint="multi-step-tool-usage"
-        title=""
-        description=""
+        title="Multi-Step Tool Usage"
+        description="This pattern demonstrates multi-step tool usage where complex math problems are solved using calculation tools across multiple steps."
         placeholder="Enter a complex math problem that requires multiple calculation steps..."
       />
 
@@ -78,7 +70,7 @@ export default function MultiStepToolUsagePage() {
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CodeIcon />
-              <Typography variant="h6">Pattern Implementation Example</Typography>
+              <Typography variant="h6">Code Example</Typography>
             </Box>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 0 }}>

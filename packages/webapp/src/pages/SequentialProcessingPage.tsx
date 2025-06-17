@@ -60,18 +60,10 @@ export default function SequentialProcessingPage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 2 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Sequential Processing
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: '960px' }}>
-        This pattern demonstrates sequential processing where tasks are executed one after another. The system generates marketing copy and then evaluates its quality in sequence.
-      </Typography>
-
       <AgentInteraction
         apiEndpoint="sequential-processing"
-        title=""
-        description=""
+        title="Sequential Processing"
+        description="This pattern demonstrates sequential processing where tasks are executed one after another. The system generates marketing copy and then evaluates its quality in sequence."
         placeholder="Enter a product or service you'd like to create marketing copy for..."
       />
 
@@ -81,7 +73,7 @@ export default function SequentialProcessingPage() {
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CodeIcon />
-              <Typography variant="h6">Pattern Implementation Example</Typography>
+              <Typography variant="h6">Code Example</Typography>
             </Box>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 0 }}>

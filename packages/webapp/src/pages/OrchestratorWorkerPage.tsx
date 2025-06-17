@@ -74,18 +74,10 @@ export default function OrchestratorWorkerPage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 2 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Orchestrator-Worker
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: '960px' }}>
-        This pattern demonstrates an orchestrator managing multiple workers. The orchestrator plans feature implementation and coordinates specialized workers for different tasks.
-      </Typography>
-
       <AgentInteraction
-        apiEndpoint="orchestrator-worker"
-        title=""
-        description=""
+      apiEndpoint="orchestrator-worker"
+        title="Orchestrator-Worker"
+        description="This pattern demonstrates an orchestrator managing multiple workers. The orchestrator plans feature implementation and coordinates specialized workers for different tasks."
         placeholder="Describe a feature you'd like to implement (e.g., 'Add user authentication', 'Create a dashboard', 'Implement file upload')..."
       />
 
@@ -95,7 +87,7 @@ export default function OrchestratorWorkerPage() {
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CodeIcon />
-              <Typography variant="h6">Pattern Implementation Example</Typography>
+              <Typography variant="h6">Code Example</Typography>
             </Box>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 0 }}>

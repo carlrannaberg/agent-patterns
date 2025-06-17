@@ -55,18 +55,10 @@ export default function RoutingPage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 2 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Routing
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: '960px' }}>
-        This pattern demonstrates intelligent routing where customer queries are classified and routed to specialized handlers for appropriate responses.
-      </Typography>
-
       <AgentInteraction
         apiEndpoint="routing"
-        title=""
-        description=""
+        title="Routing"
+        description="This pattern demonstrates intelligent routing where customer queries are classified and routed to specialized handlers for appropriate responses."
         placeholder="Enter a customer query (e.g., 'I want to return my product', 'How do I use feature X?', 'What are your pricing plans?')..."
       />
 
@@ -76,7 +68,7 @@ export default function RoutingPage() {
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CodeIcon />
-              <Typography variant="h6">Pattern Implementation Example</Typography>
+              <Typography variant="h6">Code Example</Typography>
             </Box>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 0 }}>

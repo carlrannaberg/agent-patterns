@@ -78,18 +78,10 @@ export default function ParallelProcessingPage() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 2 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Parallel Processing
-      </Typography>
-      
-      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: '960px' }}>
-        This pattern demonstrates parallel processing where multiple analyses (security, performance, maintainability) are performed simultaneously on code for comprehensive review.
-      </Typography>
-
       <AgentInteraction
-        apiEndpoint="parallel-processing"
-        title=""
-        description=""
+      apiEndpoint="parallel-processing"
+        title="Parallel Processing"
+        description="This pattern demonstrates parallel processing where multiple analyses (security, performance, maintainability) are performed simultaneously on code for comprehensive review."
         placeholder="Paste your code here for parallel analysis of security, performance, and maintainability..."
       />
 
@@ -99,7 +91,7 @@ export default function ParallelProcessingPage() {
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <CodeIcon />
-              <Typography variant="h6">Pattern Implementation Example</Typography>
+              <Typography variant="h6">Code Example</Typography>
             </Box>
           </AccordionSummary>
           <AccordionDetails sx={{ p: 0 }}>
