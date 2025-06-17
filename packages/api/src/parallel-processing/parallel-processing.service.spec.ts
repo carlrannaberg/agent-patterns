@@ -7,15 +7,9 @@ import { Readable } from 'stream';
 jest.mock('ai');
 jest.mock('@ai-sdk/google');
 
-const mockGenerateText = generateText as jest.MockedFunction<
-  typeof generateText
->;
-const mockGenerateObject = generateObject as jest.MockedFunction<
-  typeof generateObject
->;
-const mockStreamObject = streamObject as jest.MockedFunction<
-  typeof streamObject
->;
+const mockGenerateText = generateText as jest.MockedFunction<typeof generateText>;
+const mockGenerateObject = generateObject as jest.MockedFunction<typeof generateObject>;
+const mockStreamObject = streamObject as jest.MockedFunction<typeof streamObject>;
 
 describe('ParallelProcessingService - Business Logic', () => {
   let service: ParallelProcessingService;
@@ -53,10 +47,7 @@ describe('ParallelProcessingService - Business Logic', () => {
           object: {
             concerns: ['Poor variable naming', 'Lack of comments'],
             qualityScore: 6,
-            recommendations: [
-              'Improve naming conventions',
-              'Add documentation',
-            ],
+            recommendations: ['Improve naming conventions', 'Add documentation'],
           },
         } as any);
 
@@ -65,9 +56,7 @@ describe('ParallelProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -83,9 +72,7 @@ describe('ParallelProcessingService - Business Logic', () => {
         1,
         expect.objectContaining({
           system: expect.stringContaining('expert in code security'),
-          prompt: expect.stringContaining(
-            'Review this code for security issues',
-          ),
+          prompt: expect.stringContaining('Review this code for security issues'),
         }),
       );
 
@@ -94,9 +81,7 @@ describe('ParallelProcessingService - Business Logic', () => {
         2,
         expect.objectContaining({
           system: expect.stringContaining('expert in code performance'),
-          prompt: expect.stringContaining(
-            'Review this code for performance issues',
-          ),
+          prompt: expect.stringContaining('Review this code for performance issues'),
         }),
       );
 
@@ -104,12 +89,8 @@ describe('ParallelProcessingService - Business Logic', () => {
       expect(mockGenerateObject).toHaveBeenNthCalledWith(
         3,
         expect.objectContaining({
-          system: expect.stringContaining(
-            'expert in code quality and maintainability',
-          ),
-          prompt: expect.stringContaining(
-            'Review this code for maintainability and quality',
-          ),
+          system: expect.stringContaining('expert in code quality and maintainability'),
+          prompt: expect.stringContaining('Review this code for maintainability and quality'),
         }),
       );
     });
@@ -142,9 +123,7 @@ describe('ParallelProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -153,12 +132,8 @@ describe('ParallelProcessingService - Business Logic', () => {
       // Assert: Summary generation should be called with all review data
       expect(mockGenerateText).toHaveBeenCalledWith(
         expect.objectContaining({
-          system: expect.stringContaining(
-            'technical lead summarizing multiple code reviews',
-          ),
-          prompt: expect.stringContaining(
-            'Synthesize these code review results',
-          ),
+          system: expect.stringContaining('technical lead summarizing multiple code reviews'),
+          prompt: expect.stringContaining('Synthesize these code review results'),
         }),
       );
 
@@ -199,9 +174,7 @@ describe('ParallelProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -252,9 +225,7 @@ describe('ParallelProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -274,9 +245,7 @@ describe('ParallelProcessingService - Business Logic', () => {
       );
 
       const maintainabilityCall = mockGenerateObject.mock.calls[2][0];
-      expect(maintainabilityCall.system).toContain(
-        'expert in code quality and maintainability',
-      );
+      expect(maintainabilityCall.system).toContain('expert in code quality and maintainability');
       expect(maintainabilityCall.system).toContain(
         'code structure, readability, and maintainability concerns',
       );
@@ -300,9 +269,7 @@ describe('ParallelProcessingService - Business Logic', () => {
 
       mockGenerateText.mockResolvedValue({ text: 'test summary' } as any);
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -314,15 +281,9 @@ describe('ParallelProcessingService - Business Logic', () => {
 
       // Verify each call has expected structure
       const calls = mockGenerateObject.mock.calls;
-      expect(calls[0][0].prompt).toContain(
-        'Review this code for security issues',
-      );
-      expect(calls[1][0].prompt).toContain(
-        'Review this code for performance issues',
-      );
-      expect(calls[2][0].prompt).toContain(
-        'Review this code for maintainability and quality',
-      );
+      expect(calls[0][0].prompt).toContain('Review this code for security issues');
+      expect(calls[1][0].prompt).toContain('Review this code for performance issues');
+      expect(calls[2][0].prompt).toContain('Review this code for maintainability and quality');
     });
   });
 
@@ -344,8 +305,7 @@ describe('ParallelProcessingService - Business Logic', () => {
         qualityScore: 3,
         recommendations: ['Extract methods', 'Reduce nesting'],
       };
-      const summary =
-        'Critical security and performance issues require immediate attention.';
+      const summary = 'Critical security and performance issues require immediate attention.';
 
       mockGenerateObject
         .mockResolvedValueOnce({ object: securityReview } as any)
@@ -372,9 +332,7 @@ describe('ParallelProcessingService - Business Logic', () => {
             summary: expect.any(Object),
           }),
         }),
-        prompt: expect.stringContaining(
-          'Return the following data as a structured object',
-        ),
+        prompt: expect.stringContaining('Return the following data as a structured object'),
       });
 
       // Verify all review data is included in the prompt
@@ -412,9 +370,7 @@ describe('ParallelProcessingService - Business Logic', () => {
         text: 'Good overall quality',
       } as any);
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -441,9 +397,7 @@ describe('ParallelProcessingService - Business Logic', () => {
         } as any);
 
       // Act & Assert: Should throw error (Promise.all will reject)
-      await expect(service.parallelCodeReview('test code')).rejects.toThrow(
-        'Security API Error',
-      );
+      await expect(service.parallelCodeReview('test code')).rejects.toThrow('Security API Error');
     });
 
     it('should handle performance review failures gracefully', async () => {
@@ -489,9 +443,7 @@ describe('ParallelProcessingService - Business Logic', () => {
       mockGenerateText.mockRejectedValueOnce(new Error('Summary API Error'));
 
       // Act & Assert: Should throw error
-      await expect(service.parallelCodeReview('test code')).rejects.toThrow(
-        'Summary API Error',
-      );
+      await expect(service.parallelCodeReview('test code')).rejects.toThrow('Summary API Error');
     });
 
     it('should handle streaming response failures gracefully', async () => {
@@ -506,9 +458,7 @@ describe('ParallelProcessingService - Business Logic', () => {
       });
 
       // Act & Assert: Should throw streaming error
-      await expect(service.parallelCodeReview('test code')).rejects.toThrow(
-        'Streaming Error',
-      );
+      await expect(service.parallelCodeReview('test code')).rejects.toThrow('Streaming Error');
     });
   });
 
@@ -551,9 +501,7 @@ describe('ParallelProcessingService - Business Logic', () => {
       });
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -578,9 +526,7 @@ describe('ParallelProcessingService - Business Logic', () => {
 
       mockGenerateText.mockResolvedValue({ text: 'test' } as any);
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -594,9 +540,7 @@ describe('ParallelProcessingService - Business Logic', () => {
       const calls = mockGenerateObject.mock.calls;
       expect(calls[0][0].system).toContain('expert in code security');
       expect(calls[1][0].system).toContain('expert in code performance');
-      expect(calls[2][0].system).toContain(
-        'expert in code quality and maintainability',
-      );
+      expect(calls[2][0].system).toContain('expert in code quality and maintainability');
     });
   });
 });

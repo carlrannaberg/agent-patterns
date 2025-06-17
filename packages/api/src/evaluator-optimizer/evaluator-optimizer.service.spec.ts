@@ -7,15 +7,9 @@ import { Readable } from 'stream';
 jest.mock('ai');
 jest.mock('@ai-sdk/google');
 
-const mockGenerateText = generateText as jest.MockedFunction<
-  typeof generateText
->;
-const mockGenerateObject = generateObject as jest.MockedFunction<
-  typeof generateObject
->;
-const mockStreamObject = streamObject as jest.MockedFunction<
-  typeof streamObject
->;
+const mockGenerateText = generateText as jest.MockedFunction<typeof generateText>;
+const mockGenerateObject = generateObject as jest.MockedFunction<typeof generateObject>;
+const mockStreamObject = streamObject as jest.MockedFunction<typeof streamObject>;
 
 describe('EvaluatorOptimizerService - Business Logic', () => {
   let service: EvaluatorOptimizerService;
@@ -50,9 +44,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -92,9 +84,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -113,9 +103,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       expect(mockGenerateText).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          prompt: expect.stringContaining(
-            'Use more natural French expressions',
-          ),
+          prompt: expect.stringContaining('Use more natural French expressions'),
         }),
       );
     });
@@ -142,9 +130,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -155,9 +141,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       expect(mockGenerateText).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          prompt: expect.stringContaining(
-            'Translation is too casual for formal context',
-          ),
+          prompt: expect.stringContaining('Translation is too casual for formal context'),
         }),
       );
     });
@@ -184,9 +168,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -219,16 +201,12 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
           preservesNuance: true,
           culturallyAccurate: false, // Fails cultural accuracy
           specificIssues: ['Direct translation of cultural concept'],
-          improvementSuggestions: [
-            'Use culturally appropriate French equivalent',
-          ],
+          improvementSuggestions: ['Use culturally appropriate French equivalent'],
         },
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -239,9 +217,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       expect(mockGenerateText).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          prompt: expect.stringContaining(
-            'Direct translation of cultural concept',
-          ),
+          prompt: expect.stringContaining('Direct translation of cultural concept'),
         }),
       );
     });
@@ -264,9 +240,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -305,9 +279,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -322,9 +294,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
 
       expect(mockGenerateObject).toHaveBeenCalledWith(
         expect.objectContaining({
-          system: expect.stringContaining(
-            'expert in evaluating literary translations',
-          ),
+          system: expect.stringContaining('expert in evaluating literary translations'),
         }),
       );
     });
@@ -351,9 +321,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -363,9 +331,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       expect(mockGenerateText).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
-          system: expect.stringContaining(
-            'addressing the specific feedback provided',
-          ),
+          system: expect.stringContaining('addressing the specific feedback provided'),
         }),
       );
     });
@@ -404,10 +370,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       mockStreamObject.mockReturnValue(mockStreamObjectResult as any);
 
       // Act
-      const result = await service.translateWithFeedback(
-        'Test text',
-        'Italian',
-      );
+      const result = await service.translateWithFeedback('Test text', 'Italian');
 
       // Assert: Verify streaming response structure
       expect(mockStreamObject).toHaveBeenCalledWith({
@@ -421,9 +384,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
             targetLanguage: expect.any(Object),
           }),
         }),
-        prompt: expect.stringContaining(
-          'Return the following data as a structured object',
-        ),
+        prompt: expect.stringContaining('Return the following data as a structured object'),
       });
 
       expect(result).toBe(mockStreamObjectResult);
@@ -433,14 +394,12 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
   describe('Error Handling', () => {
     it('should handle initial translation failures gracefully', async () => {
       // Arrange: Mock initial translation failure
-      mockGenerateText.mockRejectedValueOnce(
-        new Error('Translation API Error'),
-      );
+      mockGenerateText.mockRejectedValueOnce(new Error('Translation API Error'));
 
       // Act & Assert: Should throw the error
-      await expect(
-        service.translateWithFeedback('test text', 'French'),
-      ).rejects.toThrow('Translation API Error');
+      await expect(service.translateWithFeedback('test text', 'French')).rejects.toThrow(
+        'Translation API Error',
+      );
     });
 
     it('should handle evaluation failures gracefully', async () => {
@@ -449,14 +408,12 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
         text: 'Translated text',
       } as any);
 
-      mockGenerateObject.mockRejectedValueOnce(
-        new Error('Evaluation API Error'),
-      );
+      mockGenerateObject.mockRejectedValueOnce(new Error('Evaluation API Error'));
 
       // Act & Assert: Should throw the error
-      await expect(
-        service.translateWithFeedback('test text', 'French'),
-      ).rejects.toThrow('Evaluation API Error');
+      await expect(service.translateWithFeedback('test text', 'French')).rejects.toThrow(
+        'Evaluation API Error',
+      );
     });
 
     it('should handle improvement generation failures gracefully', async () => {
@@ -479,9 +436,9 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       // Act & Assert: Should throw the error
-      await expect(
-        service.translateWithFeedback('test text', 'French'),
-      ).rejects.toThrow('Improvement API Error');
+      await expect(service.translateWithFeedback('test text', 'French')).rejects.toThrow(
+        'Improvement API Error',
+      );
     });
   });
 
@@ -509,9 +466,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       await service.translateWithFeedback('test', 'French');
@@ -546,9 +501,7 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -556,18 +509,14 @@ describe('EvaluatorOptimizerService - Business Logic', () => {
 
       // Assert: Streaming response should include all required data
       const streamCall = mockStreamObject.mock.calls[0][0];
-      expect(streamCall.prompt).toContain(
-        'Final Translation: Excellent translation',
-      );
+      expect(streamCall.prompt).toContain('Final Translation: Excellent translation');
       expect(streamCall.prompt).toContain('Iterations Required: 0');
       expect(streamCall.prompt).toContain('Original Text: Hello world');
       expect(streamCall.prompt).toContain('Target Language: French');
 
       // Verify streamObject was called with proper structure
       expect(streamCall.model).toBeDefined();
-      expect(streamCall.prompt).toContain(
-        'Return the following data as a structured object',
-      );
+      expect(streamCall.prompt).toContain('Return the following data as a structured object');
     });
   });
 });

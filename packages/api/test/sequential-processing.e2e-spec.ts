@@ -36,9 +36,7 @@ describe('SequentialProcessingController (e2e)', () => {
   });
 
   it('/sequential-processing (POST) should handle missing input', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/sequential-processing')
-      .send({});
+    const response = await request(app.getHttpServer()).post('/sequential-processing').send({});
 
     // Should still work since the service doesn't validate input strictly
     expect([200, 201]).toContain(response.status);

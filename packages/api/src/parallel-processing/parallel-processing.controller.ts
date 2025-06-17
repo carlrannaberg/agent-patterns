@@ -4,15 +4,11 @@ import { ParallelProcessingService } from './parallel-processing.service';
 
 @Controller('parallel-processing')
 export class ParallelProcessingController {
-  constructor(
-    private readonly parallelProcessingService: ParallelProcessingService,
-  ) {}
+  constructor(private readonly parallelProcessingService: ParallelProcessingService) {}
 
   @Post()
   async reviewCode(@Body() body: { input: string }, @Res() res: Response) {
-    const result = await this.parallelProcessingService.parallelCodeReview(
-      body.input,
-    );
+    const result = await this.parallelProcessingService.parallelCodeReview(body.input);
 
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Cache-Control', 'no-cache');

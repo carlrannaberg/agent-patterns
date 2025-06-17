@@ -64,9 +64,7 @@ describe('ParallelProcessingController (e2e)', () => {
   });
 
   it('/parallel-processing (POST) should handle missing code', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/parallel-processing')
-      .send({});
+    const response = await request(app.getHttpServer()).post('/parallel-processing').send({});
 
     // Should return 200 or 201 even with missing code - streaming endpoints handle this gracefully
     expect([200, 201]).toContain(response.status);

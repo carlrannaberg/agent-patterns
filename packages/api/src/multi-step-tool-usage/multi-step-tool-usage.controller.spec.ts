@@ -1,6 +1,5 @@
 import { MultiStepToolUsageController } from './multi-step-tool-usage.controller';
 import { MultiStepToolUsageService } from './multi-step-tool-usage.service';
-import { Response } from 'express';
 
 describe('MultiStepToolUsageController', () => {
   let controller: MultiStepToolUsageController;
@@ -31,24 +30,13 @@ describe('MultiStepToolUsageController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.solveMathProblem({ prompt }, mockResponse);
+      await controller.solveMathProblem({ input: prompt }, mockResponse);
 
       expect(service.solveMathProblem).toHaveBeenCalledWith(prompt);
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Content-Type',
-        'application/json',
-      );
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Cache-Control',
-        'no-cache',
-      );
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Connection',
-        'keep-alive',
-      );
-      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(
-        mockResponse,
-      );
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Content-Type', 'application/json');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-cache');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle complex math problem', async () => {
@@ -57,19 +45,18 @@ describe('MultiStepToolUsageController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.solveMathProblem({ prompt }, mockResponse);
+      await controller.solveMathProblem({ input: prompt }, mockResponse);
 
       expect(service.solveMathProblem).toHaveBeenCalledWith(prompt);
     });
 
     it('should handle word problem', async () => {
-      const prompt =
-        'If a train travels 120 miles in 2 hours, what is its average speed?';
+      const prompt = 'If a train travels 120 miles in 2 hours, what is its average speed?';
       const mockResponse = {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.solveMathProblem({ prompt }, mockResponse);
+      await controller.solveMathProblem({ input: prompt }, mockResponse);
 
       expect(service.solveMathProblem).toHaveBeenCalledWith(prompt);
     });
@@ -80,7 +67,7 @@ describe('MultiStepToolUsageController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.solveMathProblem({ prompt }, mockResponse);
+      await controller.solveMathProblem({ input: prompt }, mockResponse);
 
       expect(service.solveMathProblem).toHaveBeenCalledWith(prompt);
     });
@@ -91,34 +78,31 @@ describe('MultiStepToolUsageController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.solveMathProblem({ prompt }, mockResponse);
+      await controller.solveMathProblem({ input: prompt }, mockResponse);
 
       expect(service.solveMathProblem).toHaveBeenCalledWith(prompt);
     });
 
     it('should handle service errors', async () => {
       const prompt = 'Calculate sqrt(-1)';
-      (service.solveMathProblem as any).mockRejectedValue(
-        new Error('Service error'),
-      );
+      (service.solveMathProblem as any).mockRejectedValue(new Error('Service error'));
 
       const mockResponse = {
         setHeader: jest.fn(),
       } as any;
 
-      await expect(
-        controller.solveMathProblem({ prompt }, mockResponse),
-      ).rejects.toThrow('Service error');
+      await expect(controller.solveMathProblem({ input: prompt }, mockResponse)).rejects.toThrow(
+        'Service error',
+      );
     });
 
     it('should handle statistics problem', async () => {
-      const prompt =
-        'Calculate the mean, median, and mode of: 1, 2, 3, 3, 4, 5, 5, 5, 6';
+      const prompt = 'Calculate the mean, median, and mode of: 1, 2, 3, 3, 4, 5, 5, 5, 6';
       const mockResponse = {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.solveMathProblem({ prompt }, mockResponse);
+      await controller.solveMathProblem({ input: prompt }, mockResponse);
 
       expect(service.solveMathProblem).toHaveBeenCalledWith(prompt);
     });

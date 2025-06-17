@@ -7,10 +7,7 @@ export class RoutingController {
   constructor(private readonly routingService: RoutingService) {}
 
   @Post()
-  async handleCustomerQuery(
-    @Body() body: { input: string },
-    @Res() res: Response,
-  ) {
+  async handleCustomerQuery(@Body() body: { input: string }, @Res() res: Response) {
     const result = await this.routingService.handleCustomerQuery(body.input);
 
     res.setHeader('Content-Type', 'application/json');

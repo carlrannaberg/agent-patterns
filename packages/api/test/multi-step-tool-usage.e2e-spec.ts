@@ -69,9 +69,7 @@ describe('MultiStepToolUsageController (e2e)', () => {
   });
 
   it('/multi-step-tool-usage (POST) should handle missing prompt', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/multi-step-tool-usage')
-      .send({});
+    const response = await request(app.getHttpServer()).post('/multi-step-tool-usage').send({});
 
     // Should return 200 or 201 even with missing prompt - streaming endpoints handle this gracefully
     expect([200, 201]).toContain(response.status);

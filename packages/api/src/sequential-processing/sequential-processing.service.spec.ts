@@ -7,15 +7,9 @@ import { Readable } from 'stream';
 jest.mock('ai');
 jest.mock('@ai-sdk/google');
 
-const mockGenerateText = generateText as jest.MockedFunction<
-  typeof generateText
->;
-const mockGenerateObject = generateObject as jest.MockedFunction<
-  typeof generateObject
->;
-const mockStreamObject = streamObject as jest.MockedFunction<
-  typeof streamObject
->;
+const mockGenerateText = generateText as jest.MockedFunction<typeof generateText>;
+const mockGenerateObject = generateObject as jest.MockedFunction<typeof generateObject>;
+const mockStreamObject = streamObject as jest.MockedFunction<typeof streamObject>;
 
 describe('SequentialProcessingService - Business Logic', () => {
   let service: SequentialProcessingService;
@@ -25,9 +19,7 @@ describe('SequentialProcessingService - Business Logic', () => {
       providers: [SequentialProcessingService],
     }).compile();
 
-    service = module.get<SequentialProcessingService>(
-      SequentialProcessingService,
-    );
+    service = module.get<SequentialProcessingService>(SequentialProcessingService);
 
     // Reset mocks before each test
     jest.clearAllMocks();
@@ -49,9 +41,7 @@ describe('SequentialProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -85,9 +75,7 @@ describe('SequentialProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -130,9 +118,7 @@ describe('SequentialProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -167,9 +153,7 @@ describe('SequentialProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -204,9 +188,7 @@ describe('SequentialProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act
@@ -217,9 +199,7 @@ describe('SequentialProcessingService - Business Logic', () => {
       const improvementCall = mockGenerateText.mock.calls[1][0];
       expect(improvementCall.prompt).toContain('A clear call to action');
       expect(improvementCall.prompt).toContain('Stronger emotional appeal');
-      expect(improvementCall.prompt).toContain(
-        'Improved clarity and directness',
-      );
+      expect(improvementCall.prompt).toContain('Improved clarity and directness');
     });
   });
 
@@ -266,9 +246,7 @@ describe('SequentialProcessingService - Business Logic', () => {
             wasImproved: expect.any(Object),
           }),
         }),
-        prompt: expect.stringContaining(
-          'Return the following data as a structured object',
-        ),
+        prompt: expect.stringContaining('Return the following data as a structured object'),
       });
 
       expect(result).toBe(mockStreamObjectResult);
@@ -281,9 +259,7 @@ describe('SequentialProcessingService - Business Logic', () => {
       mockGenerateText.mockRejectedValueOnce(new Error('AI API Error'));
 
       // Act & Assert: Should throw the error (or handle gracefully based on requirements)
-      await expect(service.generateMarketingCopy('test input')).rejects.toThrow(
-        'AI API Error',
-      );
+      await expect(service.generateMarketingCopy('test input')).rejects.toThrow('AI API Error');
     });
 
     it('should handle malformed AI responses gracefully', async () => {
@@ -302,9 +278,7 @@ describe('SequentialProcessingService - Business Logic', () => {
       } as any);
 
       mockStreamObject.mockReturnValue({
-        toTextStreamResponse: jest
-          .fn()
-          .mockReturnValue(new Readable({ read() {} })),
+        toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
       } as any);
 
       // Act - Service should handle gracefully and not crash
@@ -353,9 +327,7 @@ describe('SequentialProcessingService - Business Logic', () => {
         mockGenerateText.mockResolvedValue({ text: 'test copy' } as any);
         mockGenerateObject.mockResolvedValue({ object: testCase } as any);
         mockStreamObject.mockReturnValue({
-          toTextStreamResponse: jest
-            .fn()
-            .mockReturnValue(new Readable({ read() {} })),
+          toTextStreamResponse: jest.fn().mockReturnValue(new Readable({ read() {} })),
         } as any);
 
         await service.generateMarketingCopy('test');

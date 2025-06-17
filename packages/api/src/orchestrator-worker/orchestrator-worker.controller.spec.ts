@@ -1,6 +1,5 @@
 import { OrchestratorWorkerController } from './orchestrator-worker.controller';
 import { OrchestratorWorkerService } from './orchestrator-worker.service';
-import { Response } from 'express';
 
 describe('OrchestratorWorkerController', () => {
   let controller: OrchestratorWorkerController;
@@ -31,24 +30,13 @@ describe('OrchestratorWorkerController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.implementFeature({ featureRequest }, mockResponse);
+      await controller.implementFeature({ input: featureRequest }, mockResponse);
 
       expect(service.implementFeature).toHaveBeenCalledWith(featureRequest);
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Content-Type',
-        'application/json',
-      );
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Cache-Control',
-        'no-cache',
-      );
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Connection',
-        'keep-alive',
-      );
-      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(
-        mockResponse,
-      );
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Content-Type', 'application/json');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-cache');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle complex feature request', async () => {
@@ -58,7 +46,7 @@ describe('OrchestratorWorkerController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.implementFeature({ featureRequest }, mockResponse);
+      await controller.implementFeature({ input: featureRequest }, mockResponse);
 
       expect(service.implementFeature).toHaveBeenCalledWith(featureRequest);
     });
@@ -69,7 +57,7 @@ describe('OrchestratorWorkerController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.implementFeature({ featureRequest }, mockResponse);
+      await controller.implementFeature({ input: featureRequest }, mockResponse);
 
       expect(service.implementFeature).toHaveBeenCalledWith(featureRequest);
     });
@@ -80,34 +68,31 @@ describe('OrchestratorWorkerController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.implementFeature({ featureRequest }, mockResponse);
+      await controller.implementFeature({ input: featureRequest }, mockResponse);
 
       expect(service.implementFeature).toHaveBeenCalledWith(featureRequest);
     });
 
     it('should handle service errors', async () => {
       const featureRequest = 'Add payment processing';
-      (service.implementFeature as any).mockRejectedValue(
-        new Error('Service error'),
-      );
+      (service.implementFeature as any).mockRejectedValue(new Error('Service error'));
 
       const mockResponse = {
         setHeader: jest.fn(),
       } as any;
 
       await expect(
-        controller.implementFeature({ featureRequest }, mockResponse),
+        controller.implementFeature({ input: featureRequest }, mockResponse),
       ).rejects.toThrow('Service error');
     });
 
     it('should handle database feature request', async () => {
-      const featureRequest =
-        'Add PostgreSQL database integration with migrations';
+      const featureRequest = 'Add PostgreSQL database integration with migrations';
       const mockResponse = {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.implementFeature({ featureRequest }, mockResponse);
+      await controller.implementFeature({ input: featureRequest }, mockResponse);
 
       expect(service.implementFeature).toHaveBeenCalledWith(featureRequest);
     });

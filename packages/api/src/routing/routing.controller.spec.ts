@@ -31,24 +31,13 @@ describe('RoutingController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.handleCustomerQuery({ query }, mockResponse);
+      await controller.handleCustomerQuery({ input: query }, mockResponse);
 
       expect(service.handleCustomerQuery).toHaveBeenCalledWith(query);
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Content-Type',
-        'application/json',
-      );
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Cache-Control',
-        'no-cache',
-      );
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Connection',
-        'keep-alive',
-      );
-      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(
-        mockResponse,
-      );
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Content-Type', 'application/json');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-cache');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle technical support query', async () => {
@@ -57,7 +46,7 @@ describe('RoutingController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.handleCustomerQuery({ query }, mockResponse);
+      await controller.handleCustomerQuery({ input: query }, mockResponse);
 
       expect(service.handleCustomerQuery).toHaveBeenCalledWith(query);
     });
@@ -68,24 +57,22 @@ describe('RoutingController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.handleCustomerQuery({ query }, mockResponse);
+      await controller.handleCustomerQuery({ input: query }, mockResponse);
 
       expect(service.handleCustomerQuery).toHaveBeenCalledWith(query);
     });
 
     it('should handle service errors', async () => {
       const query = 'Test query';
-      (service.handleCustomerQuery as any).mockRejectedValue(
-        new Error('Service error'),
-      );
+      (service.handleCustomerQuery as any).mockRejectedValue(new Error('Service error'));
 
       const mockResponse = {
         setHeader: jest.fn(),
       } as any;
 
-      await expect(
-        controller.handleCustomerQuery({ query }, mockResponse),
-      ).rejects.toThrow('Service error');
+      await expect(controller.handleCustomerQuery({ input: query }, mockResponse)).rejects.toThrow(
+        'Service error',
+      );
     });
 
     it('should handle billing queries', async () => {
@@ -94,7 +81,7 @@ describe('RoutingController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.handleCustomerQuery({ query }, mockResponse);
+      await controller.handleCustomerQuery({ input: query }, mockResponse);
 
       expect(service.handleCustomerQuery).toHaveBeenCalledWith(query);
     });

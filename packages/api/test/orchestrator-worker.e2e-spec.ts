@@ -38,8 +38,7 @@ describe('OrchestratorWorkerController (e2e)', () => {
 
   it('/orchestrator-worker (POST) should handle complex feature request', async () => {
     const inputData = {
-      featureRequest:
-        'Create a real-time chat system with websockets and message persistence',
+      featureRequest: 'Create a real-time chat system with websockets and message persistence',
     };
 
     const response = await request(app.getHttpServer())
@@ -54,9 +53,7 @@ describe('OrchestratorWorkerController (e2e)', () => {
   });
 
   it('/orchestrator-worker (POST) should handle missing feature request', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/orchestrator-worker')
-      .send({});
+    const response = await request(app.getHttpServer()).post('/orchestrator-worker').send({});
 
     // Should return 200 or 201 even with missing featureRequest - streaming endpoints handle this gracefully
     expect([200, 201]).toContain(response.status);

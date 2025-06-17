@@ -34,21 +34,10 @@ describe('SequentialProcessingController', () => {
       await controller.generateMarketingCopy({ input }, mockResponse);
 
       expect(service.generateMarketingCopy).toHaveBeenCalledWith(input);
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Content-Type',
-        'application/json',
-      );
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Cache-Control',
-        'no-cache',
-      );
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Connection',
-        'keep-alive',
-      );
-      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(
-        mockResponse,
-      );
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Content-Type', 'application/json');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-cache');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle empty input', async () => {
@@ -67,17 +56,15 @@ describe('SequentialProcessingController', () => {
 
     it('should handle service errors', async () => {
       const input = 'Test product';
-      (service.generateMarketingCopy as any).mockRejectedValue(
-        new Error('Service error'),
-      );
+      (service.generateMarketingCopy as any).mockRejectedValue(new Error('Service error'));
 
       const mockResponse = {
         setHeader: jest.fn(),
       } as any;
 
-      await expect(
-        controller.generateMarketingCopy({ input }, mockResponse),
-      ).rejects.toThrow('Service error');
+      await expect(controller.generateMarketingCopy({ input }, mockResponse)).rejects.toThrow(
+        'Service error',
+      );
     });
   });
 });

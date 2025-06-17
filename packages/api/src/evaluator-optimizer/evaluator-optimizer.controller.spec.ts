@@ -32,30 +32,13 @@ describe('EvaluatorOptimizerController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.translateWithFeedback(
-        { text, targetLanguage },
-        mockResponse,
-      );
+      await controller.translateWithFeedback({ input: text }, mockResponse);
 
-      expect(service.translateWithFeedback).toHaveBeenCalledWith(
-        text,
-        targetLanguage,
-      );
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Content-Type',
-        'application/json',
-      );
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Cache-Control',
-        'no-cache',
-      );
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Connection',
-        'keep-alive',
-      );
-      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(
-        mockResponse,
-      );
+      expect(service.translateWithFeedback).toHaveBeenCalledWith(text);
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Content-Type', 'application/json');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-cache');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle different target languages', async () => {
@@ -65,15 +48,9 @@ describe('EvaluatorOptimizerController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.translateWithFeedback(
-        { text, targetLanguage },
-        mockResponse,
-      );
+      await controller.translateWithFeedback({ input: text }, mockResponse);
 
-      expect(service.translateWithFeedback).toHaveBeenCalledWith(
-        text,
-        targetLanguage,
-      );
+      expect(service.translateWithFeedback).toHaveBeenCalledWith(text);
     });
 
     it('should handle complex text', async () => {
@@ -84,15 +61,9 @@ describe('EvaluatorOptimizerController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.translateWithFeedback(
-        { text, targetLanguage },
-        mockResponse,
-      );
+      await controller.translateWithFeedback({ input: text }, mockResponse);
 
-      expect(service.translateWithFeedback).toHaveBeenCalledWith(
-        text,
-        targetLanguage,
-      );
+      expect(service.translateWithFeedback).toHaveBeenCalledWith(text);
     });
 
     it('should handle empty text', async () => {
@@ -102,53 +73,34 @@ describe('EvaluatorOptimizerController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.translateWithFeedback(
-        { text, targetLanguage },
-        mockResponse,
-      );
+      await controller.translateWithFeedback({ input: text }, mockResponse);
 
-      expect(service.translateWithFeedback).toHaveBeenCalledWith(
-        text,
-        targetLanguage,
-      );
+      expect(service.translateWithFeedback).toHaveBeenCalledWith(text);
     });
 
     it('should handle service errors', async () => {
       const text = 'Test text';
       const targetLanguage = 'Spanish';
-      (service.translateWithFeedback as any).mockRejectedValue(
-        new Error('Service error'),
-      );
+      (service.translateWithFeedback as any).mockRejectedValue(new Error('Service error'));
 
       const mockResponse = {
         setHeader: jest.fn(),
       } as any;
 
-      await expect(
-        controller.translateWithFeedback(
-          { text, targetLanguage },
-          mockResponse,
-        ),
-      ).rejects.toThrow('Service error');
+      await expect(controller.translateWithFeedback({ input: text }, mockResponse)).rejects.toThrow(
+        'Service error',
+      );
     });
 
     it('should handle technical text translation', async () => {
-      const text =
-        'Machine learning algorithms process large datasets to identify patterns.';
-      const targetLanguage = 'Japanese';
+      const text = 'Machine learning algorithms process large datasets to identify patterns.';
       const mockResponse = {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.translateWithFeedback(
-        { text, targetLanguage },
-        mockResponse,
-      );
+      await controller.translateWithFeedback({ input: text }, mockResponse);
 
-      expect(service.translateWithFeedback).toHaveBeenCalledWith(
-        text,
-        targetLanguage,
-      );
+      expect(service.translateWithFeedback).toHaveBeenCalledWith(text);
     });
   });
 });

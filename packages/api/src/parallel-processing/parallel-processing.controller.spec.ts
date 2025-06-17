@@ -1,6 +1,5 @@
 import { ParallelProcessingController } from './parallel-processing.controller';
 import { ParallelProcessingService } from './parallel-processing.service';
-import { Response } from 'express';
 
 describe('ParallelProcessingController', () => {
   let controller: ParallelProcessingController;
@@ -31,24 +30,13 @@ describe('ParallelProcessingController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.reviewCode({ code }, mockResponse);
+      await controller.reviewCode({ input: code }, mockResponse);
 
       expect(service.parallelCodeReview).toHaveBeenCalledWith(code);
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Content-Type',
-        'application/json',
-      );
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Cache-Control',
-        'no-cache',
-      );
-      expect(mockResponse.setHeader).toHaveBeenCalledWith(
-        'Connection',
-        'keep-alive',
-      );
-      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(
-        mockResponse,
-      );
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Content-Type', 'application/json');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-cache');
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Connection', 'keep-alive');
+      expect(mockResult.pipeTextStreamToResponse).toHaveBeenCalledWith(mockResponse);
     });
 
     it('should handle complex code snippet', async () => {
@@ -64,7 +52,7 @@ describe('ParallelProcessingController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.reviewCode({ code }, mockResponse);
+      await controller.reviewCode({ input: code }, mockResponse);
 
       expect(service.parallelCodeReview).toHaveBeenCalledWith(code);
     });
@@ -75,24 +63,22 @@ describe('ParallelProcessingController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.reviewCode({ code }, mockResponse);
+      await controller.reviewCode({ input: code }, mockResponse);
 
       expect(service.parallelCodeReview).toHaveBeenCalledWith(code);
     });
 
     it('should handle service errors', async () => {
       const code = 'function test() {}';
-      (service.parallelCodeReview as any).mockRejectedValue(
-        new Error('Service error'),
-      );
+      (service.parallelCodeReview as any).mockRejectedValue(new Error('Service error'));
 
       const mockResponse = {
         setHeader: jest.fn(),
       } as any;
 
-      await expect(
-        controller.reviewCode({ code }, mockResponse),
-      ).rejects.toThrow('Service error');
+      await expect(controller.reviewCode({ input: code }, mockResponse)).rejects.toThrow(
+        'Service error',
+      );
     });
 
     it('should handle malformed code', async () => {
@@ -101,7 +87,7 @@ describe('ParallelProcessingController', () => {
         setHeader: jest.fn(),
       } as any;
 
-      await controller.reviewCode({ code }, mockResponse);
+      await controller.reviewCode({ input: code }, mockResponse);
 
       expect(service.parallelCodeReview).toHaveBeenCalledWith(code);
     });
