@@ -5,3 +5,5 @@
 - [x] **[Issue #2]** Backend (Nest.js) Implementation - `issues/2-backendnestjsimplementation.md`
 - [x] **[Issue #3]** Frontend (React) Implementation - `issues/3-frontendreactimplementation.md`
 - [x] **[Issue #4]** API Testing - `issues/4-apitesting.md`
+- [ ] **[Issue #5]** Bootstrap Evaluation Framework from Master Plan - `issues/5-bootstrapevaluationframeworkfrommasterplan.md`
+- [ ] **[Issue #6]** Test Script Fix - `issues/6-testscriptfix.md`

@@ -8,7 +8,7 @@ for f in issues/[0-9]*-*.md; do
   [ -e "$f" ] || continue
 
   # Extract number from filename: "issues/123-foo.md" -> "123"
-  CURRENT_ID=$(basename "$f" | sed -n 's/^\([0-9]\+\)-.*/\1/p')
+  CURRENT_ID=$(basename "$f" | cut -d'-' -f1)
 
   if [[ -n "$CURRENT_ID" && "$CURRENT_ID" -gt "$LAST_ID" ]]; then
     LAST_ID=$CURRENT_ID
