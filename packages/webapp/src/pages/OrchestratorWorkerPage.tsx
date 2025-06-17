@@ -78,7 +78,7 @@ export default function OrchestratorWorkerPage() {
         Orchestrator-Worker
       </Typography>
       
-      <Typography variant="body1" color="text.secondary" paragraph>
+      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: '960px' }}>
         This pattern demonstrates an orchestrator managing multiple workers. The orchestrator plans feature implementation and coordinates specialized workers for different tasks.
       </Typography>
 
@@ -90,7 +90,7 @@ export default function OrchestratorWorkerPage() {
       />
 
       {/* Code Example */}
-      <Card sx={{ mt: 3 }}>
+      <Card sx={{ mt: 3, width: '100%' }}>
         <Accordion expanded={codeExpanded} onChange={() => setCodeExpanded(!codeExpanded)}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

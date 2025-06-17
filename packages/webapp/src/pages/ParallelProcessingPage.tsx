@@ -82,7 +82,7 @@ export default function ParallelProcessingPage() {
         Parallel Processing
       </Typography>
       
-      <Typography variant="body1" color="text.secondary" paragraph>
+      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: '960px' }}>
         This pattern demonstrates parallel processing where multiple analyses (security, performance, maintainability) are performed simultaneously on code for comprehensive review.
       </Typography>
 
@@ -94,7 +94,7 @@ export default function ParallelProcessingPage() {
       />
 
       {/* Code Example */}
-      <Card sx={{ mt: 3 }}>
+      <Card sx={{ mt: 3, width: '100%' }}>
         <Accordion expanded={codeExpanded} onChange={() => setCodeExpanded(!codeExpanded)}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

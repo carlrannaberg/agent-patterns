@@ -32,7 +32,7 @@ export default function AgentInteraction({
   placeholder = 'Enter your input here...',
 }: AgentInteractionProps) {
   const [input, setInput] = useState('');
-  
+
   const { object, submit, isLoading, error } = useObject({
     api: `http://localhost:3001/${apiEndpoint}`,
     schema: z.any(), // Generic schema for any object structure
@@ -41,7 +41,7 @@ export default function AgentInteraction({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim()) return;
-    
+
     await submit({ input: input.trim() });
   };
 
@@ -50,12 +50,12 @@ export default function AgentInteraction({
       <Typography variant="h4" component="h1" gutterBottom>
         {title}
       </Typography>
-      
-      <Typography variant="body1" color="text.secondary" paragraph>
+
+      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: '960px' }}>
         {description}
       </Typography>
 
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: 3, width: '100%' }}>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <Box sx={{ mb: 2 }}>
@@ -89,7 +89,7 @@ export default function AgentInteraction({
       </Card>
 
       {error && (
-        <Card sx={{ mb: 3, borderColor: 'error.main' }}>
+        <Card sx={{ mb: 3, borderColor: 'error.main', width: '100%' }}>
           <CardContent>
             <Typography variant="h6" color="error" gutterBottom>
               Error
@@ -116,7 +116,7 @@ export default function AgentInteraction({
           ) : apiEndpoint === 'multi-step-tool-usage' ? (
             <MultiStepToolUsageDisplay result={object} />
           ) : (
-            <Card>
+            <Card sx={{ width: '100%' }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
                   Response

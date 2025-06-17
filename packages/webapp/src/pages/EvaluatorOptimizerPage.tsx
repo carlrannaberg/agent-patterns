@@ -91,7 +91,7 @@ export default function EvaluatorOptimizerPage() {
         Evaluator-Optimizer
       </Typography>
       
-      <Typography variant="body1" color="text.secondary" paragraph>
+      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: '960px' }}>
         This pattern demonstrates iterative improvement where translations are evaluated and optimized through multiple rounds for enhanced quality.
       </Typography>
 
@@ -103,7 +103,7 @@ export default function EvaluatorOptimizerPage() {
       />
 
       {/* Code Example */}
-      <Card sx={{ mt: 3 }}>
+      <Card sx={{ mt: 3, width: '100%' }}>
         <Accordion expanded={codeExpanded} onChange={() => setCodeExpanded(!codeExpanded)}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

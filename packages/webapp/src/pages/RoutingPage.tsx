@@ -59,7 +59,7 @@ export default function RoutingPage() {
         Routing
       </Typography>
       
-      <Typography variant="body1" color="text.secondary" paragraph>
+      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: '960px' }}>
         This pattern demonstrates intelligent routing where customer queries are classified and routed to specialized handlers for appropriate responses.
       </Typography>
 
@@ -71,7 +71,7 @@ export default function RoutingPage() {
       />
 
       {/* Code Example */}
-      <Card sx={{ mt: 3 }}>
+      <Card sx={{ mt: 3, width: '100%' }}>
         <Accordion expanded={codeExpanded} onChange={() => setCodeExpanded(!codeExpanded)}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

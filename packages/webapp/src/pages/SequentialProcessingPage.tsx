@@ -64,7 +64,7 @@ export default function SequentialProcessingPage() {
         Sequential Processing
       </Typography>
       
-      <Typography variant="body1" color="text.secondary" paragraph>
+      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: '960px' }}>
         This pattern demonstrates sequential processing where tasks are executed one after another. The system generates marketing copy and then evaluates its quality in sequence.
       </Typography>
 
@@ -76,7 +76,7 @@ export default function SequentialProcessingPage() {
       />
 
       {/* Code Example */}
-      <Card sx={{ mt: 3 }}>
+      <Card sx={{ mt: 3, width: '100%' }}>
         <Accordion expanded={codeExpanded} onChange={() => setCodeExpanded(!codeExpanded)}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
