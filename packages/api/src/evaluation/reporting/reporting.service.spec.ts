@@ -71,16 +71,14 @@ describe('ReportingService', () => {
 
     service = module.get<ReportingService>(ReportingService);
     evaluationResultRepo = module.get<Repository<EvaluationResult>>(
-      getRepositoryToken(EvaluationResult)
+      getRepositoryToken(EvaluationResult),
     );
     qualityBaselineRepo = module.get<Repository<QualityBaseline>>(
-      getRepositoryToken(QualityBaseline)
+      getRepositoryToken(QualityBaseline),
     );
-    failurePatternRepo = module.get<Repository<FailurePattern>>(
-      getRepositoryToken(FailurePattern)
-    );
+    failurePatternRepo = module.get<Repository<FailurePattern>>(getRepositoryToken(FailurePattern));
     alertConfigRepo = module.get<Repository<AlertConfiguration>>(
-      getRepositoryToken(AlertConfiguration)
+      getRepositoryToken(AlertConfiguration),
     );
     aggregationService = module.get<AggregationService>(AggregationService);
     failureAnalysisService = module.get<FailureAnalysisService>(FailureAnalysisService);
@@ -212,8 +210,8 @@ describe('ReportingService', () => {
           patternType: 'sequential-processing',
           metricName: 'accuracy',
           mean: 0.85,
-          p25: 0.80,
-          p75: 0.90,
+          p25: 0.8,
+          p75: 0.9,
         },
       ];
 
@@ -221,7 +219,7 @@ describe('ReportingService', () => {
         {
           id: '1',
           patternType: 'sequential-processing',
-          overallScore: 0.70,
+          overallScore: 0.7,
         },
       ];
 

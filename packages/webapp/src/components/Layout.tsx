@@ -25,6 +25,7 @@ const navigationItems = [
   { label: 'Orchestrator-Worker', path: '/orchestrator-worker' },
   { label: 'Evaluator-Optimizer', path: '/evaluator-optimizer' },
   { label: 'Multi-Step Tool Usage', path: '/multi-step-tool-usage' },
+  { label: 'Evaluation Dashboard', path: '/evaluation-dashboard' },
 ];
 
 export default function Layout() {

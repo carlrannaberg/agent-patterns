@@ -88,7 +88,7 @@ describe('ReportingController', () => {
       const mockResults = {
         results: [
           { id: '1', overallScore: 0.85 },
-          { id: '2', overallScore: 0.90 },
+          { id: '2', overallScore: 0.9 },
         ],
         total: 50,
       };
@@ -183,11 +183,7 @@ describe('ReportingController', () => {
 
       mockAggregation.detectAnomalies.mockResolvedValue(mockAnomalies);
 
-      const result = await controller.detectAnomalies(
-        'sequential-processing',
-        'accuracy',
-        2.5
-      );
+      const result = await controller.detectAnomalies('sequential-processing', 'accuracy', 2.5);
 
       expect(result.statusCode).toBe(HttpStatus.OK);
       expect(result.data).toEqual(mockAnomalies);

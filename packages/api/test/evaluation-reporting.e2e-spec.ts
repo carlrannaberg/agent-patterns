@@ -19,9 +19,9 @@ describe('Evaluation Reporting API (e2e)', () => {
       new ValidationPipe({
         whitelist: true,
         transform: true,
-      })
+      }),
     );
-    
+
     await app.init();
 
     dataSource = moduleFixture.get<DataSource>(DataSource);

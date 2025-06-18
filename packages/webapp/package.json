@@ -18,12 +18,17 @@
     "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^7.1.1",
     "@mui/material": "^7.1.1",
+    "@mui/x-date-pickers": "^8.5.2",
     "ai": "^5.0.0-alpha.13",
+    "date-fns": "^4.1.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.6.2",
     "react-textarea-autosize": "^8.5.9",
+    "recharts": "^2.15.3",
     "zod": "^3.25.64"
   },
   "devDependencies": {

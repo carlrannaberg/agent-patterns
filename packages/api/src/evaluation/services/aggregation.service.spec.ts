@@ -43,10 +43,10 @@ describe('AggregationService', () => {
 
     service = module.get<AggregationService>(AggregationService);
     evaluationResultRepo = module.get<Repository<EvaluationResult>>(
-      getRepositoryToken(EvaluationResult)
+      getRepositoryToken(EvaluationResult),
     );
     qualityBaselineRepo = module.get<Repository<QualityBaseline>>(
-      getRepositoryToken(QualityBaseline)
+      getRepositoryToken(QualityBaseline),
     );
   });
 
@@ -106,11 +106,7 @@ describe('AggregationService', () => {
 
       mockEvaluationResultRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      const result = await service.aggregateMetrics(
-        'non-existent-pattern',
-        new Date(),
-        new Date()
-      );
+      const result = await service.aggregateMetrics('non-existent-pattern', new Date(), new Date());
 
       expect(result).toEqual([]);
     });
@@ -153,7 +149,7 @@ describe('AggregationService', () => {
         'sequential-processing',
         'accuracy',
         new Date('2024-01-01'),
-        new Date('2024-01-02')
+        new Date('2024-01-02'),
       );
 
       expect(result).toHaveLength(2);
@@ -179,7 +175,7 @@ describe('AggregationService', () => {
         {
           id: '2',
           patternType: 'sequential-processing',
-          metrics: [{ name: 'accuracy', score: 0.70 }],
+          metrics: [{ name: 'accuracy', score: 0.7 }],
         },
       ];
 
@@ -201,7 +197,7 @@ describe('AggregationService', () => {
       expect(result).toHaveLength(2);
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'ABS(metric.score - :mean) > :threshold * :stdDev',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -223,18 +219,15 @@ describe('AggregationService', () => {
 
       const mockMetrics = [{ name: 'accuracy' }, { name: 'latency' }];
 
-      const mockScores = [
-        { score: '0.85' },
-        { score: '0.87' },
-        { score: '0.90' },
-      ];
+      const mockScores = [{ score: '0.85' }, { score: '0.87' }, { score: '0.90' }];
 
       const mockQueryBuilder = {
         select: jest.fn().mockReturnThis(),
         leftJoin: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
-        getRawMany: jest.fn()
+        getRawMany: jest
+          .fn()
           .mockResolvedValueOnce(mockPatternTypes)
           .mockResolvedValue(mockMetrics),
       };
