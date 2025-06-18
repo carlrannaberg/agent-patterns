@@ -52,8 +52,8 @@ export class CalibrationService {
     const humanScores = samplesWithScores.map((sample) => this.calculateAverageHumanScore(sample));
 
     // Initialize weights
-    let weights = { ...this.defaultWeights };
-    let bestWeights = { ...weights };
+    let weights: Record<string, number> = { ...this.defaultWeights };
+    let bestWeights: Record<string, number> = { ...weights };
     let bestCorrelation = -1;
     let previousCorrelation = -1;
 
@@ -123,18 +123,41 @@ export class CalibrationService {
     const randomizedInputs = this.randomizePositions([input]);
 
     // Get evaluation with calibrated weights
-    const scores = await this.llmJudgeService.evaluate(
+    const testCase: TestCase = {
+      id: 'calibration-test',
       pattern,
-      randomizedInputs[0],
-      output,
+      input: randomizedInputs[0],
       context,
-    );
+    };
 
+    const config: EvaluationConfig = {
+      pattern,
+      judgeModel: JudgeModel.GEMINI_2_5_PRO,
+      metrics: [
+        { name: 'accuracy', description: 'Accuracy', scoreRange: [0, 10] },
+        { name: 'coherence', description: 'Coherence', scoreRange: [0, 10] },
+        { name: 'completeness', description: 'Completeness', scoreRange: [0, 10] },
+        { name: 'relevance', description: 'Relevance', scoreRange: [0, 10] },
+        { name: 'efficiency', description: 'Efficiency', scoreRange: [0, 10] },
+      ],
+    };
+
+    const scores = await this.llmJudgeService.evaluate(testCase, output, config);
+
+    // Calculate overall score from metric scores
+    const overallScore = scores.metricScores.reduce((sum, metric) => sum + metric.normalizedScore, 0) / scores.metricScores.length;
+    
     // Apply length normalization
-    const normalizedScore = this.applyLengthNormalization(scores.overall, output);
+    const normalizedScore = this.applyLengthNormalization(overallScore, output);
 
+    // Convert metric scores to simple object for weight application
+    const scoreMap: Record<string, number> = {};
+    scores.metricScores.forEach(metric => {
+      scoreMap[metric.metric] = metric.normalizedScore;
+    });
+    
     // Apply calibrated weights
-    const weightedScore = this.applyWeights(scores, calibration.weights);
+    const weightedScore = this.applyWeights(scoreMap, calibration.weights);
 
     return weightedScore;
   }
@@ -196,7 +219,7 @@ export class CalibrationService {
       }
     }
 
-    return totalWeight > 0 ? weightedSum / totalWeight : scores.overall || 0;
+    return totalWeight > 0 ? weightedSum / totalWeight : 0;
   }
 
   private calculateSpearmanCorrelation(x: number[], y: number[]): number {
@@ -308,7 +331,7 @@ export class CalibrationService {
 
     // Calculate expected disagreement
     const allScores = scores.flat();
-    const expectedDisagreement = (math.variance(allScores) as number) * 2;
+    const expectedDisagreement = (math.variance(allScores as unknown as number[]) as unknown as number) * 2;
 
     return 1 - observedDisagreement / expectedDisagreement;
   }

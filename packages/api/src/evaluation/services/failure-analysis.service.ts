@@ -86,7 +86,7 @@ export class FailureAnalysisService {
       pattern = this.failurePatternRepo.create({
         patternType: evaluationResult.patternType,
         category,
-        subCategory: this.getSubCategory(evaluationResult.error),
+        subCategory: this.getSubCategory(evaluationResult.error) ?? '',
         description: this.generateDescription(evaluationResult),
         errorSignature: signature,
         occurrenceCount: 1,
@@ -142,7 +142,7 @@ export class FailureAnalysisService {
     }
 
     const similarFailures = await this.findSimilarFailures(pattern);
-    const rootCauseHypotheses = await this.generateRootCauseHypotheses(pattern);
+    const rootCauseHypotheses = this.generateRootCauseHypotheses(pattern);
     const suggestedRemediations = this.generateRemediations(pattern, rootCauseHypotheses);
 
     return {
@@ -160,7 +160,7 @@ export class FailureAnalysisService {
 
     for (const pattern of activePatterns) {
       if (!pattern.rootCauseAnalysis || pattern.occurrenceCount % 10 === 0) {
-        const commonFactors = await this.identifyCommonFactors(pattern);
+        const commonFactors = this.identifyCommonFactors(pattern);
         const rootCause = this.analyzeRootCause(pattern, commonFactors);
 
         pattern.commonFactors = commonFactors;
@@ -171,7 +171,7 @@ export class FailureAnalysisService {
     }
   }
 
-  private async identifyCommonFactors(pattern: FailurePattern): Promise<any> {
+  private identifyCommonFactors(pattern: FailurePattern): any {
     const factors = {
       inputPatterns: [] as string[],
       configPatterns: {} as Record<string, any>,
@@ -183,10 +183,12 @@ export class FailureAnalysisService {
     }
 
     // Analyze input patterns
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     const inputs = pattern.exampleCases.map((c) => c.context.input);
     factors.inputPatterns = this.findCommonPatterns(inputs);
 
     // Analyze configuration patterns
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     const configs = pattern.exampleCases.map((c) => c.context.config).filter(Boolean);
     if (configs.length > 0) {
       factors.configPatterns = this.findCommonProperties(configs);
@@ -307,7 +309,11 @@ export class FailureAnalysisService {
     return query.getMany();
   }
 
-  private async generateRootCauseHypotheses(pattern: FailurePattern): Promise<any[]> {
+  private generateRootCauseHypotheses(pattern: FailurePattern): {
+    cause: string;
+    confidence: number;
+    evidence: string[];
+  }[] {
     const hypotheses: Array<{
       cause: string;
       confidence: number;
@@ -316,7 +322,7 @@ export class FailureAnalysisService {
 
     if (pattern.rootCauseAnalysis) {
       hypotheses.push({
-        cause: pattern.rootCauseAnalysis.identifiedCause,
+        cause: pattern.rootCauseAnalysis.identifiedCause || 'Unknown cause',
         confidence: pattern.rootCauseAnalysis.confidence,
         evidence: pattern.rootCauseAnalysis.evidence,
       });
@@ -332,7 +338,11 @@ export class FailureAnalysisService {
     }
 
     // Temporal pattern hypothesis
-    const timeAnalysis = this.analyzeFailureTiming(pattern);
+    const timeAnalysis = this.analyzeFailureTiming(pattern) as {
+      pattern: string | null;
+      confidence: number;
+      evidence: string[];
+    };
     if (timeAnalysis.pattern) {
       hypotheses.push({
         cause: `Time-based issue: ${timeAnalysis.pattern}`,
@@ -416,7 +426,7 @@ export class FailureAnalysisService {
     return 'other';
   }
 
-  private getSubCategory(error: string): string {
+  private getSubCategory(error: string): string | null {
     if (!error) return null;
 
     const errorLower = error.toLowerCase();
@@ -444,7 +454,7 @@ export class FailureAnalysisService {
   }
 
   private generateDescription(result: EvaluationResult): string {
-    const category = this.categorizeError(result.error);
+    const category = this.categorizeError(result.error || '');
     const pattern = result.patternType;
 
     return `${category} error in ${pattern} pattern: ${result.error?.substring(0, 200) || 'Unknown error'}`;
@@ -508,7 +518,7 @@ export class FailureAnalysisService {
     });
 
     const commonKeys = Object.entries(keyFrequency)
-      .filter(([_, count]) => count >= inputs.length * 0.8)
+      .filter(([_, count]) => (count as number) >= inputs.length * 0.8)
       .map(([key]) => key);
 
     if (commonKeys.length > 0) {
@@ -517,6 +527,7 @@ export class FailureAnalysisService {
 
     // Find common value patterns
     for (const key of commonKeys) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       const values = inputs.map((input) => input[key]).filter(Boolean);
       if (values.length > 0) {
         const uniqueValues = [...new Set(values)];
@@ -538,6 +549,7 @@ export class FailureAnalysisService {
 
     const firstConfig = configs[0];
     for (const key in firstConfig) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       const values = configs.map((c) => c[key]);
       const uniqueValues = [...new Set(values.map((v) => JSON.stringify(v)))];
 
@@ -562,7 +574,7 @@ export class FailureAnalysisService {
     });
 
     const peakHours = Object.entries(hourCounts)
-      .filter(([_, count]) => count > times.length * 0.3)
+      .filter(([_, count]) => (count as number) > times.length * 0.3)
       .map(([hour]) => parseInt(hour));
 
     if (peakHours.length > 0) {
@@ -585,7 +597,7 @@ export class FailureAnalysisService {
     }
 
     const times = pattern.exampleCases.map((c) => new Date(c.timestamp));
-    const intervals = [];
+    const intervals: number[] = [];
 
     for (let i = 1; i < times.length; i++) {
       intervals.push(times[i].getTime() - times[i - 1].getTime());

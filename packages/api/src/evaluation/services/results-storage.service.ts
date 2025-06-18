@@ -26,31 +26,31 @@ export class ResultsStorageService {
     batchId?: string,
   ): Promise<EvaluationResult> {
     const entity = this.evaluationResultRepo.create({
-      patternType: result.patternType,
+      patternType: result.pattern,
       testCaseId: result.testCaseId,
-      input: result.input,
-      output: result.output,
+      input: result.details?.actualOutput || {},
+      output: result.details?.actualOutput || {},
       overallScore: result.overallScore,
-      metadata: result.metadata,
+      metadata: result.details || {},
       error: result.error,
-      success: result.success,
+      success: result.pass,
       executionTimeMs: result.executionTimeMs,
-      llmMetadata: result.llmMetadata,
-      evaluationMethod: result.evaluationMethod,
-      evaluatorConfig: result.evaluatorConfig,
+      llmMetadata: {},
+      evaluationMethod: result.details?.evaluationMethod || 'unknown',
+      evaluatorConfig: {},
       batchId,
     });
 
     const savedResult = await this.evaluationResultRepo.save(entity);
 
-    if (result.metrics && result.metrics.length > 0) {
-      const metricEntities = result.metrics.map((metric) =>
+    if (result.metricScores && result.metricScores.length > 0) {
+      const metricEntities = result.metricScores.map((metric) =>
         this.metricScoreRepo.create({
-          name: metric.name,
-          score: metric.score,
-          weight: metric.weight,
-          feedback: metric.feedback,
-          details: metric.details,
+          name: metric.metric,
+          score: metric.normalizedScore,
+          weight: 1,
+          feedback: metric.reasoning || '',
+          details: metric.details || {},
           evaluationResultId: savedResult.id,
         }),
       );
@@ -58,10 +58,14 @@ export class ResultsStorageService {
       await this.metricScoreRepo.save(metricEntities);
     }
 
-    return this.evaluationResultRepo.findOne({
+    const response = await this.evaluationResultRepo.findOne({
       where: { id: savedResult.id },
       relations: ['metrics'],
     });
+    if (!response) {
+      throw new Error(`Evaluation result with id ${savedResult.id} not found after save`);
+    }
+    return response;
   }
 
   async saveBatchResults(
@@ -110,24 +114,36 @@ export class ResultsStorageService {
       completedAt: new Date(),
     });
 
-    return this.evaluationBatchRepo.findOne({
+    const updatedBatch = await this.evaluationBatchRepo.findOne({
       where: { id: savedBatch.id },
       relations: ['results', 'results.metrics'],
     });
+    if (!updatedBatch) {
+      throw new Error(`Batch with id ${savedBatch.id} not found`);
+    }
+    return updatedBatch;
   }
 
   async getEvaluationResult(id: string): Promise<EvaluationResult> {
-    return this.evaluationResultRepo.findOne({
+    const result = await this.evaluationResultRepo.findOne({
       where: { id },
       relations: ['metrics', 'batch'],
     });
+    if (!result) {
+      throw new Error(`Evaluation result with id ${id} not found`);
+    }
+    return result;
   }
 
   async getEvaluationBatch(id: string): Promise<EvaluationBatch> {
-    return this.evaluationBatchRepo.findOne({
+    const batch = await this.evaluationBatchRepo.findOne({
       where: { id },
       relations: ['results', 'results.metrics'],
     });
+    if (!batch) {
+      throw new Error(`Evaluation batch with id ${id} not found`);
+    }
+    return batch;
   }
 
   async queryEvaluationResults(options: {
@@ -197,11 +213,11 @@ export class ResultsStorageService {
       relations: ['metrics'],
     });
 
-    const scoreDistribution = {};
-    const metricSums = {};
-    const metricCounts = {};
-    const executionTimes = [];
-    const errorCategories = {};
+    const scoreDistribution: Record<number, number> = {};
+    const metricSums: Record<string, number> = {};
+    const metricCounts: Record<string, number> = {};
+    const executionTimes: number[] = [];
+    const errorCategories: Record<string, number> = {};
 
     for (const result of results) {
       const scoreRange = Math.floor(result.overallScore / 0.1) * 0.1;

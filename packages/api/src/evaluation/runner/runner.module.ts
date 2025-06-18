@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CacheModule } from '@nestjs/cache-manager';
@@ -33,7 +33,7 @@ import { EvaluationModule } from '../evaluation.module';
 
 @Module({
   imports: [
-    EvaluationModule,
+    forwardRef(() => EvaluationModule),
     HttpModule,
     ScheduleModule.forRoot(),
     EventEmitterModule.forRoot({

@@ -7,14 +7,14 @@ import { LlmJudgeService } from './llm-judge.service';
 
 interface EnsembleConfig {
   models: JudgeModel[];
-  weights?: Record<JudgeModel, number>;
+  weights?: Partial<Record<JudgeModel, number>>;
   strategy: 'average' | 'weighted' | 'consensus' | 'max';
   disagreementThreshold?: number;
 }
 
 interface EnsembleResult {
   finalScore: number;
-  modelScores: Record<JudgeModel, number>;
+  modelScores: Partial<Record<JudgeModel, number>>;
   consensus: number;
   confidence: number;
   disagreementAlerts: string[];
@@ -149,7 +149,7 @@ export class EnsembleEvaluationService {
   private calculateFinalScore(
     scores: Record<JudgeModel, number>,
     strategy: EnsembleConfig['strategy'],
-    weights?: Record<JudgeModel, number>,
+    weights?: Partial<Record<JudgeModel, number>>,
   ): number {
     const scoreValues = Object.values(scores);
 

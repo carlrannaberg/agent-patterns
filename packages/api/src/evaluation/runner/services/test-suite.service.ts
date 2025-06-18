@@ -72,7 +72,7 @@ export class TestSuiteService {
     const testCases: TestCase[] = [];
 
     for (const pattern of patterns) {
-      const patternTestCases = await this.testCaseService.getTestCasesForPattern(pattern);
+      const patternTestCases = await this.testCaseService.getTestCasesByPattern(pattern);
       testCases.push(
         ...patternTestCases.map((tc) => ({
           id: uuidv4(),

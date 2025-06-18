@@ -52,11 +52,11 @@ export class BiasDetectionService {
 
     const samples = await this.goldDatasetService.getPatternSamples(pattern);
 
-    const lengthBias = await this.detectLengthBias(samples, pattern);
-    const positionBias = await this.detectPositionBias(samples, pattern);
-    const complexityBias = await this.detectComplexityBias(samples, pattern);
-    const evaluatorBias = await this.detectEvaluatorBias(samples);
-    const temporalBias = await this.detectTemporalBias(samples);
+    const lengthBias = this.detectLengthBias(samples, pattern);
+    const positionBias = this.detectPositionBias(samples, pattern);
+    const complexityBias = this.detectComplexityBias(samples, pattern);
+    const evaluatorBias = this.detectEvaluatorBias(samples);
+    const temporalBias = this.detectTemporalBias(samples);
 
     const biasTypes = {
       length: lengthBias,
@@ -80,7 +80,7 @@ export class BiasDetectionService {
     };
   }
 
-  private async detectLengthBias(samples: any[], pattern: AgentPattern): Promise<BiasMetric> {
+  private detectLengthBias(samples: any[], pattern: AgentPattern): BiasMetric {
     const scoredSamples = samples.filter((s) => s.humanScores.length > 0);
 
     if (scoredSamples.length < 10) {
@@ -90,9 +90,11 @@ export class BiasDetectionService {
       };
     }
 
-    const lengths = scoredSamples.map((s) => s.expectedOutput?.content.length || 0);
-    const scores = scoredSamples.map((s) =>
-      math.mean(s.humanScores.map((hs: any) => hs.scores.overall)),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    const lengths = scoredSamples.map((s) => s.expectedOutput?.content.length || 0) as number[];
+    const scores = scoredSamples.map(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      (s) => math.mean(s.humanScores.map((hs: any) => hs.scores.overall)) as number,
     );
 
     // Calculate correlation between length and score
@@ -118,25 +120,28 @@ export class BiasDetectionService {
     };
   }
 
-  private async detectPositionBias(samples: any[], pattern: AgentPattern): Promise<BiasMetric> {
+  private detectPositionBias(samples: any[], pattern: AgentPattern): BiasMetric {
     // Detect if evaluation scores are influenced by position in evaluation order
     const evaluationsByPosition: Record<number, number[]> = {};
 
     // Group scores by evaluation position
     samples.forEach((sample, position) => {
       if (sample.humanScores.length > 0) {
-        const avgScore = math.mean(sample.humanScores.map((hs: any) => hs.scores.overall));
+        const avgScore = math.mean(
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          sample.humanScores.map((hs: any) => hs.scores.overall),
+        ) as number;
         if (!evaluationsByPosition[position % 10]) {
           evaluationsByPosition[position % 10] = [];
         }
-        evaluationsByPosition[position % 10].push(avgScore as number);
+        evaluationsByPosition[position % 10].push(avgScore);
       }
     });
 
     // Calculate variance across positions
     const positionMeans = Object.values(evaluationsByPosition).map((scores) => math.mean(scores));
 
-    const variance = math.variance(positionMeans) as number;
+    const variance = math.variance(positionMeans as unknown as number[]) as unknown as number;
     const maxDiff = Math.max(...positionMeans) - Math.min(...positionMeans);
 
     const biasScore = Math.min(1, (variance * maxDiff) / 10);
@@ -152,7 +157,7 @@ export class BiasDetectionService {
     };
   }
 
-  private async detectComplexityBias(samples: any[], pattern: AgentPattern): Promise<BiasMetric> {
+  private detectComplexityBias(samples: any[], pattern: AgentPattern): BiasMetric {
     const complexityGroups = {
       low: samples.filter((s) => s.complexity === 'low' && s.humanScores.length > 0),
       medium: samples.filter((s) => s.complexity === 'medium' && s.humanScores.length > 0),
@@ -171,18 +176,26 @@ export class BiasDetectionService {
       Object.values(groupMeans).reduce((sum, mean) => sum + Math.pow(mean - grandMean, 2), 0) / 2;
 
     const withinGroupVar =
-      Object.entries(complexityGroups).reduce((sum, [_, group]) => {
-        const groupMean = groupMeans[_ as keyof typeof groupMeans];
-        return (
-          sum +
-          group.reduce((s, sample) => {
-            const sampleScore = math.mean(
-              sample.humanScores.map((hs: any) => hs.scores.overall),
-            ) as number;
-            return s + Math.pow(sampleScore - groupMean, 2);
-          }, 0)
-        );
-      }, 0) /
+      Object.entries(complexityGroups).reduce(
+        (sum, [_, group]: [string, { humanScores: { scores: { overall: number } }[] }[]]) => {
+          const groupMean = groupMeans[_ as keyof typeof groupMeans];
+          return (
+            sum +
+            group.reduce(
+              (s: number, sample: { humanScores: { scores: { overall: number } }[] }) => {
+                const sampleScore = math.mean(
+                  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+                  sample.humanScores.map((hs: any) => hs.scores.overall),
+                ) as number;
+
+                return s + Math.pow(sampleScore - groupMean, 2);
+              },
+              0,
+            )
+          );
+        },
+        0,
+      ) /
       (samples.length - 3);
 
     const fStatistic = betweenGroupVar / Math.max(withinGroupVar, 0.01);
@@ -204,7 +217,7 @@ export class BiasDetectionService {
     };
   }
 
-  private async detectEvaluatorBias(samples: any[]): Promise<BiasMetric> {
+  private detectEvaluatorBias(samples: any[]): BiasMetric {
     const evaluatorScores: Record<string, number[]> = {};
 
     // Collect scores by evaluator
@@ -222,16 +235,16 @@ export class BiasDetectionService {
         ...acc,
         [id]: math.mean(scores),
       }),
-      {},
+      {} as Record<string, number>,
     );
 
     const meanScores = Object.values(evaluatorMeans);
-    const variance = math.variance(meanScores) as number;
+    const variance = math.variance(meanScores as unknown as number[]) as unknown as number;
     const range = Math.max(...meanScores) - Math.min(...meanScores);
 
     // Check for outlier evaluators
-    const mean = math.mean(meanScores) as number;
-    const std = math.std(meanScores) as number;
+    const mean = math.mean(meanScores);
+    const std = math.std(meanScores as unknown as number[]) as unknown as number;
     const outliers = Object.entries(evaluatorMeans).filter(
       ([_, evalMean]) => Math.abs(evalMean - mean) > 2 * std,
     );
@@ -245,16 +258,21 @@ export class BiasDetectionService {
         evaluatorMeans,
         variance,
         range,
-        outliers: outliers.map(([id, mean]) => ({ id, mean, deviation: mean - mean })),
+        outliers: outliers.map(([id, evalMean]) => ({
+          id,
+          mean: evalMean,
+          deviation: evalMean - mean,
+        })),
       },
     };
   }
 
-  private async detectTemporalBias(samples: any[]): Promise<BiasMetric> {
+  private detectTemporalBias(samples: any[]): BiasMetric {
     const timedSamples = samples
       .filter((s) => s.humanScores.length > 0)
       .map((s) => ({
         timestamp: new Date(s.createdAt).getTime(),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         score: math.mean(s.humanScores.map((hs: any) => hs.scores.overall)) as number,
       }))
       .sort((a, b) => a.timestamp - b.timestamp);
@@ -279,7 +297,7 @@ export class BiasDetectionService {
 
     // Check for temporal drift
     const trend = this.calculateTrend(windows);
-    const variance = math.variance(windows) as number;
+    const variance = math.variance(windows as unknown as number[]) as unknown as number;
 
     const biasScore = Math.min(1, Math.abs(trend) + variance / 2);
 
@@ -362,13 +380,15 @@ export class BiasDetectionService {
   }
 
   private calculateBinVariance(bins: any[]): number {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     const means = bins.filter((b) => b.count > 0).map((b) => b.mean);
-    return means.length > 1 ? (math.variance(means) as number) : 0;
+    return means.length > 1 ? (math.variance(means) as unknown as number) : 0;
   }
 
   private calculateGroupMean(group: any[]): number {
     if (group.length === 0) return 0;
     const scores = group.map(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       (s) => math.mean(s.humanScores.map((hs: any) => hs.scores.overall)) as number,
     );
     return math.mean(scores);
@@ -467,6 +487,7 @@ export class BiasDetectionService {
       },
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return messages[type]?.[severity] || `${severity} ${type} bias detected`;
   }
 

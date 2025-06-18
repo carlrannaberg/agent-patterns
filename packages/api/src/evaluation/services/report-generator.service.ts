@@ -44,9 +44,12 @@ interface ReportData {
   }>;
   failures?: Array<{
     pattern: string;
+    category: string;
     count: number;
     impact: number;
     status: string;
+    rootCause: string;
+    suggestedFixes: string[];
   }>;
   recommendations?: string[];
 }
@@ -573,7 +576,7 @@ export class ReportGeneratorService {
       comparison: 'Pattern Comparison Report',
       trend: 'Trend Analysis Report',
       failure: 'Failure Analysis Report',
-    }[reportType];
+    }[reportType] || 'Evaluation Report';
 
     return patternType ? `${baseTitle} - ${patternType}` : baseTitle;
   }

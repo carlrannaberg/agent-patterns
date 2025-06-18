@@ -15,7 +15,7 @@ describe('CalibrationService', () => {
   const mockGoldSamples: GoldSample[] = [
     {
       id: '1',
-      pattern: AgentPattern.SEQUENTIAL_PROCESSING_PROCESSING,
+      pattern: AgentPattern.SEQUENTIAL_PROCESSING,
       version: '1.0.0',
       createdAt: new Date(),
       input: { content: 'Test input 1' },
@@ -53,7 +53,7 @@ describe('CalibrationService', () => {
           },
         },
         {
-          provide: LLMJudgeService,
+          provide: LlmJudgeService,
           useValue: {
             evaluate: jest.fn(),
           },
@@ -69,7 +69,7 @@ describe('CalibrationService', () => {
 
     service = module.get<CalibrationService>(CalibrationService);
     goldDatasetService = module.get(GoldDatasetService);
-    llmJudgeService = module.get(LLMJudgeService);
+    llmJudgeService = module.get(LlmJudgeService);
     configService = module.get(EvaluationConfigService);
   });
 
@@ -81,12 +81,17 @@ describe('CalibrationService', () => {
 
       // Mock LLM evaluations
       llmJudgeService.evaluate.mockImplementation(async () => ({
-        overall: 7.5,
-        accuracy: 7,
-        coherence: 8,
-        completeness: 7.5,
-        relevance: 8,
-        efficiency: 7,
+        metricScores: [
+          { metric: 'accuracy', score: 7, normalizedScore: 0.7 },
+          { metric: 'coherence', score: 8, normalizedScore: 0.8 },
+          { metric: 'completeness', score: 7.5, normalizedScore: 0.75 },
+          { metric: 'relevance', score: 8, normalizedScore: 0.8 },
+          { metric: 'efficiency', score: 7, normalizedScore: 0.7 },
+        ],
+        details: {
+          actualOutput: {},
+          chainOfThought: [],
+        },
       }));
 
       const result = await service.calibratePattern(AgentPattern.SEQUENTIAL_PROCESSING, {
@@ -123,12 +128,17 @@ describe('CalibrationService', () => {
         evaluationCount++;
         // Return scores that will quickly converge
         return {
-          overall: 7.5 + evaluationCount * 0.01,
-          accuracy: 7,
-          coherence: 8,
-          completeness: 7.5,
-          relevance: 8,
-          efficiency: 7,
+          metricScores: [
+            { metric: 'accuracy', score: 7, normalizedScore: 0.7 },
+            { metric: 'coherence', score: 8, normalizedScore: 0.8 },
+            { metric: 'completeness', score: 7.5, normalizedScore: 0.75 },
+            { metric: 'relevance', score: 8, normalizedScore: 0.8 },
+            { metric: 'efficiency', score: 7, normalizedScore: 0.7 },
+          ],
+          details: {
+            actualOutput: {},
+            chainOfThought: [],
+          },
         };
       });
 
@@ -145,7 +155,7 @@ describe('CalibrationService', () => {
     it('should apply calibrated weights to evaluation', async () => {
       const mockCalibration = {
         timestamp: new Date(),
-        pattern: AgentPattern.SEQUENTIAL_PROCESSING_PROCESSING,
+        pattern: AgentPattern.SEQUENTIAL_PROCESSING,
         weights: {
           accuracy: 0.4,
           coherence: 0.3,
@@ -162,11 +172,16 @@ describe('CalibrationService', () => {
       jest.spyOn(service as any, 'getCalibration').mockResolvedValue(mockCalibration);
 
       llmJudgeService.evaluate.mockResolvedValue({
-        overall: 7,
-        accuracy: 8,
-        coherence: 7,
-        completeness: 6,
-        relevance: 9,
+        metricScores: [
+          { metric: 'accuracy', score: 8, normalizedScore: 0.8 },
+          { metric: 'coherence', score: 7, normalizedScore: 0.7 },
+          { metric: 'completeness', score: 6, normalizedScore: 0.6 },
+          { metric: 'relevance', score: 9, normalizedScore: 0.9 },
+        ],
+        details: {
+          actualOutput: {},
+          chainOfThought: [],
+        },
       });
 
       const score = await service.evaluateWithCalibration(
@@ -183,7 +198,7 @@ describe('CalibrationService', () => {
     it('should apply length normalization', async () => {
       jest.spyOn(service as any, 'getCalibration').mockResolvedValue({
         timestamp: new Date(),
-        pattern: AgentPattern.SEQUENTIAL_PROCESSING_PROCESSING,
+        pattern: AgentPattern.SEQUENTIAL_PROCESSING,
         weights: { accuracy: 1 },
         spearmanCorrelation: 0.8,
         krippendorffAlpha: 0.75,
@@ -192,8 +207,13 @@ describe('CalibrationService', () => {
       });
 
       llmJudgeService.evaluate.mockResolvedValue({
-        overall: 8,
-        accuracy: 8,
+        metricScores: [
+          { metric: 'accuracy', score: 8, normalizedScore: 0.8 },
+        ],
+        details: {
+          actualOutput: {},
+          chainOfThought: [],
+        },
       });
 
       const shortOutput = 'Short';
@@ -322,7 +342,7 @@ function generateTestSamples(count: number): GoldSample[] {
 
     samples.push({
       id: `sample-${i}`,
-      pattern: AgentPattern.SEQUENTIAL_PROCESSING_PROCESSING,
+      pattern: AgentPattern.SEQUENTIAL_PROCESSING,
       version: '1.0.0',
       createdAt: new Date(),
       input: { content: `Test input ${i}` },

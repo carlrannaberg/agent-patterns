@@ -101,12 +101,12 @@ export class TestRunnerService implements TestRunner {
     let filtered = [...testCases];
 
     if (options.patterns && options.patterns.length > 0) {
-      filtered = filtered.filter((tc) => options.patterns.includes(tc.pattern));
+      filtered = filtered.filter((tc) => options.patterns?.includes(tc.pattern) ?? false);
     }
 
     if (options.tags && options.tags.length > 0) {
       filtered = filtered.filter((tc) =>
-        tc.metadata?.tags?.some((tag: string) => options.tags.includes(tag)),
+        tc.metadata?.tags?.some((tag: string) => options.tags?.includes(tag) ?? false) ?? false,
       );
     }
 
@@ -171,7 +171,7 @@ export class TestRunnerService implements TestRunner {
           testCaseId: testCase.id,
           pattern: testCase.pattern,
           status: evaluationResult.summary?.averageScore >= 0.7 ? TestResultStatus.PASSED : TestResultStatus.FAILED,
-          evaluationResult,
+          evaluationResult: evaluationResult.results?.[0],
           startedAt,
           completedAt: new Date(),
           duration: new Date().getTime() - startedAt.getTime(),

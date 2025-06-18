@@ -16,6 +16,7 @@ import {
   StageType,
   ConditionType,
   WorkflowSummary,
+  ValidationOperator,
 } from '../interfaces/workflow.interface';
 import { TestRunnerService } from './test-runner.service';
 import { BatchProcessorService } from '../processors/batch-processor.service';
@@ -349,6 +350,7 @@ export class WorkflowOrchestratorService {
       const result = await this.apiTesting.testEndpoint(
         {
           pattern,
+          endpoint: `/api/patterns/${pattern}`,
           method: 'POST',
           body: stage.config.customData,
         },
@@ -698,7 +700,7 @@ export class WorkflowOrchestratorService {
             validationRules: [
               {
                 field: '$batchResults.summary.successRate',
-                operator: 'greater-than',
+                operator: ValidationOperator.GREATER_THAN,
                 value: 0.8,
                 errorMessage: 'Success rate below 80%',
               },
@@ -712,6 +714,7 @@ export class WorkflowOrchestratorService {
           type: StageType.NOTIFICATION,
           config: {
             notificationConfig: {
+              enabled: true,
               channels: ['email', 'slack'],
             },
           },

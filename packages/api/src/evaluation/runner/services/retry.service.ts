@@ -68,7 +68,7 @@ export class RetryService {
       } catch (error) {
         lastError = error;
 
-        if (!retryConfig.retryCondition(error) || attempt === retryConfig.maxAttempts) {
+        if (!retryConfig.retryCondition?.(error) || attempt === retryConfig.maxAttempts) {
           break;
         }
 
