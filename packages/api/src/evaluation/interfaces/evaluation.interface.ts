@@ -35,6 +35,11 @@ export interface TestCase {
     tags?: string[];
     createdAt?: Date;
     updatedAt?: Date;
+    expectedTaskCount?: number;
+    expectedIssues?: string[];
+    expectedDepartment?: string;
+    expectedAnswer?: number | string;
+    [key: string]: any;
   };
 }
 

@@ -82,19 +82,19 @@ export class OrchestratorWorkerEvaluator extends PatternEvaluatorBase {
     const scores: MetricScore[] = [];
 
     // Task Decomposition
-    if (config.metrics.includes('task_decomposition')) {
+    if (config.metrics.some(m => m.name === 'task_decomposition')) {
       const decompositionScore = this.evaluateTaskDecomposition(testCase, response);
       scores.push(decompositionScore);
     }
 
     // Worker Coordination
-    if (config.metrics.includes('worker_coordination')) {
+    if (config.metrics.some(m => m.name === 'worker_coordination')) {
       const coordinationScore = this.evaluateWorkerCoordination(response);
       scores.push(coordinationScore);
     }
 
     // Implementation Correctness
-    if (config.metrics.includes('implementation_correctness')) {
+    if (config.metrics.some(m => m.name === 'implementation_correctness')) {
       const implementationScore = this.evaluateImplementationCorrectness(response);
       scores.push(implementationScore);
     }
@@ -108,16 +108,21 @@ export class OrchestratorWorkerEvaluator extends PatternEvaluatorBase {
     scores.push(executionScore);
 
     const overallScore = this.calculateWeightedScore(scores);
-    const passed = overallScore >= (config.passingThreshold || 0.75);
+    const passed = overallScore >= 0.75;
 
     return {
       testCaseId: testCase.id,
       pattern: this.pattern,
-      scores,
+      judgeModel: config.judgeModel,
+      metricScores: scores,
       overallScore,
-      passed,
-      feedback: this.generateFeedback(scores, response),
-      timestamp: new Date().toISOString(),
+      pass: passed,
+      executionTimeMs: 0,
+      timestamp: new Date(),
+      details: {
+        actualOutput: response,
+        chainOfThought: [this.generateFeedback(scores, response)],
+      },
     };
   }
 
@@ -248,8 +253,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'task_decomposition',
       score: this.normalizeScore(score),
-      rationale: `Task decomposition quality based on granularity, coverage, and logical structure.`,
-      weight: 1.5,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Task decomposition quality based on granularity, coverage, and logical structure.`,
     };
   }
 
@@ -289,8 +294,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'worker_coordination',
       score: this.normalizeScore(score),
-      rationale: `Worker coordination evaluated on assignment, dependencies, and execution management.`,
-      weight: 1.3,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Worker coordination evaluated on assignment, dependencies, and execution management.`,
     };
   }
 
@@ -331,8 +336,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'implementation_correctness',
       score: this.normalizeScore(score),
-      rationale: `Implementation correctness based on success rate, tests, and quality indicators.`,
-      weight: 1.5,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Implementation correctness based on success rate, tests, and quality indicators.`,
     };
   }
 
@@ -369,8 +374,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'planning_quality',
       score: this.normalizeScore(score),
-      rationale: `Planning quality assessed through overview, timeline, risks, and estimates.`,
-      weight: 1.0,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Planning quality assessed through overview, timeline, risks, and estimates.`,
     };
   }
 
@@ -404,8 +409,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'execution_effectiveness',
       score: this.normalizeScore(score),
-      rationale: `Execution effectiveness based on completion rate and tracking quality.`,
-      weight: 1.1,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Execution effectiveness based on completion rate and tracking quality.`,
     };
   }
 

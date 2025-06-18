@@ -33,7 +33,10 @@ export class HumanScoringController {
     @Body()
     scoreData: {
       evaluatorId: string;
-      scores: Record<string, number>;
+      scores: {
+        overall: number;
+        [dimension: string]: number;
+      };
       comments?: string;
       timeSpent: number;
     },

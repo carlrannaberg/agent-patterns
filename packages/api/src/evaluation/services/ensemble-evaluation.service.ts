@@ -231,44 +231,44 @@ export class EnsembleEvaluationService {
     // Pattern-specific default configurations
     const configs: Record<AgentPattern, EnsembleConfig> = {
       [AgentPattern.SEQUENTIAL_PROCESSING]: {
-        models: [JudgeModel.GEMINI_PRO, JudgeModel.GEMINI_FLASH],
+        models: [JudgeModel.GEMINI_2_5_PRO, JudgeModel.GEMINI_2_5_FLASH],
         strategy: 'weighted',
         weights: {
-          [JudgeModel.GEMINI_PRO]: 0.7,
-          [JudgeModel.GEMINI_FLASH]: 0.3,
+          [JudgeModel.GEMINI_2_5_PRO]: 0.7,
+          [JudgeModel.GEMINI_2_5_FLASH]: 0.3,
         },
         disagreementThreshold: 2.0,
       },
       [AgentPattern.ROUTING]: {
-        models: [JudgeModel.GEMINI_PRO, JudgeModel.GEMINI_FLASH],
+        models: [JudgeModel.GEMINI_2_5_PRO, JudgeModel.GEMINI_2_5_FLASH],
         strategy: 'consensus',
         disagreementThreshold: 1.5,
       },
       [AgentPattern.PARALLEL_PROCESSING]: {
-        models: [JudgeModel.GEMINI_PRO, JudgeModel.GEMINI_FLASH],
+        models: [JudgeModel.GEMINI_2_5_PRO, JudgeModel.GEMINI_2_5_FLASH],
         strategy: 'average',
         disagreementThreshold: 2.0,
       },
       [AgentPattern.ORCHESTRATOR_WORKER]: {
-        models: [JudgeModel.GEMINI_PRO, JudgeModel.GEMINI_FLASH],
+        models: [JudgeModel.GEMINI_2_5_PRO, JudgeModel.GEMINI_2_5_FLASH],
         strategy: 'weighted',
         weights: {
-          [JudgeModel.GEMINI_PRO]: 0.8,
-          [JudgeModel.GEMINI_FLASH]: 0.2,
+          [JudgeModel.GEMINI_2_5_PRO]: 0.8,
+          [JudgeModel.GEMINI_2_5_FLASH]: 0.2,
         },
         disagreementThreshold: 2.5,
       },
       [AgentPattern.EVALUATOR_OPTIMIZER]: {
-        models: [JudgeModel.GEMINI_PRO, JudgeModel.GEMINI_FLASH],
+        models: [JudgeModel.GEMINI_2_5_PRO, JudgeModel.GEMINI_2_5_FLASH],
         strategy: 'max',
         disagreementThreshold: 3.0,
       },
       [AgentPattern.MULTI_STEP_TOOL_USAGE]: {
-        models: [JudgeModel.GEMINI_PRO, JudgeModel.GEMINI_FLASH],
+        models: [JudgeModel.GEMINI_2_5_PRO, JudgeModel.GEMINI_2_5_FLASH],
         strategy: 'weighted',
         weights: {
-          [JudgeModel.GEMINI_PRO]: 0.6,
-          [JudgeModel.GEMINI_FLASH]: 0.4,
+          [JudgeModel.GEMINI_2_5_PRO]: 0.6,
+          [JudgeModel.GEMINI_2_5_FLASH]: 0.4,
         },
         disagreementThreshold: 2.0,
       },

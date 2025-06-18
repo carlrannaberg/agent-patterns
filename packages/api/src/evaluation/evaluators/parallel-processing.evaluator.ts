@@ -68,19 +68,19 @@ export class ParallelProcessingEvaluator extends PatternEvaluatorBase {
     const scores: MetricScore[] = [];
 
     // Analysis Completeness
-    if (config.metrics.includes('analysis_completeness')) {
+    if (config.metrics.some(m => m.name === 'analysis_completeness')) {
       const completenessScore = this.evaluateAnalysisCompleteness(testCase, response);
       scores.push(completenessScore);
     }
 
     // Consistency
-    if (config.metrics.includes('consistency')) {
+    if (config.metrics.some(m => m.name === 'consistency')) {
       const consistencyScore = this.evaluateConsistency(response);
       scores.push(consistencyScore);
     }
 
     // Aggregation Quality
-    if (config.metrics.includes('aggregation_quality')) {
+    if (config.metrics.some(m => m.name === 'aggregation_quality')) {
       const aggregationScore = this.evaluateAggregationQuality(response);
       scores.push(aggregationScore);
     }
@@ -94,16 +94,21 @@ export class ParallelProcessingEvaluator extends PatternEvaluatorBase {
     scores.push(actionabilityScore);
 
     const overallScore = this.calculateWeightedScore(scores);
-    const passed = overallScore >= (config.passingThreshold || 0.75);
+    const passed = overallScore >= 0.75;
 
     return {
       testCaseId: testCase.id,
       pattern: this.pattern,
-      scores,
+      judgeModel: config.judgeModel,
+      metricScores: scores,
       overallScore,
-      passed,
-      feedback: this.generateFeedback(scores, response),
-      timestamp: new Date().toISOString(),
+      pass: passed,
+      executionTimeMs: 0,
+      timestamp: new Date(),
+      details: {
+        actualOutput: response,
+        chainOfThought: [this.generateFeedback(scores, response)],
+      },
     };
   }
 
@@ -216,8 +221,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'analysis_completeness',
       score: this.normalizeScore(score),
-      rationale: `Completeness evaluated based on coverage of focus areas and depth of analysis.`,
-      weight: 1.5,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Completeness evaluated based on coverage of focus areas and depth of analysis.`,
     };
   }
 
@@ -259,8 +264,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'consistency',
       score: this.normalizeScore(score),
-      rationale: `Consistency measured across parallel analyses and aggregated results.`,
-      weight: 1.2,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Consistency measured across parallel analyses and aggregated results.`,
     };
   }
 
@@ -304,8 +309,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'aggregation_quality',
       score: this.normalizeScore(score),
-      rationale: `Aggregation quality based on synthesis, prioritization, and clarity.`,
-      weight: 1.0,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Aggregation quality based on synthesis, prioritization, and clarity.`,
     };
   }
 
@@ -353,8 +358,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'finding_accuracy',
       score: this.normalizeScore(score),
-      rationale: `Finding accuracy based on expected issues and reasonable distribution.`,
-      weight: 1.3,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Finding accuracy based on expected issues and reasonable distribution.`,
     };
   }
 
@@ -389,8 +394,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'actionability',
       score: this.normalizeScore(score),
-      rationale: `Actionability measured by quality of suggestions and specific recommendations.`,
-      weight: 0.9,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Actionability measured by quality of suggestions and specific recommendations.`,
     };
   }
 

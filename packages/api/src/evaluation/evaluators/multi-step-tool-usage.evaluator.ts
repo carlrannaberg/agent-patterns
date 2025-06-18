@@ -59,25 +59,25 @@ export class MultiStepToolUsageEvaluator extends PatternEvaluatorBase {
     const scores: MetricScore[] = [];
 
     // Answer Correctness
-    if (config.metrics.includes('answer_correctness')) {
+    if (config.metrics.some(m => m.name === 'answer_correctness')) {
       const correctnessScore = this.evaluateAnswerCorrectness(testCase, response);
       scores.push(correctnessScore);
     }
 
     // Tool Selection
-    if (config.metrics.includes('tool_selection')) {
+    if (config.metrics.some(m => m.name === 'tool_selection')) {
       const toolScore = this.evaluateToolSelection(testCase, response);
       scores.push(toolScore);
     }
 
     // Step Efficiency
-    if (config.metrics.includes('step_efficiency')) {
+    if (config.metrics.some(m => m.name === 'step_efficiency')) {
       const efficiencyScore = this.evaluateStepEfficiency(testCase, response);
       scores.push(efficiencyScore);
     }
 
     // Calculation Accuracy
-    if (config.metrics.includes('calculation_accuracy')) {
+    if (config.metrics.some(m => m.name === 'calculation_accuracy')) {
       const calculationScore = this.evaluateCalculationAccuracy(response);
       scores.push(calculationScore);
     }
@@ -87,16 +87,21 @@ export class MultiStepToolUsageEvaluator extends PatternEvaluatorBase {
     scores.push(explanationScore);
 
     const overallScore = this.calculateWeightedScore(scores);
-    const passed = overallScore >= (config.passingThreshold || 0.8);
+    const passed = overallScore >= 0.8;
 
     return {
       testCaseId: testCase.id,
       pattern: this.pattern,
-      scores,
+      judgeModel: config.judgeModel,
+      metricScores: scores,
       overallScore,
-      passed,
-      feedback: this.generateFeedback(scores, response),
-      timestamp: new Date().toISOString(),
+      pass: passed,
+      executionTimeMs: 0,
+      timestamp: new Date(),
+      details: {
+        actualOutput: response,
+        chainOfThought: [this.generateFeedback(scores, response)],
+      },
     };
   }
 
@@ -112,7 +117,7 @@ export class MultiStepToolUsageEvaluator extends PatternEvaluatorBase {
         return `Evaluate the correctness of this mathematical solution:
 Problem: ${input.problem}
 Final Answer: ${response.finalAnswer}
-Expected Answer: ${testCase.metadata?.expectedAnswer || 'Not provided'}
+Expected Answer: ${(testCase.metadata as any)?.expectedAnswer || 'Not provided'}
 
 Evaluation Criteria:
 1. Mathematical accuracy
@@ -179,7 +184,7 @@ Provide a score from 0-1 and detailed rationale.`;
     testCase: TestCase,
     response: MultiStepToolUsageResponse,
   ): MetricScore {
-    const expectedAnswer = testCase.metadata?.expectedAnswer;
+    const expectedAnswer = (testCase.metadata as any)?.expectedAnswer;
     let score = 0;
 
     if (expectedAnswer === undefined) {
@@ -187,8 +192,8 @@ Provide a score from 0-1 and detailed rationale.`;
       return {
         metric: 'answer_correctness',
         score: 0.5,
-        rationale: 'No expected answer provided for comparison.',
-        weight: 2.0,
+        normalizedScore: 0.5,
+        reasoning: 'No expected answer provided for comparison.',
       };
     }
 
@@ -209,8 +214,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'answer_correctness',
       score,
-      rationale: `Answer ${response.finalAnswer} compared to expected ${expectedAnswer}.`,
-      weight: 2.0,
+      normalizedScore: score,
+      reasoning: `Answer ${response.finalAnswer} compared to expected ${expectedAnswer}.`,
     };
   }
 
@@ -252,8 +257,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'tool_selection',
       score: this.normalizeScore(score),
-      rationale: `Tool selection evaluated for appropriateness and constraint adherence.`,
-      weight: 1.2,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Tool selection evaluated for appropriateness and constraint adherence.`,
     };
   }
 
@@ -290,8 +295,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'step_efficiency',
       score: this.normalizeScore(score),
-      rationale: `Solution used ${actualSteps} steps for a problem requiring approximately ${expectedSteps} steps.`,
-      weight: 1.0,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Solution used ${actualSteps} steps for a problem requiring approximately ${expectedSteps} steps.`,
     };
   }
 
@@ -312,8 +317,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'calculation_accuracy',
       score,
-      rationale: `${correctCalculations} out of ${totalCalculations} calculations appear valid.`,
-      weight: 1.5,
+      normalizedScore: score,
+      reasoning: `${correctCalculations} out of ${totalCalculations} calculations appear valid.`,
     };
   }
 
@@ -353,9 +358,9 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'explanation_quality',
       score: this.normalizeScore(score),
-      rationale:
+      normalizedScore: this.normalizeScore(score),
+      reasoning:
         'Explanation quality assessed based on completeness, clarity, and connection to solution steps.',
-      weight: 0.8,
     };
   }
 

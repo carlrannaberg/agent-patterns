@@ -6,7 +6,7 @@ import {
   EvaluationResult as IEvaluationResult,
   EvaluationBatch as IEvaluationBatch,
   TestCase,
-} from '../evaluation.interface';
+} from '../interfaces/evaluation.interface';
 
 @Injectable()
 export class ResultsStorageService {

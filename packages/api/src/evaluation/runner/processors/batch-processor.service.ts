@@ -265,8 +265,8 @@ export class BatchProcessorService {
     ).length;
 
     const scores = testRun.results
-      .filter((r) => r.evaluationResult?.score !== undefined)
-      .map((r) => r.evaluationResult!.score);
+      .filter((r) => r.evaluationResult?.overallScore !== undefined)
+      .map((r) => r.evaluationResult!.overallScore);
 
     if (scores.length > 0) {
       patternResult.averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
@@ -318,8 +318,8 @@ export class BatchProcessorService {
       results.summary.successRate = results.summary.passedTests / results.summary.totalTests;
 
       const scores = allResults
-        .filter((r) => r.evaluationResult?.score !== undefined)
-        .map((r) => r.evaluationResult!.score);
+        .filter((r) => r.evaluationResult?.overallScore !== undefined)
+        .map((r) => r.evaluationResult!.overallScore);
 
       if (scores.length > 0) {
         results.summary.averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;

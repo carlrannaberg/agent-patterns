@@ -55,25 +55,25 @@ export class SequentialProcessingEvaluator extends PatternEvaluatorBase {
     const scores: MetricScore[] = [];
 
     // Content Quality
-    if (config.metrics.includes('content_quality')) {
+    if (config.metrics.some(m => m.name === 'content_quality')) {
       const contentScore = await this.evaluateContentQuality(testCase, response);
       scores.push(contentScore);
     }
 
     // Call to Action
-    if (config.metrics.includes('call_to_action')) {
+    if (config.metrics.some(m => m.name === 'call_to_action')) {
       const ctaScore = this.evaluateCallToAction(response);
       scores.push(ctaScore);
     }
 
     // Emotional Appeal
-    if (config.metrics.includes('emotional_appeal')) {
+    if (config.metrics.some(m => m.name === 'emotional_appeal')) {
       const emotionalScore = this.evaluateEmotionalAppeal(testCase, response);
       scores.push(emotionalScore);
     }
 
     // Clarity
-    if (config.metrics.includes('clarity')) {
+    if (config.metrics.some(m => m.name === 'clarity')) {
       const clarityScore = this.evaluateClarity(response);
       scores.push(clarityScore);
     }
@@ -83,16 +83,21 @@ export class SequentialProcessingEvaluator extends PatternEvaluatorBase {
     scores.push(iterationScore);
 
     const overallScore = this.calculateWeightedScore(scores);
-    const passed = overallScore >= (config.passingThreshold || 0.7);
+    const passed = overallScore >= 0.7;
 
     return {
       testCaseId: testCase.id,
       pattern: this.pattern,
-      scores,
+      judgeModel: config.judgeModel,
+      metricScores: scores,
       overallScore,
-      passed,
-      feedback: this.generateFeedback(scores, response),
-      timestamp: new Date().toISOString(),
+      pass: passed,
+      executionTimeMs: 0,
+      timestamp: new Date(),
+      details: {
+        actualOutput: response,
+        chainOfThought: [this.generateFeedback(scores, response)],
+      },
     };
   }
 
@@ -212,8 +217,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'content_quality',
       score: this.normalizeScore(score),
-      rationale: `Content quality assessed based on relevance, audience targeting, brand alignment, and structure.`,
-      weight: 1.5,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Content quality assessed based on relevance, audience targeting, brand alignment, and structure.`,
     };
   }
 
@@ -253,8 +258,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'call_to_action',
       score: this.normalizeScore(score),
-      rationale: `CTA effectiveness evaluated based on presence, urgency, and action-oriented language.`,
-      weight: 1.2,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `CTA effectiveness evaluated based on presence, urgency, and action-oriented language.`,
     };
   }
 
@@ -289,8 +294,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'emotional_appeal',
       score: this.normalizeScore(score),
-      rationale: `Emotional appeal measured through use of emotional language, storytelling, and connection with audience.`,
-      weight: 1.0,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Emotional appeal measured through use of emotional language, storytelling, and connection with audience.`,
     };
   }
 
@@ -323,8 +328,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'clarity',
       score: this.normalizeScore(score),
-      rationale: `Clarity assessed through sentence structure, vocabulary simplicity, and formatting.`,
-      weight: 1.0,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Clarity assessed through sentence structure, vocabulary simplicity, and formatting.`,
     };
   }
 
@@ -336,8 +341,8 @@ Provide a score from 0-1 and detailed rationale.`;
       return {
         metric: 'iteration_effectiveness',
         score: 0,
-        rationale: 'No iterations found in the response.',
-        weight: 0.8,
+        normalizedScore: 0,
+        reasoning: 'No iterations found in the response.',
       };
     }
 
@@ -365,8 +370,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'iteration_effectiveness',
       score: this.normalizeScore(score),
-      rationale: `Iteration effectiveness measured by presence of improvements, feedback quality, and evolution of copy.`,
-      weight: 0.8,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Iteration effectiveness measured by presence of improvements, feedback quality, and evolution of copy.`,
     };
   }
 
@@ -409,7 +414,7 @@ Provide a score from 0-1 and detailed rationale.`;
     // Specific metric feedback
     scores.forEach((score) => {
       if (score.score < 0.6) {
-        feedback.push(`${score.metric}: ${score.rationale}`);
+        feedback.push(`${score.metric}: ${score.reasoning || 'No reasoning provided'}`);
       }
     });
 

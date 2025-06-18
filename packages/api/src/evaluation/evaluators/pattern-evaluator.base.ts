@@ -39,8 +39,8 @@ export abstract class PatternEvaluatorBase implements PatternEvaluator {
   validateMetrics(scores: MetricScore[]): boolean {
     return scores.every((score) => {
       const isValidScore = score.score >= 0 && score.score <= 1;
-      const hasRationale = score.rationale && score.rationale.length > 0;
-      return isValidScore && hasRationale;
+      const hasReasoning = score.reasoning && score.reasoning.length > 0;
+      return isValidScore && hasReasoning;
     });
   }
 
@@ -49,9 +49,9 @@ export abstract class PatternEvaluatorBase implements PatternEvaluator {
   }
 
   protected calculateWeightedScore(scores: MetricScore[]): number {
-    const totalWeight = scores.reduce((sum, score) => sum + (score.weight || 1), 0);
-    const weightedSum = scores.reduce((sum, score) => sum + score.score * (score.weight || 1), 0);
-    return totalWeight > 0 ? weightedSum / totalWeight : 0;
+    // Simple average since weights are removed from MetricScore interface
+    const totalScore = scores.reduce((sum, score) => sum + score.score, 0);
+    return scores.length > 0 ? totalScore / scores.length : 0;
   }
 
   protected generateBaseTestCase(
@@ -64,9 +64,8 @@ export abstract class PatternEvaluatorBase implements PatternEvaluator {
       id: `${pattern}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       pattern,
       input,
-      expectedBehavior,
       metadata: {
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
         complexity: metadata?.complexity || 'moderate',
         ...metadata,
       },

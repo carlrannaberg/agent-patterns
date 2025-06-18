@@ -54,19 +54,19 @@ export class RoutingEvaluator extends PatternEvaluatorBase {
     const scores: MetricScore[] = [];
 
     // Classification Accuracy
-    if (config.metrics.includes('classification_accuracy')) {
+    if (config.metrics.some(m => m.name === 'classification_accuracy')) {
       const classificationScore = this.evaluateClassificationAccuracy(testCase, response);
       scores.push(classificationScore);
     }
 
     // Routing Appropriateness
-    if (config.metrics.includes('routing_appropriateness')) {
+    if (config.metrics.some(m => m.name === 'routing_appropriateness')) {
       const routingScore = this.evaluateRoutingAppropriateness(testCase, response);
       scores.push(routingScore);
     }
 
     // Response Relevance
-    if (config.metrics.includes('response_relevance')) {
+    if (config.metrics.some(m => m.name === 'response_relevance')) {
       const relevanceScore = this.evaluateResponseRelevance(testCase, response);
       scores.push(relevanceScore);
     }
@@ -80,16 +80,21 @@ export class RoutingEvaluator extends PatternEvaluatorBase {
     scores.push(fallbackScore);
 
     const overallScore = this.calculateWeightedScore(scores);
-    const passed = overallScore >= (config.passingThreshold || 0.75);
+    const passed = overallScore >= 0.75;
 
     return {
       testCaseId: testCase.id,
       pattern: this.pattern,
-      scores,
+      judgeModel: config.judgeModel,
+      metricScores: scores,
       overallScore,
-      passed,
-      feedback: this.generateFeedback(scores, response, testCase),
-      timestamp: new Date().toISOString(),
+      pass: passed,
+      executionTimeMs: 0,
+      timestamp: new Date(),
+      details: {
+        actualOutput: response,
+        chainOfThought: [this.generateFeedback(scores, response, testCase)],
+      },
     };
   }
 
@@ -164,7 +169,7 @@ Provide a score from 0-1 and detailed rationale.`;
     // Check if routed to expected department
     if (expectedDepartment && response.routedTo === expectedDepartment) {
       score = 0.8;
-    } else if (this.isAcceptableAlternative(expectedDepartment, response.routedTo)) {
+    } else if (expectedDepartment && this.isAcceptableAlternative(expectedDepartment, response.routedTo)) {
       score = 0.6;
     } else {
       score = 0.2;
@@ -185,8 +190,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'classification_accuracy',
       score: this.normalizeScore(score),
-      rationale: `Classification accuracy based on expected department match and confidence alignment.`,
-      weight: 1.5,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Classification accuracy based on expected department match and confidence alignment.`,
     };
   }
 
@@ -235,8 +240,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'routing_appropriateness',
       score: this.normalizeScore(score),
-      rationale: `Routing appropriateness evaluated based on query content and department match.`,
-      weight: 1.3,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Routing appropriateness evaluated based on query content and department match.`,
     };
   }
 
@@ -269,8 +274,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'response_relevance',
       score: this.normalizeScore(score),
-      rationale: `Response relevance measured by query addressing and appropriate content.`,
-      weight: 1.2,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Response relevance measured by query addressing and appropriate content.`,
     };
   }
 
@@ -306,8 +311,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'confidence_alignment',
       score: this.normalizeScore(score),
-      rationale: `Confidence score appropriately reflects routing certainty.`,
-      weight: 0.8,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Confidence score appropriately reflects routing certainty.`,
     };
   }
 
@@ -338,8 +343,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'fallback_handling',
       score: this.normalizeScore(score),
-      rationale: `Fallback handling evaluated for ambiguous queries and edge cases.`,
-      weight: 0.7,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Fallback handling evaluated for ambiguous queries and edge cases.`,
     };
   }
 

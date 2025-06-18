@@ -1,6 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AgentPattern } from '../enums/agent-pattern.enum';
+import { JudgeModel } from '../enums/judge-model.enum';
 import { CalibrationResult, GoldSample } from '../interfaces/gold-dataset.interface';
+import { TestCase, EvaluationConfig } from '../interfaces/evaluation.interface';
 import { GoldDatasetService } from './gold-dataset.service';
 import { LlmJudgeService } from './llm-judge.service';
 import { EvaluationConfigService } from './evaluation-config.service';
@@ -150,14 +152,33 @@ export class CalibrationService {
     const scores: number[] = [];
 
     for (const sample of samples) {
-      const evaluation = await this.llmJudgeService.evaluate(
+      const testCase: TestCase = {
+        id: sample.id,
         pattern,
-        sample.input.content,
+        input: sample.input,
+        expectedOutput: sample.expectedOutput,
+        context: sample.input.context,
+      };
+
+      const config: EvaluationConfig = {
+        pattern,
+        judgeModel: JudgeModel.GEMINI_2_5_PRO,
+        metrics: [],
+      };
+
+      const evaluation = await this.llmJudgeService.evaluate(
+        testCase,
         sample.expectedOutput?.content || '',
-        sample.input.context,
+        config,
       );
 
-      const weightedScore = this.applyWeights(evaluation, weights);
+      // Convert metricScores to a simple score map
+      const scoreMap: Record<string, number> = {};
+      evaluation.metricScores.forEach(metricScore => {
+        scoreMap[metricScore.metric] = metricScore.normalizedScore;
+      });
+
+      const weightedScore = this.applyWeights(scoreMap, weights);
       scores.push(weightedScore);
     }
 
@@ -287,7 +308,7 @@ export class CalibrationService {
 
     // Calculate expected disagreement
     const allScores = scores.flat();
-    const expectedDisagreement = (math.var(allScores) as number) * 2;
+    const expectedDisagreement = (math.variance(allScores) as number) * 2;
 
     return 1 - observedDisagreement / expectedDisagreement;
   }
@@ -380,8 +401,8 @@ export class CalibrationService {
     return calibration;
   }
 
-  private async loadCalibrationFromDisk(pattern: AgentPattern): Promise<CalibrationResult | null> {
+  private async loadCalibrationFromDisk(pattern: AgentPattern): Promise<CalibrationResult | undefined> {
     // Implementation would load from persistent storage
-    return null;
+    return undefined;
   }
 }

@@ -60,25 +60,25 @@ export class EvaluatorOptimizerEvaluator extends PatternEvaluatorBase {
     const scores: MetricScore[] = [];
 
     // Translation Accuracy
-    if (config.metrics.includes('translation_accuracy')) {
+    if (config.metrics.some(m => m.name === 'translation_accuracy')) {
       const accuracyScore = this.evaluateTranslationAccuracy(testCase, response);
       scores.push(accuracyScore);
     }
 
     // Fluency and Naturalness
-    if (config.metrics.includes('fluency')) {
+    if (config.metrics.some(m => m.name === 'fluency')) {
       const fluencyScore = this.evaluateFluency(response);
       scores.push(fluencyScore);
     }
 
     // Iterative Improvement
-    if (config.metrics.includes('iterative_improvement')) {
+    if (config.metrics.some(m => m.name === 'iterative_improvement')) {
       const improvementScore = this.evaluateIterativeImprovement(response);
       scores.push(improvementScore);
     }
 
     // Cultural Appropriateness
-    if (config.metrics.includes('cultural_appropriateness')) {
+    if (config.metrics.some(m => m.name === 'cultural_appropriateness')) {
       const culturalScore = this.evaluateCulturalAppropriateness(testCase, response);
       scores.push(culturalScore);
     }
@@ -88,16 +88,17 @@ export class EvaluatorOptimizerEvaluator extends PatternEvaluatorBase {
     scores.push(contextScore);
 
     const overallScore = this.calculateWeightedScore(scores);
-    const passed = overallScore >= (config.passingThreshold || 0.75);
+    const passed = overallScore >= 0.75;
 
     return {
       testCaseId: testCase.id,
       pattern: this.pattern,
-      scores,
+      judgeModel: config.judgeModel,
+      metricScores: scores,
       overallScore,
-      passed,
-      feedback: this.generateFeedback(scores, response),
-      timestamp: new Date().toISOString(),
+      pass: passed,
+      executionTimeMs: 0,
+      timestamp: new Date(),
     };
   }
 
@@ -204,9 +205,9 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'translation_accuracy',
       score: this.normalizeScore(score),
-      rationale:
+      normalizedScore: this.normalizeScore(score),
+      reasoning:
         'Translation accuracy evaluated based on completeness, semantic preservation, and improvement through iterations.',
-      weight: 1.5,
     };
   }
 
@@ -239,9 +240,9 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'fluency',
       score: this.normalizeScore(score),
-      rationale:
+      normalizedScore: this.normalizeScore(score),
+      reasoning:
         'Fluency assessed through sentence structure, natural flow, and iterative improvements.',
-      weight: 1.2,
     };
   }
 
@@ -253,8 +254,8 @@ Provide a score from 0-1 and detailed rationale.`;
       return {
         metric: 'iterative_improvement',
         score: 0,
-        rationale: 'No iterative improvement process detected.',
-        weight: 1.0,
+        normalizedScore: 0,
+        reasoning: 'No iterative improvement process detected',
       };
     }
 
@@ -283,8 +284,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'iterative_improvement',
       score: this.normalizeScore(score),
-      rationale: `Iterative process effectiveness measured across ${response.totalIterations} iterations with ${meaningfulIterations} meaningful improvements.`,
-      weight: 1.0,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: `Iterative process effectiveness measured across ${response.totalIterations} iterations with ${meaningfulIterations} meaningful improvements.`,
     };
   }
 
@@ -324,9 +325,9 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'cultural_appropriateness',
       score: this.normalizeScore(score),
-      rationale:
+      normalizedScore: this.normalizeScore(score),
+      reasoning:
         'Cultural appropriateness evaluated based on context consideration and cultural adaptations.',
-      weight: 0.8,
     };
   }
 
@@ -357,7 +358,7 @@ Provide a score from 0-1 and detailed rationale.`;
     // Check if context influenced the translation
     if (input.context) {
       const contextRelevantOptimizations = response.optimizations.some((opt) =>
-        opt.changes.toLowerCase().includes(input.context.toLowerCase()),
+        opt.changes.toLowerCase().includes(input.context?.toLowerCase() || ''),
       );
       if (contextRelevantOptimizations) {
         score += 0.1;
@@ -367,8 +368,8 @@ Provide a score from 0-1 and detailed rationale.`;
     return {
       metric: 'context_preservation',
       score: this.normalizeScore(score),
-      rationale: 'Context and formatting preservation evaluated based on input requirements.',
-      weight: 0.7,
+      normalizedScore: this.normalizeScore(score),
+      reasoning: 'Context and formatting preservation evaluated based on input requirements.',
     };
   }
 
@@ -388,7 +389,7 @@ Provide a score from 0-1 and detailed rationale.`;
     // Specific metric feedback
     scores.forEach((score) => {
       if (score.score < 0.6) {
-        feedback.push(`${score.metric}: ${score.rationale}`);
+        feedback.push(`${score.metric}: ${score.reasoning || 'No reasoning provided'}`);
       }
     });
 

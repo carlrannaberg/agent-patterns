@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
 import { v4 as uuidv4 } from 'uuid';
+import { AgentPattern } from '../../enums/agent-pattern.enum';
 import {
   ScheduledEvaluation,
   ScheduleConfig,
