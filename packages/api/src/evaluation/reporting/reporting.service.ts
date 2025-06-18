@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThan } from 'typeorm';
 import { QualityBaseline, EvaluationResult, EvaluationBatch } from '../../database/entities';
 
-interface DashboardSummary {
+export interface DashboardSummary {
   period: string;
   totalEvaluations: number;
   averageScore: number;
@@ -33,7 +33,7 @@ interface DashboardSummary {
   };
 }
 
-interface OptimizationOpportunity {
+export interface OptimizationOpportunity {
   patternType: string;
   metric: string;
   currentScore: number;

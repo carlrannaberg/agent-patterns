@@ -29,9 +29,9 @@ export class MetricsService implements OnModuleInit {
   private readonly alerts: Map<string, MetricAlert> = new Map();
 
   private readonly maxMetricsRetention = 7 * 24 * 60 * 60 * 1000; // 7 days
-  private systemMetricsInterval: NodeJS.Timer;
-  private cleanupInterval: NodeJS.Timer;
-  private aggregationInterval: NodeJS.Timer;
+  private systemMetricsInterval: NodeJS.Timeout | undefined;
+  private cleanupInterval: NodeJS.Timeout | undefined;
+  private aggregationInterval: NodeJS.Timeout | undefined;
 
   private readonly alertThresholds = {
     errorRate: 0.1, // 10%

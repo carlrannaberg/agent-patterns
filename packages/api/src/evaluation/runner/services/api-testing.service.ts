@@ -172,7 +172,7 @@ export class ApiTestingService {
 
     try {
       const response = await firstValueFrom(
-        this.httpService.options(url, {
+        this.httpService.head(url, {
           timeout: 5000,
         }),
       );
@@ -216,7 +216,7 @@ export class ApiTestingService {
 
   private parseStreamData(data: string): any {
     const lines = data.split('\n').filter((line) => line.trim());
-    const objects = [];
+    const objects: any[] = [];
 
     for (const line of lines) {
       if (line.startsWith('data: ')) {

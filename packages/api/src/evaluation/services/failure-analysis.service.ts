@@ -4,7 +4,7 @@ import { Repository, MoreThan, In } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { FailurePattern, EvaluationResult } from '../../database/entities';
 
-interface FailureAnalysisResult {
+export interface FailureAnalysisResult {
   pattern: FailurePattern;
   similarFailures: EvaluationResult[];
   rootCauseHypotheses: Array<{
@@ -173,9 +173,9 @@ export class FailureAnalysisService {
 
   private async identifyCommonFactors(pattern: FailurePattern): Promise<any> {
     const factors = {
-      inputPatterns: [],
-      configPatterns: {},
-      environmentFactors: [],
+      inputPatterns: [] as string[],
+      configPatterns: {} as Record<string, any>,
+      environmentFactors: [] as string[],
     };
 
     if (pattern.exampleCases.length < 3) {
@@ -200,7 +200,7 @@ export class FailureAnalysisService {
   }
 
   private analyzeRootCause(pattern: FailurePattern, commonFactors: any): any {
-    const evidence = [];
+    const evidence: string[] = [];
     let identifiedCause = 'Unknown';
     let confidence = 0.3;
 
@@ -244,7 +244,7 @@ export class FailureAnalysisService {
   }
 
   private generateSuggestedFixes(cause: string, pattern: FailurePattern): string[] {
-    const fixes = [];
+    const fixes: string[] = [];
 
     switch (cause) {
       case 'Performance/timeout issue':
@@ -308,7 +308,11 @@ export class FailureAnalysisService {
   }
 
   private async generateRootCauseHypotheses(pattern: FailurePattern): Promise<any[]> {
-    const hypotheses = [];
+    const hypotheses: Array<{
+      cause: string;
+      confidence: number;
+      evidence: string[];
+    }> = [];
 
     if (pattern.rootCauseAnalysis) {
       hypotheses.push({
@@ -341,7 +345,11 @@ export class FailureAnalysisService {
   }
 
   private generateRemediations(pattern: FailurePattern, hypotheses: any[]): any[] {
-    const remediations = [];
+    const remediations: Array<{
+      action: string;
+      priority: 'high' | 'medium' | 'low';
+      estimatedEffort: 'low' | 'medium' | 'high';
+    }> = [];
 
     for (const hypothesis of hypotheses) {
       const fixes = this.generateSuggestedFixes(hypothesis.cause, pattern);
@@ -488,7 +496,7 @@ export class FailureAnalysisService {
   }
 
   private findCommonPatterns(inputs: any[]): string[] {
-    const patterns = [];
+    const patterns: string[] = [];
 
     if (inputs.length < 3) return patterns;
 
@@ -542,7 +550,7 @@ export class FailureAnalysisService {
   }
 
   private analyzeTemporalPatterns(times: Date[]): string[] {
-    const patterns = [];
+    const patterns: string[] = [];
 
     if (times.length < 5) return patterns;
 

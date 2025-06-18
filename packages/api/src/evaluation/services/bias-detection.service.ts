@@ -136,7 +136,7 @@ export class BiasDetectionService {
     // Calculate variance across positions
     const positionMeans = Object.values(evaluationsByPosition).map((scores) => math.mean(scores));
 
-    const variance = math.var(positionMeans) as number;
+    const variance = math.variance(positionMeans) as number;
     const maxDiff = Math.max(...positionMeans) - Math.min(...positionMeans);
 
     const biasScore = Math.min(1, (variance * maxDiff) / 10);
@@ -226,7 +226,7 @@ export class BiasDetectionService {
     );
 
     const meanScores = Object.values(evaluatorMeans);
-    const variance = math.var(meanScores) as number;
+    const variance = math.variance(meanScores) as number;
     const range = Math.max(...meanScores) - Math.min(...meanScores);
 
     // Check for outlier evaluators
@@ -268,7 +268,7 @@ export class BiasDetectionService {
 
     // Split into time windows
     const windowSize = Math.floor(timedSamples.length / 5);
-    const windows = [];
+    const windows: number[] = [];
 
     for (let i = 0; i < timedSamples.length; i += windowSize) {
       const window = timedSamples.slice(i, i + windowSize);
@@ -279,7 +279,7 @@ export class BiasDetectionService {
 
     // Check for temporal drift
     const trend = this.calculateTrend(windows);
-    const variance = math.var(windows) as number;
+    const variance = math.variance(windows) as number;
 
     const biasScore = Math.min(1, Math.abs(trend) + variance / 2);
 
@@ -363,7 +363,7 @@ export class BiasDetectionService {
 
   private calculateBinVariance(bins: any[]): number {
     const means = bins.filter((b) => b.count > 0).map((b) => b.mean);
-    return means.length > 1 ? (math.var(means) as number) : 0;
+    return means.length > 1 ? (math.variance(means) as number) : 0;
   }
 
   private calculateGroupMean(group: any[]): number {

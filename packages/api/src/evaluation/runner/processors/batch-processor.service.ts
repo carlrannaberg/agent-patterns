@@ -161,7 +161,7 @@ export class BatchProcessorService {
       job.progress.currentPattern = pattern;
 
       for (const suiteId of job.testSuiteIds) {
-        if (job.status === BatchJobStatus.CANCELLED) break;
+        if ((job.status as BatchJobStatus) === BatchJobStatus.CANCELLED) break;
 
         try {
           const testRun = await this.runTestSuite(pattern, suiteId, job);

@@ -254,7 +254,12 @@ export class ReportGeneratorService {
 
     const metricStats = await query.getRawMany();
 
-    const detailedMetrics = [];
+    const detailedMetrics: Array<{
+      name: string;
+      statistics: any;
+      trend: any;
+      baseline: any;
+    }> = [];
 
     for (const stat of metricStats) {
       const baseline = await this.qualityBaselineRepo.findOne({
@@ -293,7 +298,11 @@ export class ReportGeneratorService {
       .select('DISTINCT result.patternType', 'patternType')
       .getRawMany();
 
-    const comparisons = [];
+    const comparisons: Array<{
+      pattern: string;
+      summary: any;
+      topMetrics: any[];
+    }> = [];
 
     for (const { patternType } of patterns) {
       const summary = await this.getBaseReportData(startDate, endDate, patternType);
@@ -321,7 +330,12 @@ export class ReportGeneratorService {
     patternType?: string,
     metrics?: string[],
   ): Promise<any[]> {
-    const trendMetrics = [];
+    const trendMetrics: Array<{
+      name: string;
+      timeSeries: any;
+      statistics: any;
+      trend: any;
+    }> = [];
     const metricsToAnalyze = metrics || ['overall', 'accuracy', 'performance'];
 
     for (const metric of metricsToAnalyze) {
@@ -515,7 +529,7 @@ export class ReportGeneratorService {
 
   private generateMetricsCsv(data: ReportData): string {
     const headers = ['Metric', 'Average', 'Min', 'Max', 'StdDev', 'Count', 'Trend'];
-    const rows = [headers.join(',')];
+    const rows: string[] = [headers.join(',')];
 
     if (data.metrics) {
       for (const metric of data.metrics) {
@@ -537,7 +551,7 @@ export class ReportGeneratorService {
 
   private generateSummaryCsv(data: ReportData): string {
     const headers = ['Pattern', 'Evaluations', 'Average Score', 'Success Rate'];
-    const rows = [headers.join(',')];
+    const rows: string[] = [headers.join(',')];
 
     for (const pattern of data.summary.patternBreakdown) {
       const row = [
@@ -610,7 +624,7 @@ export class ReportGeneratorService {
   }
 
   private async generateRecommendations(data: ReportData): Promise<string[]> {
-    const recommendations = [];
+    const recommendations: string[] = [];
 
     // Performance-based recommendations
     if (data.summary.averageScore < 0.7) {

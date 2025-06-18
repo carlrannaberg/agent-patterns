@@ -170,7 +170,7 @@ export class TestRunnerService implements TestRunner {
         return {
           testCaseId: testCase.id,
           pattern: testCase.pattern,
-          status: evaluationResult.score >= 0.7 ? TestResultStatus.PASSED : TestResultStatus.FAILED,
+          status: evaluationResult.summary?.averageScore >= 0.7 ? TestResultStatus.PASSED : TestResultStatus.FAILED,
           evaluationResult,
           startedAt,
           completedAt: new Date(),

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { v4 as uuidv4 } from 'uuid';
+import { AgentPattern } from '../../enums/agent-pattern.enum';
 import {
   Workflow,
   WorkflowStage,
@@ -342,7 +343,7 @@ export class WorkflowOrchestratorService {
 
   private async runApiTestStage(stage: WorkflowStage, execution: WorkflowExecution): Promise<any> {
     const patterns = stage.config.patterns || [];
-    const results = [];
+    const results: any[] = [];
 
     for (const pattern of patterns) {
       const result = await this.apiTesting.testEndpoint(
@@ -369,7 +370,12 @@ export class WorkflowOrchestratorService {
     execution: WorkflowExecution,
   ): Promise<any> {
     const rules = stage.config.validationRules || [];
-    const results = [];
+    const results: Array<{
+      field: string;
+      passed: boolean;
+      value: any;
+      message: string;
+    }> = [];
 
     for (const rule of rules) {
       const value = this.getValueFromContext(rule.field, execution.context);

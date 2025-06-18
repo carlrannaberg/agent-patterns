@@ -485,7 +485,12 @@ export class AlertingService {
     channels: Array<{ type: string; config: Record<string, any> }>,
     payload: NotificationPayload,
   ): Promise<any[]> {
-    const results = [];
+    const results: Array<{
+      channel: string;
+      success: boolean;
+      sentAt: Date;
+      error?: string;
+    }> = [];
 
     for (const channel of channels) {
       try {

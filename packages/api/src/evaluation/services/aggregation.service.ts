@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { EvaluationResult, QualityBaseline, FailurePattern } from '../../database/entities';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
-interface AggregationResult {
+export interface AggregationResult {
   patternType: string;
   metric: string;
   period: 'hourly' | 'daily' | 'weekly' | 'monthly';
