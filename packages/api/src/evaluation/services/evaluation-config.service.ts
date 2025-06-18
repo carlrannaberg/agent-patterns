@@ -302,7 +302,9 @@ export class EvaluationConfigService {
         metric.scoreRange.length !== 2 ||
         metric.scoreRange[0] >= metric.scoreRange[1]
       ) {
-        throw new Error(`Invalid score range for metric ${metric.name}: ${metric.scoreRange.join(',')}`); 
+        throw new Error(
+          `Invalid score range for metric ${metric.name}: ${metric.scoreRange.join(',')}`,
+        );
       }
 
       if (metric.weight !== undefined && metric.weight <= 0) {
