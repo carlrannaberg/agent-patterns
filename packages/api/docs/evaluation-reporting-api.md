@@ -625,5 +625,36 @@ API endpoints are cached with appropriate TTL values:
 1. **Pagination**: Always use pagination for large result sets
 2. **Date Filtering**: Use date ranges to limit query scope
 3. **Caching**: Leverage HTTP caching headers
+
+## Testing
+
+The evaluation reporting system has comprehensive test coverage:
+
+### Unit Tests
+- **AggregationService** (`aggregation.service.spec.ts`): Tests metric aggregation, time series calculations, anomaly detection, and quality baseline updates
+- **ReportingService** (`reporting.service.spec.ts`): Tests dashboard summaries, quality baselines, pattern comparisons, and trend analysis
+- **ReportingController** (`reporting.controller.spec.ts`): Tests all API endpoints with proper request/response handling
+
+### End-to-End Tests
+- **Evaluation Reporting E2E** (`evaluation-reporting.e2e-spec.ts`): Tests complete API flows including:
+  - Result querying with pagination and filtering
+  - Metric aggregation and time series data
+  - Quality baseline management
+  - Alert configuration
+  - Report generation
+  - Anomaly detection
+  - Optimization opportunity identification
+
+### Running Tests
+```bash
+# Run unit tests
+npm run test --workspace=api
+
+# Run E2E tests
+npm run test:e2e --workspace=api
+
+# Run specific test file
+npm run test --workspace=api -- aggregation.service.spec.ts
+```
 4. **Batch Operations**: Use batch endpoints for bulk operations
 5. **Monitoring**: Set up alerts for critical metrics

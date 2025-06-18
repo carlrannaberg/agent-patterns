@@ -9,9 +9,8 @@ import {
   HttpCode,
   ValidationPipe,
   UseInterceptors,
-  CacheInterceptor,
-  CacheTTL,
 } from '@nestjs/common';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { ReportingService } from './reporting.service';
 import { ResultsStorageService } from '../services/results-storage.service';
 import { AggregationService } from '../services/aggregation.service';

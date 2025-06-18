@@ -119,7 +119,7 @@ export class ReportingService {
       .select('DISTINCT result.patternType', 'patternType')
       .getRawMany();
 
-    const comparisons = [];
+    const comparisons: any[] = [];
 
     for (const { patternType } of patterns) {
       const baseline = await this.qualityBaselineRepo.findOne({
@@ -140,7 +140,7 @@ export class ReportingService {
           trend: baseline.trendData?.direction || 'stable',
           percentileRanks: {
             p25: baseline.p25,
-            p50: baseline.p50,
+            p50: baseline.median,
             p75: baseline.p75,
             p90: baseline.p90,
           },
@@ -259,7 +259,7 @@ export class ReportingService {
       .groupBy('result.patternType')
       .getRawMany();
 
-    const performance = [];
+    const performance: any[] = [];
 
     for (const result of results) {
       const baseline = await this.qualityBaselineRepo.findOne({
@@ -293,7 +293,7 @@ export class ReportingService {
       .limit(5)
       .getRawMany();
 
-    const topMetrics = [];
+    const topMetrics: any[] = [];
 
     for (const metric of currentMetrics) {
       const previousPeriodStart = new Date(startDate);
@@ -351,7 +351,7 @@ export class ReportingService {
 
     const avgResponseTime =
       recentEvals.length > 0
-        ? recentEvals.reduce((sum, eval) => sum + eval.executionTimeMs, 0) / recentEvals.length
+        ? recentEvals.reduce((sum, ev) => sum + ev.executionTimeMs, 0) / recentEvals.length
         : 0;
 
     const failureRate =
@@ -386,7 +386,7 @@ export class ReportingService {
     metric: string,
     currentScore: number,
   ): string[] {
-    const recommendations = [];
+    const recommendations: string[] = [];
 
     if (metric === 'accuracy' && currentScore < 0.8) {
       recommendations.push('Review and improve prompt engineering');

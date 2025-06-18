@@ -80,7 +80,9 @@ export class AggregationService {
         }
 
         const agg = aggregations.get(key);
-        this.updateStatistics(agg.statistics, metric.score);
+        if (agg) {
+          this.updateStatistics(agg.statistics, metric.score);
+        }
       }
     }
 
@@ -156,7 +158,7 @@ export class AggregationService {
     for (const period of periods) {
       const startDate = period.days
         ? new Date(Date.now() - period.days * 24 * 60 * 60 * 1000)
-        : null;
+        : undefined;
 
       const metrics = await this.getUniqueMetrics(patternType, startDate);
 
