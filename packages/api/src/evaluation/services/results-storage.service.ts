@@ -69,11 +69,11 @@ export class ResultsStorageService {
     results: IEvaluationResult[],
   ): Promise<EvaluationBatch> {
     const batchEntity = this.evaluationBatchRepo.create({
-      patternType: batch.patternType,
+      patternType: batch.pattern,
       status: 'running',
       totalTests: results.length,
-      configuration: batch.configuration,
-      description: batch.description,
+      configuration: batch.config,
+      description: 'Evaluation batch',
       startedAt: new Date(),
     });
 
@@ -87,7 +87,7 @@ export class ResultsStorageService {
       try {
         await this.saveEvaluationResult(result, savedBatch.id);
         completedTests++;
-        if (!result.success) {
+        if (!result.pass) {
           failedTests++;
         }
         totalScore += result.overallScore;

@@ -41,7 +41,11 @@ export interface StageConfig {
   patterns?: AgentPattern[];
   testSuiteIds?: string[];
   validationRules?: ValidationRule[];
-  notificationConfig?: NotificationConfig;
+  notificationConfig?: {
+    enabled: boolean;
+    channels: string[];
+    thresholds?: Record<string, number>;
+  };
   parallelStages?: string[];
   approvalConfig?: ApprovalConfig;
   customData?: any;
