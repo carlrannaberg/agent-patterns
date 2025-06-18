@@ -10,10 +10,15 @@ interface Calculation {
   step?: number;
 }
 
+interface Step {
+  calculation: string;
+  reasoning: string;
+}
+
 interface MultiStepToolUsageResult {
   problem?: string;
   calculations?: Calculation[];
-  steps?: string[];
+  steps?: Step[]; // Changed from string[] to Step[]
   workingSteps?: string;
   finalAnswer?: string;
 }
@@ -26,12 +31,16 @@ export default function MultiStepToolUsageDisplay({ result }: MultiStepToolUsage
   const { problem, calculations, steps, workingSteps, finalAnswer } = result;
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       {/* Problem Statement */}
       {problem && (
         <Card>
           <CardContent>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{ display: "flex", alignItems: "center", gap: 1 }}
+            >
               <FunctionsIcon />
               Problem
             </Typography>
@@ -39,14 +48,14 @@ export default function MultiStepToolUsageDisplay({ result }: MultiStepToolUsage
               variant="body1"
               sx={{
                 p: 2,
-                backgroundColor: 'grey.50',
+                backgroundColor: "grey.50",
                 borderRadius: 1,
                 lineHeight: 1.6,
-                border: '1px solid',
-                borderColor: 'grey.200'
+                border: "1px solid",
+                borderColor: "grey.200",
               }}
             >
-              {problem}
+              {String(problem)}
             </Typography>
           </CardContent>
         </Card>
@@ -56,7 +65,11 @@ export default function MultiStepToolUsageDisplay({ result }: MultiStepToolUsage
       {workingSteps && (
         <Card>
           <CardContent>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{ display: "flex", alignItems: "center", gap: 1 }}
+            >
               <PlaylistAddCheckIcon />
               Solution Approach
             </Typography>
@@ -64,72 +77,103 @@ export default function MultiStepToolUsageDisplay({ result }: MultiStepToolUsage
               variant="body1"
               sx={{
                 p: 2,
-                backgroundColor: 'info.50',
+                backgroundColor: "info.50",
                 borderRadius: 1,
                 lineHeight: 1.6,
-                whiteSpace: 'pre-wrap',
-                border: '1px solid',
-                borderColor: 'info.200'
+                whiteSpace: "pre-wrap",
+                border: "1px solid",
+                borderColor: "info.200",
               }}
             >
-              {workingSteps}
+              {String(workingSteps)}
             </Typography>
           </CardContent>
         </Card>
       )}
 
       {/* Step-by-step breakdown */}
-      {steps && steps.length > 0 && (
+      {steps && Array.isArray(steps) && steps.length > 0 && (
         <Card>
           <CardContent>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{ display: "flex", alignItems: "center", gap: 1 }}
+            >
               <PlaylistAddCheckIcon />
               Step-by-Step Solution
             </Typography>
             <List>
-              {steps.map((step, index) => (
-                <ListItem key={index} disablePadding sx={{ mb: 1 }}>
-                  <Box sx={{ width: '100%' }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                      <Chip label={`Step ${index + 1}`} color="primary" size="small" />
+              {steps
+                .filter((step) => step && typeof step === "object")
+                .map((step, index) => (
+                  <ListItem key={index} disablePadding sx={{ mb: 2 }}>
+                    <Box sx={{ width: "100%" }}>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                        <Chip label={`Step ${index + 1}`} color="primary" size="small" />
+                      </Box>
+                      <Box
+                        sx={{
+                          p: 2,
+                          backgroundColor: "grey.50",
+                          borderRadius: 1,
+                          border: "1px solid",
+                          borderColor: "grey.200",
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          <strong>Calculation:</strong>
+                        </Typography>
+                        <Typography
+                          variant="body1"
+                          sx={{
+                            fontFamily: 'Monaco, Consolas, "Courier New", monospace',
+                            mb: 1,
+                          }}
+                        >
+                          {String(step.calculation || "N/A")}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" gutterBottom>
+                          <strong>Reasoning:</strong>
+                        </Typography>
+                        <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
+                          {String(step.reasoning || "N/A")}
+                        </Typography>
+                      </Box>
                     </Box>
-                    <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
-                      {step}
-                    </Typography>
-                  </Box>
-                </ListItem>
-              ))}
+                  </ListItem>
+                ))}
             </List>
           </CardContent>
         </Card>
       )}
 
       {/* Calculations */}
-      {calculations && calculations.length > 0 && (
+      {calculations && Array.isArray(calculations) && calculations.length > 0 && (
         <Card>
           <CardContent>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{ display: "flex", alignItems: "center", gap: 1 }}
+            >
               <CalculateIcon />
               Calculations ({calculations.length})
             </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               {calculations.map((calc, index) => (
                 <Box
                   key={index}
                   sx={{
                     p: 2,
-                    backgroundColor: 'warning.50',
+                    backgroundColor: "warning.50",
                     borderRadius: 1,
-                    border: '1px solid',
-                    borderColor: 'warning.200'
+                    border: "1px solid",
+                    borderColor: "warning.200",
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <Chip
-                      label={`Step ${calc.step || index + 1}`}
-                      color="warning"
-                      size="small"
-                    />
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+                    <Chip label={`Step ${calc.step || index + 1}`} color="warning" size="small" />
                   </Box>
 
                   {calc.expression && (
@@ -137,11 +181,11 @@ export default function MultiStepToolUsageDisplay({ result }: MultiStepToolUsage
                       variant="body1"
                       sx={{
                         fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-                        fontSize: '1.1rem',
-                        mb: 1
+                        fontSize: "1.1rem",
+                        mb: 1,
                       }}
                     >
-                      <strong>Expression:</strong> {calc.expression}
+                      <strong>Expression:</strong> {String(calc.expression)}
                     </Typography>
                   )}
 
@@ -150,12 +194,12 @@ export default function MultiStepToolUsageDisplay({ result }: MultiStepToolUsage
                       variant="body1"
                       sx={{
                         fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-                        fontSize: '1.1rem',
-                        color: 'success.main',
-                        fontWeight: 'bold'
+                        fontSize: "1.1rem",
+                        color: "success.main",
+                        fontWeight: "bold",
                       }}
                     >
-                      <strong>Result:</strong> {calc.result}
+                      <strong>Result:</strong> {String(calc.result)}
                     </Typography>
                   )}
                 </Box>
@@ -169,22 +213,26 @@ export default function MultiStepToolUsageDisplay({ result }: MultiStepToolUsage
       {finalAnswer && finalAnswer !== "No answer provided" && (
         <Card>
           <CardContent>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography
+              variant="h6"
+              gutterBottom
+              sx={{ display: "flex", alignItems: "center", gap: 1 }}
+            >
               <CheckCircleIcon color="success" />
               Final Answer
             </Typography>
             <Alert
               severity="success"
               sx={{
-                fontSize: '1.1rem',
-                fontWeight: 'bold',
-                '& .MuiAlert-message': {
-                  fontSize: 'inherit',
-                  fontWeight: 'inherit'
-                }
+                fontSize: "1.1rem",
+                fontWeight: "bold",
+                "& .MuiAlert-message": {
+                  fontSize: "inherit",
+                  fontWeight: "inherit",
+                },
               }}
             >
-              {finalAnswer}
+              {String(finalAnswer)}
             </Alert>
           </CardContent>
         </Card>
@@ -202,15 +250,20 @@ export default function MultiStepToolUsageDisplay({ result }: MultiStepToolUsage
       )}
 
       {/* No Final Answer State - only show if we have calculations but no final answer */}
-      {finalAnswer === "No answer provided" && calculations && calculations.length > 0 && !workingSteps && !steps?.length && (
-        <Card>
-          <CardContent>
-            <Alert severity="warning">
-              Calculations completed but no final answer provided. The problem may need additional steps.
-            </Alert>
-          </CardContent>
-        </Card>
-      )}
+      {finalAnswer === "No answer provided" &&
+        calculations &&
+        calculations.length > 0 &&
+        !workingSteps &&
+        !steps?.length && (
+          <Card>
+            <CardContent>
+              <Alert severity="warning">
+                Calculations completed but no final answer provided. The problem may need additional
+                steps.
+              </Alert>
+            </CardContent>
+          </Card>
+        )}
     </Box>
   );
 }
