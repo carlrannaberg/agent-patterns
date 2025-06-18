@@ -18,9 +18,10 @@ import { OrchestratorWorkerEvaluator } from './evaluators/orchestrator-worker.ev
 import { EvaluatorOptimizerEvaluator } from './evaluators/evaluator-optimizer.evaluator';
 import { MultiStepToolUsageEvaluator } from './evaluators/multi-step-tool-usage.evaluator';
 import { HumanScoringController } from './controllers/human-scoring.controller';
+import { RunnerModule } from './runner/runner.module';
 
 @Module({
-  imports: [ConfigModule],
+  imports: [ConfigModule, RunnerModule],
   controllers: [HumanScoringController],
   providers: [
     EvaluationService,
@@ -56,6 +57,7 @@ import { HumanScoringController } from './controllers/human-scoring.controller';
     OrchestratorWorkerEvaluator,
     EvaluatorOptimizerEvaluator,
     MultiStepToolUsageEvaluator,
+    RunnerModule,
   ],
 })
 export class EvaluationModule {}
