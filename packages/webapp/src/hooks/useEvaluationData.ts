@@ -37,13 +37,30 @@ export function useEvaluationData() {
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/evaluation/reporting/dashboard/summary`);
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch dashboard data: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      setDashboardData(data);
+      const apiResponse = await response.json();
+      // Handle the API response structure and property mapping
+      const data = apiResponse.data || apiResponse;
+
+      // Map API response to expected frontend interface
+      const mappedData: DashboardSummary = {
+        totalEvaluations: data.totalEvaluations || 0,
+        averageScore: data.averageScore || 0,
+        successRate: data.successRate || 0,
+        systemHealth: {
+          status: data.systemHealth?.status || 'healthy',
+          issues: data.systemHealth?.issues || []
+        },
+        patternPerformance: data.patternPerformance || [],
+        topMetrics: data.topPerformingMetrics || [], // Map from API property name
+        recentFailures: data.recentFailures || []
+      };
+
+      setDashboardData(mappedData);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error'));
@@ -94,7 +111,7 @@ export function useEvaluationResults(params?: {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams();
-      
+
       if (params?.patternType) queryParams.append('patternType', params.patternType);
       if (params?.startDate) queryParams.append('startDate', params.startDate.toISOString());
       if (params?.endDate) queryParams.append('endDate', params.endDate.toISOString());
@@ -103,16 +120,24 @@ export function useEvaluationResults(params?: {
       const response = await fetch(
         `${API_BASE_URL}/evaluation/reporting/results?${queryParams.toString()}`
       );
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch results: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      setResults(data);
+      const apiResponse = await response.json();
+      // Handle API response structure - extract array from response
+      const resultsData = apiResponse.data || apiResponse;
+
+      // Ensure we always have an array
+      const resultsArray = Array.isArray(resultsData) ? resultsData : [];
+
+      setResults(resultsArray);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error'));
+      // Set empty array on error to prevent slice errors
+      setResults([]);
     } finally {
       setLoading(false);
     }
@@ -151,13 +176,13 @@ export function useTimeSeriesData(params: {
         endDate: params.endDate.toISOString(),
         interval: params.interval || 'day',
       });
-      
+
       if (params.metric) queryParams.append('metric', params.metric);
 
       const response = await fetch(
         `${API_BASE_URL}/evaluation/reporting/metrics/time-series?${queryParams.toString()}`
       );
-      
+
       if (!response.ok) {
         throw new Error(`Failed to fetch time series: ${response.statusText}`);
       }

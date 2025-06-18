@@ -333,50 +333,56 @@ export function PatternComparison() {
           <Typography variant="h6" gutterBottom>
             Key Insights
           </Typography>
-          <Box display="flex" flexWrap="wrap" gap={2}>
-            <Box flex={{ xs: '0 0 100%', md: '0 0 calc(33.333% - 16px)' }}>
-              <Box>
-                <Typography variant="subtitle2" color="textSecondary">
-                  Best Overall Performance
-                </Typography>
-                <Typography variant="h6">
-                  {filteredData.reduce((best, current) => {
-                    const currentScore = 
-                      (current.accuracy + current.relevance + current.completeness + 
-                       current.efficiency + current.consistency + current.scalability) / 6;
-                    const bestScore = 
-                      (best.accuracy + best.relevance + best.completeness + 
-                       best.efficiency + best.consistency + best.scalability) / 6;
-                    return currentScore > bestScore ? current : best;
-                  }).pattern}
-                </Typography>
+          {filteredData.length > 0 ? (
+            <Box display="flex" flexWrap="wrap" gap={2}>
+              <Box flex={{ xs: '0 0 100%', md: '0 0 calc(33.333% - 16px)' }}>
+                <Box>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Best Overall Performance
+                  </Typography>
+                  <Typography variant="h6">
+                    {filteredData.reduce((best, current) => {
+                      const currentScore =
+                        (current.accuracy + current.relevance + current.completeness +
+                         current.efficiency + current.consistency + current.scalability) / 6;
+                      const bestScore =
+                        (best.accuracy + best.relevance + best.completeness +
+                         best.efficiency + best.consistency + best.scalability) / 6;
+                      return currentScore > bestScore ? current : best;
+                    }).pattern}
+                  </Typography>
+                </Box>
+              </Box>
+              <Box flex={{ xs: '0 0 100%', md: '0 0 calc(33.333% - 16px)' }}>
+                <Box>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Most Efficient Pattern
+                  </Typography>
+                  <Typography variant="h6">
+                    {filteredData.reduce((best, current) =>
+                      current.executionTime < best.executionTime ? current : best
+                    ).pattern}
+                  </Typography>
+                </Box>
+              </Box>
+              <Box flex={{ xs: '0 0 100%', md: '0 0 calc(33.333% - 16px)' }}>
+                <Box>
+                  <Typography variant="subtitle2" color="textSecondary">
+                    Highest Success Rate
+                  </Typography>
+                  <Typography variant="h6">
+                    {filteredData.reduce((best, current) =>
+                      current.successRate > best.successRate ? current : best
+                    ).pattern}
+                  </Typography>
+                </Box>
               </Box>
             </Box>
-            <Box flex={{ xs: '0 0 100%', md: '0 0 calc(33.333% - 16px)' }}>
-              <Box>
-                <Typography variant="subtitle2" color="textSecondary">
-                  Most Efficient Pattern
-                </Typography>
-                <Typography variant="h6">
-                  {filteredData.reduce((best, current) =>
-                    current.executionTime < best.executionTime ? current : best
-                  ).pattern}
-                </Typography>
-              </Box>
-            </Box>
-            <Box flex={{ xs: '0 0 100%', md: '0 0 calc(33.333% - 16px)' }}>
-              <Box>
-                <Typography variant="subtitle2" color="textSecondary">
-                  Highest Success Rate
-                </Typography>
-                <Typography variant="h6">
-                  {filteredData.reduce((best, current) =>
-                    current.successRate > best.successRate ? current : best
-                  ).pattern}
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
+          ) : (
+            <Typography color="textSecondary">
+              Select at least one pattern to view insights.
+            </Typography>
+          )}
         </Paper>
       </Box>
     </Box>

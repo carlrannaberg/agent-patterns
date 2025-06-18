@@ -365,7 +365,7 @@ export function RealTimeMonitor() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {results.slice(0, 5).map((result) => (
+                {(results || []).slice(0, 5).map((result) => (
                   <TableRow key={result.id}>
                     <TableCell>{result.patternType}</TableCell>
                     <TableCell>

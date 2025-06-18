@@ -79,15 +79,15 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
     }
   };
 
-  // Prepare data for pie chart
-  const pieData = data.patternPerformance.map((pattern) => ({
+  // Prepare data for pie chart with safety checks
+  const pieData = (data.patternPerformance || []).map((pattern) => ({
     name: pattern.pattern.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase()),
     value: pattern.evaluationCount,
   }));
 
-  // Prepare data for bar chart
-  const barData = data.patternPerformance.map((pattern) => ({
-    pattern: pattern.pattern.split('-').map(word => 
+  // Prepare data for bar chart with safety checks
+  const barData = (data.patternPerformance || []).map((pattern) => ({
+    pattern: pattern.pattern.split('-').map(word =>
       word.charAt(0).toUpperCase() + word.slice(1)
     ).join(' '),
     score: pattern.averageScore,
@@ -238,7 +238,7 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
             Top Performing Metrics
           </Typography>
           <List>
-            {data.topMetrics.slice(0, 5).map((metric, index) => (
+            {(data.topMetrics || []).slice(0, 5).map((metric, index) => (
               <ListItem key={index}>
                 <ListItemText
                   primary={metric.name}
@@ -266,7 +266,7 @@ export function DashboardOverview({ data }: DashboardOverviewProps) {
             Recent Failures
           </Typography>
           <List>
-            {data.recentFailures.slice(0, 5).map((failure) => (
+            {(data.recentFailures || []).slice(0, 5).map((failure) => (
               <ListItem key={failure.id}>
                 <ListItemText
                   primary={
