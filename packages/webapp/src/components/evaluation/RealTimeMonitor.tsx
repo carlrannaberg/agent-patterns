@@ -15,6 +15,7 @@ import {
   TableRow,
   IconButton,
   Tooltip,
+  CircularProgress,
 } from '@mui/material';
 import {
   PlayArrow,
@@ -36,6 +37,8 @@ import {
 } from 'recharts';
 import { useEvaluationResults } from '../../hooks/useEvaluationData';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 interface LiveEvaluation {
   id: string;
   patternType: string;
@@ -54,21 +57,18 @@ export function RealTimeMonitor() {
     throughput: number;
     latency: number;
   }>>([]);
+  const [isStartingEvaluation, setIsStartingEvaluation] = useState(false);
 
-  // Memoize the params to prevent infinite loops
   const queryParams = useMemo(() => ({ limit: 10 }), []);
   const { results, refetch } = useEvaluationResults(queryParams);
 
-  // Memoize refetch to prevent recreating the function
   const stableRefetch = useCallback(() => {
     refetch();
   }, [refetch]);
 
-  // Simulate real-time data updates
   useEffect(() => {
     let intervalCount = 0;
     const interval = setInterval(() => {
-      // Update live evaluations progress
       setLiveEvaluations((prev) =>
         prev.map((evaluation) => {
           if (evaluation.status === 'running' && evaluation.progress < 100) {
@@ -88,7 +88,6 @@ export function RealTimeMonitor() {
         })
       );
 
-      // Update real-time metrics
       const now = new Date();
       setRealtimeMetrics((prev) => {
         const newData = [...prev];
@@ -102,7 +101,6 @@ export function RealTimeMonitor() {
         return newData;
       });
 
-      // Only refetch results every 10 seconds (every 5th interval)
       intervalCount++;
       if (intervalCount % 5 === 0) {
         stableRefetch();
@@ -110,9 +108,11 @@ export function RealTimeMonitor() {
     }, 2000);
 
     return () => clearInterval(interval);
-  }, []); // Remove refetch from dependencies
+  }, []);
 
-  const handleStartEvaluation = () => {
+  const handleStartEvaluation = async () => {
+    setIsStartingEvaluation(true);
+
     const patterns = [
       'sequential-processing',
       'routing',
@@ -122,15 +122,64 @@ export function RealTimeMonitor() {
       'multi-step-tool-usage',
     ];
 
-    const newEvaluation: LiveEvaluation = {
+    const selectedPattern = patterns[Math.floor(Math.random() * patterns.length)];
+
+    const mockEvaluation: LiveEvaluation = {
       id: `eval-${Date.now()}`,
-      patternType: patterns[Math.floor(Math.random() * patterns.length)],
+      patternType: selectedPattern,
       status: 'running',
       progress: 0,
       startTime: new Date().toISOString(),
     };
 
-    setLiveEvaluations((prev) => [newEvaluation, ...prev].slice(0, 10));
+    setLiveEvaluations((prev) => [mockEvaluation, ...prev].slice(0, 10));
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/${selectedPattern}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          input: 'Test evaluation request',
+          config: {
+            timeout: 30000,
+            maxRetries: 3,
+          },
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Evaluation started successfully:', result);
+
+        setLiveEvaluations((prev) =>
+          prev.map((evaluation) =>
+            evaluation.id === mockEvaluation.id
+              ? {
+                  ...evaluation,
+                  id: result.id || evaluation.id,
+                  status: 'running',
+                }
+              : evaluation
+          )
+        );
+
+        setTimeout(() => refetch(), 1000);
+      } else {
+        console.error('Failed to start evaluation:', response.statusText);
+        setLiveEvaluations((prev) =>
+          prev.filter((evaluation) => evaluation.id !== mockEvaluation.id)
+        );
+      }
+    } catch (error) {
+      console.error('Error starting evaluation:', error);
+      setLiveEvaluations((prev) =>
+        prev.filter((evaluation) => evaluation.id !== mockEvaluation.id)
+      );
+    } finally {
+      setIsStartingEvaluation(false);
+    }
   };
 
   const getStatusIcon = (status: string) => {
@@ -168,8 +217,12 @@ export function RealTimeMonitor() {
             <Typography variant="h6">Live Evaluation Monitor</Typography>
             <Box>
               <Tooltip title="Start New Evaluation">
-                <IconButton color="primary" onClick={handleStartEvaluation}>
-                  <PlayArrow />
+                <IconButton
+                  color="primary"
+                  onClick={handleStartEvaluation}
+                  disabled={isStartingEvaluation}
+                >
+                  {isStartingEvaluation ? <CircularProgress size={24} /> : <PlayArrow />}
                 </IconButton>
               </Tooltip>
               <Tooltip title="Refresh Data">
@@ -296,66 +349,74 @@ export function RealTimeMonitor() {
         </Paper>
       </Box>
 
-      {/* Active Evaluations */}
+      {/* Active Evaluations with better empty state */}
       <Box width="100%">
         <Paper sx={{ p: 2 }}>
           <Typography variant="h6" gutterBottom>
             Active Evaluations
           </Typography>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Pattern</TableCell>
-                  <TableCell>Progress</TableCell>
-                  <TableCell>Start Time</TableCell>
-                  <TableCell>Execution Time</TableCell>
-                  <TableCell>Score</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {liveEvaluations.map((evaluation) => (
-                  <TableRow key={evaluation.id}>
-                    <TableCell>
-                      <Chip
-                        icon={getStatusIcon(evaluation.status) as React.ReactElement}
-                        label={evaluation.status}
-                        color={getStatusColor(evaluation.status) as 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>{evaluation.patternType}</TableCell>
-                    <TableCell>
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <LinearProgress
-                          variant="determinate"
-                          value={evaluation.progress}
-                          sx={{ flexGrow: 1, minWidth: 100 }}
-                        />
-                        <Typography variant="body2">
-                          {evaluation.progress.toFixed(0)}%
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      {new Date(evaluation.startTime).toLocaleTimeString()}
-                    </TableCell>
-                    <TableCell>
-                      {evaluation.executionTime
-                        ? `${(evaluation.executionTime / 1000).toFixed(2)}s`
-                        : '-'}
-                    </TableCell>
-                    <TableCell>
-                      {evaluation.score
-                        ? `${(evaluation.score * 100).toFixed(1)}%`
-                        : '-'}
-                    </TableCell>
+          {liveEvaluations.length === 0 ? (
+            <Box textAlign="center" py={4}>
+              <Typography color="textSecondary">
+                No active evaluations. Click "Start New Evaluation" to begin.
+              </Typography>
+            </Box>
+          ) : (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Pattern</TableCell>
+                    <TableCell>Progress</TableCell>
+                    <TableCell>Start Time</TableCell>
+                    <TableCell>Execution Time</TableCell>
+                    <TableCell>Score</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {liveEvaluations.map((evaluation) => (
+                    <TableRow key={evaluation.id}>
+                      <TableCell>
+                        <Chip
+                          icon={getStatusIcon(evaluation.status) as React.ReactElement}
+                          label={evaluation.status}
+                          color={getStatusColor(evaluation.status) as 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>{evaluation.patternType}</TableCell>
+                      <TableCell>
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <LinearProgress
+                            variant="determinate"
+                            value={evaluation.progress}
+                            sx={{ flexGrow: 1, minWidth: 100 }}
+                          />
+                          <Typography variant="body2">
+                            {evaluation.progress.toFixed(0)}%
+                          </Typography>
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(evaluation.startTime).toLocaleTimeString()}
+                      </TableCell>
+                      <TableCell>
+                        {evaluation.executionTime
+                          ? `${(evaluation.executionTime / 1000).toFixed(2)}s`
+                          : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {evaluation.score
+                          ? `${(evaluation.score * 100).toFixed(1)}%`
+                          : '-'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
         </Paper>
       </Box>
 
