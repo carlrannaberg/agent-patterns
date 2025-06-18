@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Paper,
   Typography,
@@ -54,10 +54,19 @@ export function RealTimeMonitor() {
     throughput: number;
     latency: number;
   }>>([]);
-  const { results, refetch } = useEvaluationResults({ limit: 10 });
+
+  // Memoize the params to prevent infinite loops
+  const queryParams = useMemo(() => ({ limit: 10 }), []);
+  const { results, refetch } = useEvaluationResults(queryParams);
+
+  // Memoize refetch to prevent recreating the function
+  const stableRefetch = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   // Simulate real-time data updates
   useEffect(() => {
+    let intervalCount = 0;
     const interval = setInterval(() => {
       // Update live evaluations progress
       setLiveEvaluations((prev) =>
@@ -93,12 +102,15 @@ export function RealTimeMonitor() {
         return newData;
       });
 
-      // Refresh evaluation results
-      refetch();
+      // Only refetch results every 10 seconds (every 5th interval)
+      intervalCount++;
+      if (intervalCount % 5 === 0) {
+        stableRefetch();
+      }
     }, 2000);
 
     return () => clearInterval(interval);
-  }, [refetch]);
+  }, []); // Remove refetch from dependencies
 
   const handleStartEvaluation = () => {
     const patterns = [

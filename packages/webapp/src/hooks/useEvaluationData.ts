@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -107,15 +107,23 @@ export function useEvaluationResults(params?: {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Memoize the params to prevent infinite loops
+  const stableParams = useMemo(() => ({
+    patternType: params?.patternType,
+    startDate: params?.startDate?.toISOString(),
+    endDate: params?.endDate?.toISOString(),
+    limit: params?.limit,
+  }), [params?.patternType, params?.startDate, params?.endDate, params?.limit]);
+
   const fetchResults = useCallback(async () => {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams();
 
-      if (params?.patternType) queryParams.append('patternType', params.patternType);
-      if (params?.startDate) queryParams.append('startDate', params.startDate.toISOString());
-      if (params?.endDate) queryParams.append('endDate', params.endDate.toISOString());
-      if (params?.limit) queryParams.append('limit', params.limit.toString());
+      if (stableParams.patternType) queryParams.append('patternType', stableParams.patternType);
+      if (stableParams.startDate) queryParams.append('startDate', stableParams.startDate);
+      if (stableParams.endDate) queryParams.append('endDate', stableParams.endDate);
+      if (stableParams.limit) queryParams.append('limit', stableParams.limit.toString());
 
       const response = await fetch(
         `${API_BASE_URL}/evaluation/reporting/results?${queryParams.toString()}`
@@ -126,22 +134,18 @@ export function useEvaluationResults(params?: {
       }
 
       const apiResponse = await response.json();
-      // Handle API response structure - extract array from response
       const resultsData = apiResponse.data || apiResponse;
-
-      // Ensure we always have an array
       const resultsArray = Array.isArray(resultsData) ? resultsData : [];
 
       setResults(resultsArray);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Unknown error'));
-      // Set empty array on error to prevent slice errors
       setResults([]);
     } finally {
       setLoading(false);
     }
-  }, [params]);
+  }, [stableParams.patternType, stableParams.startDate, stableParams.endDate, stableParams.limit]);
 
   useEffect(() => {
     fetchResults();
@@ -167,17 +171,26 @@ export function useTimeSeriesData(params: {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Memoize the params to prevent infinite loops
+  const stableParams = useMemo(() => ({
+    patternType: params.patternType,
+    startDate: params.startDate.toISOString(),
+    endDate: params.endDate.toISOString(),
+    interval: params.interval || 'day',
+    metric: params.metric,
+  }), [params.patternType, params.startDate, params.endDate, params.interval, params.metric]);
+
   const fetchTimeSeries = useCallback(async () => {
     try {
       setLoading(true);
       const queryParams = new URLSearchParams({
-        patternType: params.patternType,
-        startDate: params.startDate.toISOString(),
-        endDate: params.endDate.toISOString(),
-        interval: params.interval || 'day',
+        patternType: stableParams.patternType,
+        startDate: stableParams.startDate,
+        endDate: stableParams.endDate,
+        interval: stableParams.interval,
       });
 
-      if (params.metric) queryParams.append('metric', params.metric);
+      if (stableParams.metric) queryParams.append('metric', stableParams.metric);
 
       const response = await fetch(
         `${API_BASE_URL}/evaluation/reporting/metrics/time-series?${queryParams.toString()}`
@@ -195,7 +208,7 @@ export function useTimeSeriesData(params: {
     } finally {
       setLoading(false);
     }
-  }, [params]);
+  }, [stableParams.patternType, stableParams.startDate, stableParams.endDate, stableParams.interval, stableParams.metric]);
 
   useEffect(() => {
     fetchTimeSeries();
