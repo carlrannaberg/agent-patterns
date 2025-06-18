@@ -10,6 +10,7 @@ This repository implements a **structured agentic workflow system** that combine
 
 - **Backend**: Nest.js API with streaming responses using Vercel AI SDK
 - **Frontend**: React + Vite + Material UI with real-time streaming UI
+- **Database**: PostgreSQL for persistent storage, Redis for caching and sessions
 - **Monorepo**: npm workspaces managing `packages/api` and `packages/webapp`
 
 ## Workflow System
@@ -94,6 +95,8 @@ npm run claude
 
 #### Prerequisites
 - Node.js 18+
+- PostgreSQL 15+ (for data persistence)
+- Redis 6+ (for caching and session management)
 - Claude CLI (`npm install -g @anthropic-ai/claude-cli`)
 - Google AI API key
 
@@ -106,6 +109,24 @@ npm install
 
 # Set up environment
 echo "GOOGLE_GENERATIVE_AI_API_KEY=your-key" > packages/api/.env
+
+# Set up PostgreSQL
+# Option 1: Using Docker
+docker run --name agent-patterns-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=agent_patterns -p 5432:5432 -d postgres:15
+
+# Option 2: Local PostgreSQL installation
+# Create database: createdb agent_patterns
+
+# Set up Redis
+# Option 1: Using Docker
+docker run --name agent-patterns-redis -p 6379:6379 -d redis:6-alpine
+
+# Option 2: Local Redis installation
+# Start Redis: redis-server
+
+# Add database connection to .env
+echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/agent_patterns" >> packages/api/.env
+echo "REDIS_URL=redis://localhost:6379" >> packages/api/.env
 ```
 
 #### Development
