@@ -124,58 +124,145 @@ export function RealTimeMonitor() {
 
     const selectedPattern = patterns[Math.floor(Math.random() * patterns.length)];
 
+    // Generate appropriate input for each pattern type
+    const getPatternInput = (pattern: string): string => {
+      switch (pattern) {
+        case 'sequential-processing':
+          return 'A new AI-powered fitness tracking app that uses advanced algorithms to provide personalized workout recommendations';
+        case 'routing':
+          return 'Hi, I purchased a premium subscription last month but I am being charged twice. Can you help me get a refund for the duplicate charge?';
+        case 'parallel-processing':
+          return `function processUserData(users) {
+  const results = [];
+  for (let user of users) {
+    const validated = validateUser(user);
+    const processed = processData(validated);
+    results.push(processed);
+  }
+  return results;
+}`;
+        case 'orchestrator-worker':
+          return 'Create a comprehensive content marketing strategy for a sustainable fashion brand targeting millennials';
+        case 'evaluator-optimizer':
+          return 'Optimize this slow database query that processes user analytics data for the dashboard';
+        case 'multi-step-tool-usage':
+          return 'Analyze the sentiment of customer reviews, extract key themes, and generate a summary report with actionable insights';
+        default:
+          return 'Test input for evaluation';
+      }
+    };
+
     const mockEvaluation: LiveEvaluation = {
       id: `eval-${Date.now()}`,
       patternType: selectedPattern,
       status: 'running',
-      progress: 0,
+      progress: 10,
       startTime: new Date().toISOString(),
     };
 
     setLiveEvaluations((prev) => [mockEvaluation, ...prev].slice(0, 10));
 
     try {
-      const response = await fetch(`${API_BASE_URL}/${selectedPattern}`, {
+      console.log(`Starting evaluation pipeline for pattern: ${selectedPattern}`);
+
+      // Step 1: Execute the pattern with real input
+      const patternInput = getPatternInput(selectedPattern);
+      console.log(`Executing pattern with input:`, patternInput);
+
+      const patternResponse = await fetch(`${API_BASE_URL}/${selectedPattern}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          input: 'Test evaluation request',
+          input: patternInput,
+        }),
+      });
+
+      if (!patternResponse.ok) {
+        throw new Error(`Pattern execution failed: ${patternResponse.statusText}`);
+      }
+
+      // Update progress - pattern executed
+      setLiveEvaluations((prev) =>
+        prev.map((evaluation) =>
+          evaluation.id === mockEvaluation.id
+            ? { ...evaluation, progress: 50 }
+            : evaluation
+        )
+      );
+
+      // Step 2: Get the pattern output
+      const patternOutput = await patternResponse.json();
+      console.log('Pattern output received:', patternOutput);
+
+      // Update progress - output received
+      setLiveEvaluations((prev) =>
+        prev.map((evaluation) =>
+          evaluation.id === mockEvaluation.id
+            ? { ...evaluation, progress: 70 }
+            : evaluation
+        )
+      );
+
+      // Step 3: Trigger evaluation of the pattern output
+      console.log('Starting evaluation of pattern output...');
+      const evaluationResponse = await fetch(`${API_BASE_URL}/evaluation/evaluate-single`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          patternType: selectedPattern,
+          input: patternInput,
+          output: patternOutput,
           config: {
-            timeout: 30000,
-            maxRetries: 3,
+            evaluationMethod: 'standard',
+            judgeModel: 'gpt-4',
           },
         }),
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        console.log('Evaluation started successfully:', result);
-
-        setLiveEvaluations((prev) =>
-          prev.map((evaluation) =>
-            evaluation.id === mockEvaluation.id
-              ? {
-                  ...evaluation,
-                  id: result.id || evaluation.id,
-                  status: 'running',
-                }
-              : evaluation
-          )
-        );
-
-        setTimeout(() => refetch(), 1000);
-      } else {
-        console.error('Failed to start evaluation:', response.statusText);
-        setLiveEvaluations((prev) =>
-          prev.filter((evaluation) => evaluation.id !== mockEvaluation.id)
-        );
+      if (!evaluationResponse.ok) {
+        throw new Error(`Evaluation failed: ${evaluationResponse.statusText}`);
       }
-    } catch (error) {
-      console.error('Error starting evaluation:', error);
+
+      const evaluationResult = await evaluationResponse.json();
+      console.log('Evaluation completed:', evaluationResult);
+
+      // Complete the evaluation
       setLiveEvaluations((prev) =>
-        prev.filter((evaluation) => evaluation.id !== mockEvaluation.id)
+        prev.map((evaluation) =>
+          evaluation.id === mockEvaluation.id
+            ? {
+                ...evaluation,
+                status: 'completed',
+                progress: 100,
+                executionTime: evaluationResult.executionTimeMs,
+                score: evaluationResult.overallScore,
+              }
+            : evaluation
+        )
+      );
+
+      // Refresh results to show new evaluation
+      setTimeout(() => refetch(), 1000);
+
+    } catch (error) {
+      console.error('Error during evaluation pipeline:', error);
+
+      // Mark evaluation as failed
+      setLiveEvaluations((prev) =>
+        prev.map((evaluation) =>
+          evaluation.id === mockEvaluation.id
+            ? {
+                ...evaluation,
+                status: 'failed',
+                progress: 100,
+                executionTime: Date.now() - new Date(evaluation.startTime).getTime(),
+              }
+            : evaluation
+        )
       );
     } finally {
       setIsStartingEvaluation(false);

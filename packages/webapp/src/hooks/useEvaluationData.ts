@@ -43,10 +43,8 @@ export function useEvaluationData() {
       }
 
       const apiResponse = await response.json();
-      // Handle the API response structure and property mapping
       const data = apiResponse.data || apiResponse;
 
-      // Map API response to expected frontend interface
       const mappedData: DashboardSummary = {
         totalEvaluations: data.totalEvaluations || 0,
         averageScore: data.averageScore || 0,
@@ -56,7 +54,7 @@ export function useEvaluationData() {
           issues: data.systemHealth?.issues || []
         },
         patternPerformance: data.patternPerformance || [],
-        topMetrics: data.topPerformingMetrics || [], // Map from API property name
+        topMetrics: data.topPerformingMetrics || [],
         recentFailures: data.recentFailures || []
       };
 

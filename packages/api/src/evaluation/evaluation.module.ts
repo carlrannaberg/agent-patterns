@@ -37,6 +37,7 @@ import {
   AlertConfiguration,
   AlertHistory,
 } from '../database/entities';
+import { EvaluationController } from './controllers/evaluation.controller';
 
 @Module({
   imports: [
@@ -55,7 +56,7 @@ import {
     forwardRef(() => RunnerModule),
     ReportingModule,
   ],
-  controllers: [HumanScoringController],
+  controllers: [HumanScoringController, EvaluationController],
   providers: [
     EvaluationService,
     LlmJudgeService,
