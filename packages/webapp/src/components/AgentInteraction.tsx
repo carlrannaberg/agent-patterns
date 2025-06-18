@@ -31,7 +31,7 @@ export default function AgentInteraction({
   description,
   placeholder = 'Enter your input here...',
 }: AgentInteractionProps) {
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
 
   const { object, submit, isLoading, error } = useObject({
     api: `http://localhost:3001/${apiEndpoint}`,
@@ -45,34 +45,47 @@ export default function AgentInteraction({
     await submit({ input: input.trim() });
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      if (!input.trim() || isLoading) return;
+      const formEvent = new Event("submit", {
+        bubbles: true,
+        cancelable: true,
+      }) as unknown as React.FormEvent;
+      handleSubmit(formEvent);
+    }
+  };
+
   return (
     <Container maxWidth="lg" sx={{ py: 2 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         {title}
       </Typography>
 
-      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: '960px' }}>
+      <Typography variant="body1" color="text.secondary" paragraph sx={{ maxWidth: "960px" }}>
         {description}
       </Typography>
 
-      <Card sx={{ mb: 3, width: '100%' }}>
+      <Card sx={{ mb: 3, width: "100%" }}>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <Box sx={{ mb: 2 }}>
               <TextareaAutosize
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={placeholder}
+                onKeyDown={handleKeyDown}
+                placeholder={`${placeholder} (Press Cmd+Enter to submit)`}
                 minRows={3}
                 maxRows={10}
                 style={{
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '14px',
-                  fontFamily: 'inherit',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  resize: 'vertical',
+                  width: "100%",
+                  padding: "12px",
+                  fontSize: "14px",
+                  fontFamily: "inherit",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  resize: "vertical",
                 }}
               />
             </Box>
@@ -82,20 +95,20 @@ export default function AgentInteraction({
               disabled={!input.trim() || isLoading}
               startIcon={isLoading ? <CircularProgress size={20} /> : null}
             >
-              {isLoading ? 'Processing...' : 'Submit'}
+              {isLoading ? "Processing..." : "Submit"}
             </Button>
           </form>
         </CardContent>
       </Card>
 
       {error && (
-        <Card sx={{ mb: 3, borderColor: 'error.main', width: '100%' }}>
+        <Card sx={{ mb: 3, borderColor: "error.main", width: "100%" }}>
           <CardContent>
             <Typography variant="h6" color="error" gutterBottom>
               Error
             </Typography>
             <Typography variant="body2" color="error">
-              {error.message || 'An error occurred while processing your request.'}
+              {error.message || "An error occurred while processing your request."}
             </Typography>
           </CardContent>
         </Card>
@@ -103,20 +116,20 @@ export default function AgentInteraction({
 
       {object && (
         <>
-          {apiEndpoint === 'sequential-processing' ? (
+          {apiEndpoint === "sequential-processing" ? (
             <SequentialProcessingDisplay result={object} />
-          ) : apiEndpoint === 'routing' ? (
+          ) : apiEndpoint === "routing" ? (
             <RoutingDisplay result={object} />
-          ) : apiEndpoint === 'parallel-processing' ? (
+          ) : apiEndpoint === "parallel-processing" ? (
             <ParallelProcessingDisplay result={object} />
-          ) : apiEndpoint === 'orchestrator-worker' ? (
+          ) : apiEndpoint === "orchestrator-worker" ? (
             <OrchestratorWorkerDisplay result={object} />
-          ) : apiEndpoint === 'evaluator-optimizer' ? (
+          ) : apiEndpoint === "evaluator-optimizer" ? (
             <EvaluatorOptimizerDisplay result={object} />
-          ) : apiEndpoint === 'multi-step-tool-usage' ? (
+          ) : apiEndpoint === "multi-step-tool-usage" ? (
             <MultiStepToolUsageDisplay result={object} />
           ) : (
-            <Card sx={{ width: '100%' }}>
+            <Card sx={{ width: "100%" }}>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
                   Response
@@ -124,14 +137,14 @@ export default function AgentInteraction({
                 <Box
                   component="pre"
                   sx={{
-                    backgroundColor: '#f5f5f5',
+                    backgroundColor: "#f5f5f5",
                     p: 2,
                     borderRadius: 1,
-                    overflow: 'auto',
+                    overflow: "auto",
                     fontFamily: 'Monaco, Consolas, "Courier New", monospace',
-                    fontSize: '14px',
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
+                    fontSize: "14px",
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
                   }}
                 >
                   {JSON.stringify(object, null, 2)}
