@@ -1,10 +1,10 @@
 import { Injectable, Logger, HttpException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
-import { 
-  ApiEndpointTest, 
-  ApiTestResult, 
-  StreamData, 
+import {
+  ApiEndpointTest,
+  ApiTestResult,
+  StreamData,
   EndpointHealth,
   ApiClientConfig,
 } from '../interfaces/api-testing.interface';
@@ -16,9 +16,7 @@ export class ApiTestingService {
   private readonly endpointMap: Map<AgentPattern, string>;
   private readonly healthCache = new Map<string, EndpointHealth>();
 
-  constructor(
-    private readonly httpService: HttpService,
-  ) {
+  constructor(private readonly httpService: HttpService) {
     this.endpointMap = new Map([
       [AgentPattern.SEQUENTIAL_PROCESSING, '/api/sequential-processing/stream'],
       [AgentPattern.ROUTING, '/api/routing/stream'],
@@ -32,13 +30,13 @@ export class ApiTestingService {
   async testEndpoint(test: ApiEndpointTest, config: ApiClientConfig): Promise<ApiTestResult> {
     const startTime = Date.now();
     const endpoint = test.endpoint || this.endpointMap.get(test.pattern);
-    
+
     if (!endpoint) {
       throw new Error(`No endpoint configured for pattern ${test.pattern}`);
     }
 
     const url = `${config.baseUrl}${endpoint}`;
-    
+
     try {
       if (this.isStreamingEndpoint(endpoint)) {
         return await this.testStreamingEndpoint(test, url, config, startTime);
@@ -47,7 +45,7 @@ export class ApiTestingService {
       }
     } catch (error) {
       this.logger.error(`API test failed for ${test.pattern}`, error);
-      
+
       return {
         pattern: test.pattern,
         endpoint,
@@ -71,7 +69,7 @@ export class ApiTestingService {
     startTime: number,
   ): Promise<ApiTestResult> {
     const streamData: StreamData[] = [];
-    
+
     const response = await fetch(url, {
       method: test.method,
       headers: {
@@ -83,10 +81,7 @@ export class ApiTestingService {
     });
 
     if (!response.ok) {
-      throw new HttpException(
-        `Stream request failed: ${response.statusText}`,
-        response.status,
-      );
+      throw new HttpException(`Stream request failed: ${response.statusText}`, response.status);
     }
 
     const reader = response.body?.getReader();
@@ -143,7 +138,7 @@ export class ApiTestingService {
     const response = await firstValueFrom(
       test.method === 'POST'
         ? this.httpService.post(url, test.body, requestConfig)
-        : this.httpService.get(url, requestConfig)
+        : this.httpService.get(url, requestConfig),
     );
 
     return {
@@ -167,7 +162,7 @@ export class ApiTestingService {
 
     const cacheKey = `${pattern}-${endpoint}`;
     const cached = this.healthCache.get(cacheKey);
-    
+
     if (cached && Date.now() - cached.lastChecked.getTime() < 60000) {
       return cached;
     }
@@ -179,7 +174,7 @@ export class ApiTestingService {
       const response = await firstValueFrom(
         this.httpService.options(url, {
           timeout: 5000,
-        })
+        }),
       );
 
       const health: EndpointHealth = {
@@ -210,7 +205,7 @@ export class ApiTestingService {
   async checkAllEndpointsHealth(config: ApiClientConfig): Promise<EndpointHealth[]> {
     const patterns = Array.from(this.endpointMap.keys());
     const healthChecks = await Promise.all(
-      patterns.map(pattern => this.checkEndpointHealth(pattern, config))
+      patterns.map((pattern) => this.checkEndpointHealth(pattern, config)),
     );
     return healthChecks;
   }
@@ -220,7 +215,7 @@ export class ApiTestingService {
   }
 
   private parseStreamData(data: string): any {
-    const lines = data.split('\n').filter(line => line.trim());
+    const lines = data.split('\n').filter((line) => line.trim());
     const objects = [];
 
     for (const line of lines) {
@@ -269,7 +264,7 @@ export class ApiTestingService {
     };
 
     const response = await this.testEndpoint(test, config);
-    
+
     timing.total = Date.now() - timing.start;
 
     return {

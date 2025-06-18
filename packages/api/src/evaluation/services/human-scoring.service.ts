@@ -11,31 +11,31 @@ export class HumanScoringService {
 
   constructor(
     private readonly goldDatasetService: GoldDatasetService,
-    private readonly configService: EvaluationConfigService
+    private readonly configService: EvaluationConfigService,
   ) {}
 
   async getUnscoreSamples(
     pattern: AgentPattern,
     evaluatorId: string,
-    limit: number
+    limit: number,
   ): Promise<GoldSample[]> {
     const allSamples = await this.goldDatasetService.getPatternSamples(pattern);
-    
+
     // Filter samples that haven't been scored by this evaluator
-    const unscoredSamples = allSamples.filter(sample => 
-      !sample.humanScores.some(score => score.evaluatorId === evaluatorId)
+    const unscoredSamples = allSamples.filter(
+      (sample) => !sample.humanScores.some((score) => score.evaluatorId === evaluatorId),
     );
 
     // Prioritize edge cases and ensure complexity distribution
-    const edgeCases = unscoredSamples.filter(s => s.edgeCase);
-    const regularCases = unscoredSamples.filter(s => !s.edgeCase);
+    const edgeCases = unscoredSamples.filter((s) => s.edgeCase);
+    const regularCases = unscoredSamples.filter((s) => !s.edgeCase);
 
     const result: GoldSample[] = [];
-    
+
     // Include at least 20% edge cases
     const edgeCaseCount = Math.ceil(limit * 0.2);
     result.push(...this.shuffleArray(edgeCases).slice(0, edgeCaseCount));
-    
+
     // Fill the rest with stratified regular cases
     const remainingLimit = limit - result.length;
     const stratified = this.stratifySamplesByComplexity(regularCases, remainingLimit);
@@ -64,9 +64,9 @@ export class HumanScoringService {
 
       for (const sample of samples) {
         const evaluatorScores = sample.humanScores.filter(
-          score => score.evaluatorId === evaluatorId
+          (score) => score.evaluatorId === evaluatorId,
         );
-        
+
         if (evaluatorScores.length > 0) {
           patternCount++;
           totalScored++;
@@ -91,7 +91,7 @@ export class HumanScoringService {
     sampleCount: number;
   }> {
     const samples = await this.goldDatasetService.getPatternSamples(pattern);
-    const scoredSamples = samples.filter(s => s.humanScores.length >= 2);
+    const scoredSamples = samples.filter((s) => s.humanScores.length >= 2);
 
     // Calculate Krippendorff's alpha
     const alpha = this.calculateKrippendorffAlpha(scoredSamples);
@@ -284,14 +284,11 @@ export class HumanScoringService {
     return rubrics[pattern] || rubrics[AgentPattern.SEQUENTIAL_PROCESSING];
   }
 
-  private stratifySamplesByComplexity(
-    samples: GoldSample[],
-    limit: number
-  ): GoldSample[] {
+  private stratifySamplesByComplexity(samples: GoldSample[], limit: number): GoldSample[] {
     const grouped = {
-      low: samples.filter(s => s.complexity === 'low'),
-      medium: samples.filter(s => s.complexity === 'medium'),
-      high: samples.filter(s => s.complexity === 'high'),
+      low: samples.filter((s) => s.complexity === 'low'),
+      medium: samples.filter((s) => s.complexity === 'medium'),
+      high: samples.filter((s) => s.complexity === 'high'),
     };
 
     const perGroup = Math.floor(limit / 3);
@@ -317,10 +314,10 @@ export class HumanScoringService {
   private calculateKrippendorffAlpha(samples: GoldSample[]): number {
     // Implementation of Krippendorff's alpha for ordinal data
     const units: number[][] = [];
-    
+
     for (const sample of samples) {
       if (sample.humanScores.length >= 2) {
-        units.push(sample.humanScores.map(hs => hs.scores.overall));
+        units.push(sample.humanScores.map((hs) => hs.scores.overall));
       }
     }
 
@@ -365,23 +362,23 @@ export class HumanScoringService {
       }
     }
 
-    return 1 - (observedDisagreement / expectedDisagreement);
+    return 1 - observedDisagreement / expectedDisagreement;
   }
 
   private getEvaluatorPairs(samples: GoldSample[]): Map<string, GoldSample[]> {
     const pairs = new Map<string, GoldSample[]>();
 
     for (const sample of samples) {
-      const evaluators = [...new Set(sample.humanScores.map(s => s.evaluatorId))].sort();
-      
+      const evaluators = [...new Set(sample.humanScores.map((s) => s.evaluatorId))].sort();
+
       for (let i = 0; i < evaluators.length - 1; i++) {
         for (let j = i + 1; j < evaluators.length; j++) {
           const pairKey = `${evaluators[i]}-${evaluators[j]}`;
-          
+
           if (!pairs.has(pairKey)) {
             pairs.set(pairKey, []);
           }
-          
+
           pairs.get(pairKey)!.push(sample);
         }
       }
@@ -396,9 +393,9 @@ export class HumanScoringService {
 
     for (const sample of samples) {
       if (sample.humanScores.length >= 2) {
-        const scores = sample.humanScores.map(hs => hs.scores.overall);
+        const scores = sample.humanScores.map((hs) => hs.scores.overall);
         const diff = Math.abs(scores[0] - scores[1]);
-        const agreement = 1 - (diff / 10); // Assuming 0-10 scale
+        const agreement = 1 - diff / 10; // Assuming 0-10 scale
         totalAgreement += Math.max(0, agreement);
         count++;
       }

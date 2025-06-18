@@ -68,10 +68,7 @@ export class AutomationController {
   }
 
   @Put('suites/:suiteId')
-  async updateTestSuite(
-    @Param('suiteId') suiteId: string,
-    @Body() updates: any,
-  ) {
+  async updateTestSuite(@Param('suiteId') suiteId: string, @Body() updates: any) {
     return this.testSuiteService.updateSuite(suiteId, updates);
   }
 
@@ -85,12 +82,7 @@ export class AutomationController {
   @Post('batch')
   async createBatchJob(@Body() body: any) {
     const { name, patterns, testSuiteIds, config } = body;
-    return this.batchProcessor.createBatchJob(
-      name,
-      patterns,
-      testSuiteIds,
-      config,
-    );
+    return this.batchProcessor.createBatchJob(name, patterns, testSuiteIds, config);
   }
 
   @Get('batch')
@@ -127,10 +119,7 @@ export class AutomationController {
   }
 
   @Put('schedules/:scheduleId')
-  async updateSchedule(
-    @Param('scheduleId') scheduleId: string,
-    @Body() updates: any,
-  ) {
+  async updateSchedule(@Param('scheduleId') scheduleId: string, @Body() updates: any) {
     return this.scheduler.updateSchedule(scheduleId, updates);
   }
 
@@ -231,10 +220,7 @@ export class AutomationController {
   }
 
   @Post('workflows/:workflowId/execute')
-  async executeWorkflow(
-    @Param('workflowId') workflowId: string,
-    @Body() context: any = {},
-  ) {
+  async executeWorkflow(@Param('workflowId') workflowId: string, @Body() context: any = {}) {
     return this.workflow.executeWorkflow(workflowId, context);
   }
 

@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EvaluationService } from './services/evaluation.service';
 import { LlmJudgeService } from './services/llm-judge.service';
 import { GEvalService } from './services/g-eval.service';
@@ -11,6 +14,11 @@ import { CalibrationService } from './services/calibration.service';
 import { HumanScoringService } from './services/human-scoring.service';
 import { EnsembleEvaluationService } from './services/ensemble-evaluation.service';
 import { BiasDetectionService } from './services/bias-detection.service';
+import { ResultsStorageService } from './services/results-storage.service';
+import { AggregationService } from './services/aggregation.service';
+import { FailureAnalysisService } from './services/failure-analysis.service';
+import { AlertingService } from './services/alerting.service';
+import { ReportGeneratorService } from './services/report-generator.service';
 import { SequentialProcessingEvaluator } from './evaluators/sequential-processing.evaluator';
 import { RoutingEvaluator } from './evaluators/routing.evaluator';
 import { ParallelProcessingEvaluator } from './evaluators/parallel-processing.evaluator';
@@ -19,9 +27,34 @@ import { EvaluatorOptimizerEvaluator } from './evaluators/evaluator-optimizer.ev
 import { MultiStepToolUsageEvaluator } from './evaluators/multi-step-tool-usage.evaluator';
 import { HumanScoringController } from './controllers/human-scoring.controller';
 import { RunnerModule } from './runner/runner.module';
+import { ReportingModule } from './reporting/reporting.module';
+import {
+  EvaluationResult,
+  EvaluationBatch,
+  MetricScore,
+  QualityBaseline,
+  FailurePattern,
+  AlertConfiguration,
+  AlertHistory,
+} from '../database/entities';
 
 @Module({
-  imports: [ConfigModule, RunnerModule],
+  imports: [
+    ConfigModule,
+    ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
+    TypeOrmModule.forFeature([
+      EvaluationResult,
+      EvaluationBatch,
+      MetricScore,
+      QualityBaseline,
+      FailurePattern,
+      AlertConfiguration,
+      AlertHistory,
+    ]),
+    RunnerModule,
+    ReportingModule,
+  ],
   controllers: [HumanScoringController],
   providers: [
     EvaluationService,
@@ -35,6 +68,11 @@ import { RunnerModule } from './runner/runner.module';
     HumanScoringService,
     EnsembleEvaluationService,
     BiasDetectionService,
+    ResultsStorageService,
+    AggregationService,
+    FailureAnalysisService,
+    AlertingService,
+    ReportGeneratorService,
     SequentialProcessingEvaluator,
     RoutingEvaluator,
     ParallelProcessingEvaluator,
@@ -51,6 +89,11 @@ import { RunnerModule } from './runner/runner.module';
     HumanScoringService,
     EnsembleEvaluationService,
     BiasDetectionService,
+    ResultsStorageService,
+    AggregationService,
+    FailureAnalysisService,
+    AlertingService,
+    ReportGeneratorService,
     SequentialProcessingEvaluator,
     RoutingEvaluator,
     ParallelProcessingEvaluator,
@@ -58,6 +101,7 @@ import { RunnerModule } from './runner/runner.module';
     EvaluatorOptimizerEvaluator,
     MultiStepToolUsageEvaluator,
     RunnerModule,
+    ReportingModule,
   ],
 })
 export class EvaluationModule {}

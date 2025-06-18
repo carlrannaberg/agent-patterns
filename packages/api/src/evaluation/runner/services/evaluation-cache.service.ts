@@ -29,7 +29,7 @@ export class EvaluationCacheService implements OnModuleInit {
       uncached: 0,
     },
   };
-  
+
   private readonly responseTimes = {
     cached: [] as number[],
     uncached: [] as number[],
@@ -60,28 +60,28 @@ export class EvaluationCacheService implements OnModuleInit {
     }
 
     const startTime = Date.now();
-    
+
     try {
       const cached = await this.cacheManager.get<CacheEntry<T>>(key);
-      
+
       if (cached) {
         this.stats.hits++;
         this.updateHitRate();
-        
+
         const responseTime = Date.now() - startTime;
         this.recordResponseTime('cached', responseTime);
-        
+
         await this.updateMetadata(key, cached);
-        
+
         this.eventEmitter.emit('cache.hit', { key, responseTime });
         return cached.value;
       } else {
         this.stats.misses++;
         this.updateHitRate();
-        
+
         const responseTime = Date.now() - startTime;
         this.recordResponseTime('cached', responseTime);
-        
+
         this.eventEmitter.emit('cache.miss', { key, responseTime });
         return null;
       }
@@ -118,7 +118,7 @@ export class EvaluationCacheService implements OnModuleInit {
 
       const ttl = options?.ttl || this.config.ttl;
       await this.cacheManager.set(key, entry, ttl * 1000);
-      
+
       this.stats.size++;
       this.eventEmitter.emit('cache.set', { key, ttl });
     } catch (error) {
@@ -133,14 +133,14 @@ export class EvaluationCacheService implements OnModuleInit {
   ): Promise<EvaluationResult | null> {
     const key = this.generateEvaluationKey(pattern, input, expectedOutput);
     const startTime = Date.now();
-    
+
     const cached = await this.get<EvaluationResult>(key);
-    
+
     if (cached) {
       const responseTime = Date.now() - startTime;
       this.logger.debug(`Cache hit for evaluation ${pattern}: ${responseTime}ms`);
     }
-    
+
     return cached;
   }
 
@@ -152,7 +152,7 @@ export class EvaluationCacheService implements OnModuleInit {
     ttl?: number,
   ): Promise<void> {
     const key = this.generateEvaluationKey(pattern, input, expectedOutput);
-    
+
     await this.set(key, result, {
       ttl,
       source: CacheSource.EVALUATION,
@@ -172,11 +172,11 @@ export class EvaluationCacheService implements OnModuleInit {
 
   async invalidatePattern(pattern: AgentPattern): Promise<void> {
     const keys = await this.cacheManager.store.keys(`*${pattern}*`);
-    
+
     for (const key of keys) {
       await this.invalidate(key);
     }
-    
+
     this.logger.log(`Invalidated ${keys.length} cache entries for pattern ${pattern}`);
   }
 
@@ -203,18 +203,14 @@ export class EvaluationCacheService implements OnModuleInit {
 
   async warmupCache(): Promise<void> {
     this.logger.log('Starting cache warmup...');
-    
+
     // This would typically load frequently accessed evaluations
     // from a database or file system
-    
+
     this.logger.log('Cache warmup completed');
   }
 
-  generateEvaluationKey(
-    pattern: AgentPattern,
-    input: any,
-    expectedOutput?: any,
-  ): string {
+  generateEvaluationKey(pattern: AgentPattern, input: any, expectedOutput?: any): string {
     const keyData = {
       pattern,
       input: this.normalizeInput(input),
@@ -222,10 +218,7 @@ export class EvaluationCacheService implements OnModuleInit {
       version: process.env.EVALUATION_VERSION || '1.0',
     };
 
-    const hash = crypto
-      .createHash('sha256')
-      .update(JSON.stringify(keyData))
-      .digest('hex');
+    const hash = crypto.createHash('sha256').update(JSON.stringify(keyData)).digest('hex');
 
     return `eval:${pattern}:${hash.substring(0, 16)}`;
   }
@@ -234,29 +227,29 @@ export class EvaluationCacheService implements OnModuleInit {
     if (typeof input === 'string') {
       return input.trim().toLowerCase();
     }
-    
+
     if (Array.isArray(input)) {
-      return input.map(item => this.normalizeInput(item));
+      return input.map((item) => this.normalizeInput(item));
     }
-    
+
     if (typeof input === 'object' && input !== null) {
       const normalized: any = {};
       const keys = Object.keys(input).sort();
-      
+
       for (const key of keys) {
         normalized[key] = this.normalizeInput(input[key]);
       }
-      
+
       return normalized;
     }
-    
+
     return input;
   }
 
   private async updateMetadata(key: string, entry: CacheEntry<any>): Promise<void> {
     entry.metadata.hitCount++;
     entry.metadata.lastAccessed = new Date();
-    
+
     await this.cacheManager.set(key, entry, entry.ttl);
   }
 
@@ -267,7 +260,7 @@ export class EvaluationCacheService implements OnModuleInit {
 
   private recordResponseTime(type: 'cached' | 'uncached', time: number): void {
     this.responseTimes[type].push(time);
-    
+
     if (this.responseTimes[type].length > 1000) {
       this.responseTimes[type].shift();
     }
@@ -275,11 +268,11 @@ export class EvaluationCacheService implements OnModuleInit {
 
   private calculateAvgResponseTime(type: 'cached' | 'uncached'): number {
     const times = this.responseTimes[type];
-    
+
     if (times.length === 0) {
       return 0;
     }
-    
+
     const sum = times.reduce((a, b) => a + b, 0);
     return sum / times.length;
   }
@@ -293,12 +286,14 @@ export class EvaluationCacheService implements OnModuleInit {
     this.logger.log('Cache configuration updated', this.config);
   }
 
-  async preloadEvaluations(evaluations: Array<{
-    pattern: AgentPattern;
-    input: any;
-    result: EvaluationResult;
-    expectedOutput?: any;
-  }>): Promise<void> {
+  async preloadEvaluations(
+    evaluations: Array<{
+      pattern: AgentPattern;
+      input: any;
+      result: EvaluationResult;
+      expectedOutput?: any;
+    }>,
+  ): Promise<void> {
     const startTime = Date.now();
     let loaded = 0;
 
@@ -314,7 +309,7 @@ export class EvaluationCacheService implements OnModuleInit {
 
     const duration = Date.now() - startTime;
     this.logger.log(`Preloaded ${loaded} evaluations in ${duration}ms`);
-    
+
     this.eventEmitter.emit('cache.preloaded', { count: loaded, duration });
   }
 }

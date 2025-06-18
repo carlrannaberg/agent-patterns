@@ -17,7 +17,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 export class EvaluationSchedulerService {
   private readonly logger = new Logger(EvaluationSchedulerService.name);
   private readonly schedules = new Map<string, ScheduledEvaluation>();
-  
+
   constructor(
     private readonly schedulerRegistry: SchedulerRegistry,
     private readonly batchProcessor: BatchProcessorService,
@@ -43,7 +43,7 @@ export class EvaluationSchedulerService {
     };
 
     this.schedules.set(scheduledEvaluation.id, scheduledEvaluation);
-    
+
     if (scheduledEvaluation.enabled) {
       this.registerCronJob(scheduledEvaluation);
     }
@@ -149,27 +149,26 @@ export class EvaluationSchedulerService {
       schedule.lastRun = historyEntry.startedAt;
       this.updateNextRun(schedule);
 
-      this.eventEmitter.emit('schedule.run.completed', { 
-        schedule, 
-        runId, 
-        results 
+      this.eventEmitter.emit('schedule.run.completed', {
+        schedule,
+        runId,
+        results,
       });
-
     } catch (error) {
       this.logger.error(`Scheduled job ${schedule.name} failed`, error);
       historyEntry.status = ScheduleRunStatus.ERROR;
       historyEntry.error = error.message;
       historyEntry.completedAt = new Date();
 
-      this.eventEmitter.emit('schedule.run.failed', { 
-        schedule, 
-        runId, 
-        error 
+      this.eventEmitter.emit('schedule.run.failed', {
+        schedule,
+        runId,
+        error,
       });
     }
 
     schedule.history.push(historyEntry);
-    
+
     if (schedule.history.length > 100) {
       schedule.history = schedule.history.slice(-100);
     }
@@ -177,14 +176,14 @@ export class EvaluationSchedulerService {
 
   private registerCronJob(schedule: ScheduledEvaluation): void {
     const cronExpression = this.getCronExpression(schedule.schedule);
-    
+
     const job = new CronJob(
       cronExpression,
       () => {
-        this.runScheduledJob({ 
-          scheduleId: schedule.id, 
-          skipIfRunning: true 
-        }).catch(error => {
+        this.runScheduledJob({
+          scheduleId: schedule.id,
+          skipIfRunning: true,
+        }).catch((error) => {
           this.logger.error(`Failed to run scheduled job ${schedule.name}`, error);
         });
       },
@@ -195,7 +194,7 @@ export class EvaluationSchedulerService {
 
     this.schedulerRegistry.addCronJob(schedule.id, job);
     this.updateNextRun(schedule);
-    
+
     this.logger.log(`Registered cron job for schedule ${schedule.name}`);
   }
 
@@ -212,20 +211,20 @@ export class EvaluationSchedulerService {
     switch (config.type) {
       case ScheduleType.CRON:
         return config.cronExpression!;
-      
+
       case ScheduleType.INTERVAL:
         const minutes = Math.floor(config.interval! / 60000);
         return `*/${minutes} * * * *`;
-      
+
       case ScheduleType.DAILY:
         return `${config.minute || 0} ${config.hour || 0} * * *`;
-      
+
       case ScheduleType.WEEKLY:
         return `${config.minute || 0} ${config.hour || 0} * * ${config.dayOfWeek || 0}`;
-      
+
       case ScheduleType.MONTHLY:
         return `${config.minute || 0} ${config.hour || 0} 1 * *`;
-      
+
       default:
         throw new Error(`Unsupported schedule type: ${config.type}`);
     }
@@ -244,7 +243,7 @@ export class EvaluationSchedulerService {
 
   private isScheduleRunning(schedule: ScheduledEvaluation): boolean {
     if (schedule.history.length === 0) return false;
-    
+
     const lastRun = schedule.history[schedule.history.length - 1];
     return !lastRun.completedAt;
   }
@@ -302,14 +301,12 @@ export class EvaluationSchedulerService {
       },
     ];
 
-    schedules.forEach(config => {
-      this.createSchedule(
-        config.name,
-        config.schedule as ScheduleConfig,
-        config.evaluation,
-      ).catch(error => {
-        this.logger.error(`Failed to create default schedule ${config.name}`, error);
-      });
+    schedules.forEach((config) => {
+      this.createSchedule(config.name, config.schedule as ScheduleConfig, config.evaluation).catch(
+        (error) => {
+          this.logger.error(`Failed to create default schedule ${config.name}`, error);
+        },
+      );
     });
   }
 }

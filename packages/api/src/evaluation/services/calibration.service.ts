@@ -21,7 +21,7 @@ export class CalibrationService {
   constructor(
     private readonly goldDatasetService: GoldDatasetService,
     private readonly llmJudgeService: LlmJudgeService,
-    private readonly configService: EvaluationConfigService
+    private readonly configService: EvaluationConfigService,
   ) {}
 
   async calibratePattern(
@@ -30,28 +30,24 @@ export class CalibrationService {
       maxIterations?: number;
       learningRate?: number;
       convergenceThreshold?: number;
-    } = {}
+    } = {},
   ): Promise<CalibrationResult> {
-    const {
-      maxIterations = 100,
-      learningRate = 0.01,
-      convergenceThreshold = 0.001,
-    } = options;
+    const { maxIterations = 100, learningRate = 0.01, convergenceThreshold = 0.001 } = options;
 
     this.logger.log(`Starting calibration for pattern: ${pattern}`);
 
     // Get gold samples with human scores
     const samples = await this.goldDatasetService.getPatternSamples(pattern);
-    const samplesWithScores = samples.filter(s => s.humanScores.length >= 2);
+    const samplesWithScores = samples.filter((s) => s.humanScores.length >= 2);
 
     if (samplesWithScores.length < 30) {
-      throw new Error(`Insufficient samples for calibration. Need at least 30, found ${samplesWithScores.length}`);
+      throw new Error(
+        `Insufficient samples for calibration. Need at least 30, found ${samplesWithScores.length}`,
+      );
     }
 
     // Calculate average human scores
-    const humanScores = samplesWithScores.map(sample => 
-      this.calculateAverageHumanScore(sample)
-    );
+    const humanScores = samplesWithScores.map((sample) => this.calculateAverageHumanScore(sample));
 
     // Initialize weights
     let weights = { ...this.defaultWeights };
@@ -88,7 +84,11 @@ export class CalibrationService {
     }
 
     // Calculate final metrics
-    const finalLLMScores = await this.getLLMScoresWithWeights(samplesWithScores, pattern, bestWeights);
+    const finalLLMScores = await this.getLLMScoresWithWeights(
+      samplesWithScores,
+      pattern,
+      bestWeights,
+    );
     const krippendorffAlpha = this.calculateKrippendorffAlpha(samplesWithScores);
     const confidenceInterval = this.bootstrapConfidenceInterval(humanScores, finalLLMScores);
     const validationMetrics = this.calculateValidationMetrics(humanScores, finalLLMScores);
@@ -113,19 +113,19 @@ export class CalibrationService {
     pattern: AgentPattern,
     input: string,
     output: string,
-    context?: Record<string, any>
+    context?: Record<string, any>,
   ): Promise<number> {
     const calibration = await this.getCalibration(pattern);
-    
+
     // Apply position randomization
     const randomizedInputs = this.randomizePositions([input]);
-    
+
     // Get evaluation with calibrated weights
     const scores = await this.llmJudgeService.evaluate(
       pattern,
       randomizedInputs[0],
       output,
-      context
+      context,
     );
 
     // Apply length normalization
@@ -138,14 +138,14 @@ export class CalibrationService {
   }
 
   private calculateAverageHumanScore(sample: GoldSample): number {
-    const scores = sample.humanScores.map(hs => hs.scores.overall);
-    return math.mean(scores) as number;
+    const scores = sample.humanScores.map((hs) => hs.scores.overall);
+    return math.mean(scores);
   }
 
   private async getLLMScoresWithWeights(
     samples: GoldSample[],
     pattern: AgentPattern,
-    weights: Record<string, number>
+    weights: Record<string, number>,
   ): Promise<number[]> {
     const scores: number[] = [];
 
@@ -154,7 +154,7 @@ export class CalibrationService {
         pattern,
         sample.input.content,
         sample.expectedOutput?.content || '',
-        sample.input.context
+        sample.input.context,
       );
 
       const weightedScore = this.applyWeights(evaluation, weights);
@@ -164,10 +164,7 @@ export class CalibrationService {
     return scores;
   }
 
-  private applyWeights(
-    scores: Record<string, number>,
-    weights: Record<string, number>
-  ): number {
+  private applyWeights(scores: Record<string, number>, weights: Record<string, number>): number {
     let weightedSum = 0;
     let totalWeight = 0;
 
@@ -200,8 +197,7 @@ export class CalibrationService {
   }
 
   private rankArray(arr: number[]): number[] {
-    const sorted = [...arr].map((val, idx) => ({ val, idx }))
-      .sort((a, b) => a.val - b.val);
+    const sorted = [...arr].map((val, idx) => ({ val, idx })).sort((a, b) => a.val - b.val);
 
     const ranks = new Array(arr.length);
     let currentRank = 1;
@@ -232,7 +228,7 @@ export class CalibrationService {
     weights: Record<string, number>,
     humanScores: number[],
     llmScores: number[],
-    learningRate: number
+    learningRate: number,
   ): Record<string, number> {
     const newWeights = { ...weights };
     const epsilon = 0.01;
@@ -243,7 +239,7 @@ export class CalibrationService {
       perturbedWeights[dimension] += epsilon;
 
       const currentCorr = this.calculateSpearmanCorrelation(humanScores, llmScores);
-      
+
       // This is a simplified gradient approximation
       // In practice, we'd need to recalculate LLM scores with perturbed weights
       const gradient = (Math.random() - 0.5) * 0.1; // Placeholder
@@ -265,10 +261,10 @@ export class CalibrationService {
     // Simplified Krippendorff's alpha calculation
     // Full implementation would require more complex coincidence matrix calculation
     const scores: number[][] = [];
-    
+
     for (const sample of samples) {
       if (sample.humanScores.length >= 2) {
-        scores.push(sample.humanScores.map(hs => hs.scores.overall));
+        scores.push(sample.humanScores.map((hs) => hs.scores.overall));
       }
     }
 
@@ -291,31 +287,31 @@ export class CalibrationService {
 
     // Calculate expected disagreement
     const allScores = scores.flat();
-    const expectedDisagreement = math.var(allScores) as number * 2;
+    const expectedDisagreement = (math.var(allScores) as number) * 2;
 
-    return 1 - (observedDisagreement / expectedDisagreement);
+    return 1 - observedDisagreement / expectedDisagreement;
   }
 
   private bootstrapConfidenceInterval(
     humanScores: number[],
     llmScores: number[],
     iterations = 1000,
-    confidence = 0.95
+    confidence = 0.95,
   ): { lower: number; upper: number } {
     const correlations: number[] = [];
     const n = humanScores.length;
 
     for (let i = 0; i < iterations; i++) {
       const indices = Array.from({ length: n }, () => Math.floor(Math.random() * n));
-      const sampledHuman = indices.map(idx => humanScores[idx]);
-      const sampledLLM = indices.map(idx => llmScores[idx]);
+      const sampledHuman = indices.map((idx) => humanScores[idx]);
+      const sampledLLM = indices.map((idx) => llmScores[idx]);
 
       correlations.push(this.calculateSpearmanCorrelation(sampledHuman, sampledLLM));
     }
 
     correlations.sort((a, b) => a - b);
-    const lowerIdx = Math.floor((1 - confidence) / 2 * iterations);
-    const upperIdx = Math.floor((1 + confidence) / 2 * iterations);
+    const lowerIdx = Math.floor(((1 - confidence) / 2) * iterations);
+    const upperIdx = Math.floor(((1 + confidence) / 2) * iterations);
 
     return {
       lower: correlations[lowerIdx],
@@ -325,7 +321,7 @@ export class CalibrationService {
 
   private calculateValidationMetrics(
     humanScores: number[],
-    llmScores: number[]
+    llmScores: number[],
   ): { mse: number; mae: number; bias: number } {
     const n = humanScores.length;
     let mse = 0;
@@ -360,11 +356,11 @@ export class CalibrationService {
 
   private async getCalibration(pattern: AgentPattern): Promise<CalibrationResult> {
     let calibration = this.calibrationCache.get(pattern);
-    
+
     if (!calibration) {
       // Try to load from disk or use default
       calibration = await this.loadCalibrationFromDisk(pattern);
-      
+
       if (!calibration) {
         // Use default calibration
         calibration = {
@@ -377,7 +373,7 @@ export class CalibrationService {
           validationMetrics: { mse: 0, mae: 0, bias: 0 },
         };
       }
-      
+
       this.calibrationCache.set(pattern, calibration);
     }
 

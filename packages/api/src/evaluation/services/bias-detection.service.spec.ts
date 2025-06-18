@@ -43,7 +43,7 @@ describe('BiasDetectionService', () => {
 
       expect(report.biasTypes.length.score).toBeGreaterThan(0.5);
       expect(report.biasTypes.length.effectSize).toBeDefined();
-      expect(report.alerts.some(a => a.type === 'length')).toBe(true);
+      expect(report.alerts.some((a) => a.type === 'length')).toBe(true);
     });
 
     it('should detect position bias', async () => {
@@ -75,7 +75,9 @@ describe('BiasDetectionService', () => {
 
       expect(report.biasTypes.evaluator.score).toBeGreaterThan(0.3);
       expect(report.biasTypes.evaluator.details.evaluatorMeans).toBeDefined();
-      expect(Object.keys(report.biasTypes.evaluator.details.evaluatorMeans).length).toBeGreaterThan(1);
+      expect(Object.keys(report.biasTypes.evaluator.details.evaluatorMeans).length).toBeGreaterThan(
+        1,
+      );
     });
 
     it('should detect temporal bias', async () => {
@@ -97,14 +99,14 @@ describe('BiasDetectionService', () => {
 
       const report = await service.detectBias(AgentPattern.SEQUENTIAL_PROCESSING);
 
-      const highAlerts = report.alerts.filter(a => a.severity === 'high');
-      const mediumAlerts = report.alerts.filter(a => a.severity === 'medium');
-      const lowAlerts = report.alerts.filter(a => a.severity === 'low');
+      const highAlerts = report.alerts.filter((a) => a.severity === 'high');
+      const mediumAlerts = report.alerts.filter((a) => a.severity === 'medium');
+      const lowAlerts = report.alerts.filter((a) => a.severity === 'low');
 
       expect(report.alerts.length).toBeGreaterThan(0);
-      expect(highAlerts.every(a => a.metric.score >= 0.7)).toBe(true);
-      expect(mediumAlerts.every(a => a.metric.score >= 0.5 && a.metric.score < 0.7)).toBe(true);
-      expect(lowAlerts.every(a => a.metric.score >= 0.3 && a.metric.score < 0.5)).toBe(true);
+      expect(highAlerts.every((a) => a.metric.score >= 0.7)).toBe(true);
+      expect(mediumAlerts.every((a) => a.metric.score >= 0.5 && a.metric.score < 0.7)).toBe(true);
+      expect(lowAlerts.every((a) => a.metric.score >= 0.3 && a.metric.score < 0.5)).toBe(true);
     });
 
     it('should sort alerts by severity', async () => {
@@ -129,9 +131,7 @@ describe('BiasDetectionService', () => {
       const report = await service.detectBias(AgentPattern.SEQUENTIAL_PROCESSING);
 
       expect(report.recommendations.length).toBeGreaterThan(0);
-      expect(report.recommendations.some(r => 
-        r.toLowerCase().includes('length')
-      )).toBe(true);
+      expect(report.recommendations.some((r) => r.toLowerCase().includes('length'))).toBe(true);
     });
 
     it('should prioritize urgent recommendations for multiple high biases', async () => {
@@ -180,7 +180,7 @@ describe('BiasDetectionService', () => {
 
       const report = await service.detectBias(AgentPattern.SEQUENTIAL_PROCESSING);
 
-      const manualCalculation = 
+      const manualCalculation =
         report.biasTypes.length.score * 0.25 +
         report.biasTypes.position.score * 0.2 +
         report.biasTypes.complexity.score * 0.2 +
@@ -195,11 +195,11 @@ describe('BiasDetectionService', () => {
 // Helper functions
 function createSamplesWithLengthBias(): GoldSample[] {
   const samples: GoldSample[] = [];
-  
+
   for (let i = 0; i < 50; i++) {
     const length = 100 + i * 20;
     const score = Math.min(10, 5 + length / 200); // Longer = higher score
-    
+
     samples.push({
       id: `sample-${i}`,
       pattern: AgentPattern.SEQUENTIAL_PROCESSING,
@@ -220,17 +220,17 @@ function createSamplesWithLengthBias(): GoldSample[] {
       tags: [],
     });
   }
-  
+
   return samples;
 }
 
 function createSamplesWithPositionBias(): GoldSample[] {
   const samples: GoldSample[] = [];
-  
+
   for (let i = 0; i < 50; i++) {
     // Early positions get higher scores
     const positionEffect = Math.max(0, 10 - i / 5);
-    
+
     samples.push({
       id: `sample-${i}`,
       pattern: AgentPattern.SEQUENTIAL_PROCESSING,
@@ -251,15 +251,15 @@ function createSamplesWithPositionBias(): GoldSample[] {
       tags: [],
     });
   }
-  
+
   return samples;
 }
 
 function createSamplesWithComplexityBias(): GoldSample[] {
   const samples: GoldSample[] = [];
   const complexityScores = { low: 9, medium: 7, high: 5 };
-  
-  ['low', 'medium', 'high'].forEach(complexity => {
+
+  ['low', 'medium', 'high'].forEach((complexity) => {
     for (let i = 0; i < 20; i++) {
       samples.push({
         id: `sample-${complexity}-${i}`,
@@ -272,7 +272,11 @@ function createSamplesWithComplexityBias(): GoldSample[] {
           {
             evaluatorId: 'eval1',
             timestamp: new Date(),
-            scores: { overall: complexityScores[complexity as keyof typeof complexityScores] + (Math.random() - 0.5) },
+            scores: {
+              overall:
+                complexityScores[complexity as keyof typeof complexityScores] +
+                (Math.random() - 0.5),
+            },
             timeSpent: 60,
           },
         ],
@@ -282,14 +286,14 @@ function createSamplesWithComplexityBias(): GoldSample[] {
       });
     }
   });
-  
+
   return samples;
 }
 
 function createSamplesWithEvaluatorBias(): GoldSample[] {
   const samples: GoldSample[] = [];
   const evaluatorBiases = { eval1: 8, eval2: 6, eval3: 7 };
-  
+
   for (let i = 0; i < 30; i++) {
     samples.push({
       id: `sample-${i}`,
@@ -309,21 +313,21 @@ function createSamplesWithEvaluatorBias(): GoldSample[] {
       tags: [],
     });
   }
-  
+
   return samples;
 }
 
 function createSamplesWithTemporalBias(): GoldSample[] {
   const samples: GoldSample[] = [];
   const startDate = new Date('2024-01-01');
-  
+
   for (let i = 0; i < 50; i++) {
     const date = new Date(startDate);
     date.setDate(date.getDate() + i);
-    
+
     // Score increases over time
-    const score = 5 + (i / 10);
-    
+    const score = 5 + i / 10;
+
     samples.push({
       id: `sample-${i}`,
       pattern: AgentPattern.SEQUENTIAL_PROCESSING,
@@ -344,7 +348,7 @@ function createSamplesWithTemporalBias(): GoldSample[] {
       tags: [],
     });
   }
-  
+
   return samples;
 }
 
@@ -358,12 +362,12 @@ function createSamplesWithMultipleBiases(): GoldSample[] {
 
 function createSamplesWithSevereBiases(): GoldSample[] {
   const samples: GoldSample[] = [];
-  
+
   // Create samples with extreme biases
   for (let i = 0; i < 30; i++) {
     const length = i < 15 ? 50 : 2000;
     const score = i < 15 ? 3 : 9;
-    
+
     samples.push({
       id: `sample-${i}`,
       pattern: AgentPattern.SEQUENTIAL_PROCESSING,
@@ -384,13 +388,13 @@ function createSamplesWithSevereBiases(): GoldSample[] {
       tags: [],
     });
   }
-  
+
   return samples;
 }
 
 function createBalancedSamples(): GoldSample[] {
   const samples: GoldSample[] = [];
-  
+
   for (let i = 0; i < 60; i++) {
     samples.push({
       id: `sample-${i}`,
@@ -412,7 +416,7 @@ function createBalancedSamples(): GoldSample[] {
       tags: [],
     });
   }
-  
+
   return samples;
 }
 

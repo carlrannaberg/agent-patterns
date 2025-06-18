@@ -62,9 +62,12 @@ describe('RateLimitService', () => {
       const result = await service.checkRateLimit('test-id', config);
 
       expect(result).toBe(false);
-      expect(eventEmitter.emit).toHaveBeenCalledWith('ratelimit.violation', expect.objectContaining({
-        type: ViolationType.REQUEST_LIMIT,
-      }));
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        'ratelimit.violation',
+        expect.objectContaining({
+          type: ViolationType.REQUEST_LIMIT,
+        }),
+      );
     });
 
     it('should track token usage', async () => {
@@ -98,7 +101,7 @@ describe('RateLimitService', () => {
       expect(result1).toBe(false);
 
       // Wait for window to reset
-      await new Promise(resolve => setTimeout(resolve, 1100));
+      await new Promise((resolve) => setTimeout(resolve, 1100));
       const result2 = await service.checkRateLimit('test-id', config);
 
       expect(result2).toBe(true);
@@ -152,12 +155,19 @@ describe('RateLimitService', () => {
 
       await service.checkQuota('test-id', AgentPattern.SEQUENTIAL_PROCESSING, config);
       await service.checkQuota('test-id', AgentPattern.SEQUENTIAL_PROCESSING, config);
-      const result = await service.checkQuota('test-id', AgentPattern.SEQUENTIAL_PROCESSING, config);
+      const result = await service.checkQuota(
+        'test-id',
+        AgentPattern.SEQUENTIAL_PROCESSING,
+        config,
+      );
 
       expect(result).toBe(false);
-      expect(eventEmitter.emit).toHaveBeenCalledWith('ratelimit.violation', expect.objectContaining({
-        type: ViolationType.QUOTA_EXCEEDED,
-      }));
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        'ratelimit.violation',
+        expect.objectContaining({
+          type: ViolationType.QUOTA_EXCEEDED,
+        }),
+      );
     });
 
     it('should handle pattern-specific quotas', async () => {
@@ -168,17 +178,24 @@ describe('RateLimitService', () => {
           evaluations: 50,
         },
         perPattern: new Map([
-          [AgentPattern.SEQUENTIAL_PROCESSING, {
-            requests: 2,
-            tokens: 1000,
-            evaluations: 2,
-          }],
+          [
+            AgentPattern.SEQUENTIAL_PROCESSING,
+            {
+              requests: 2,
+              tokens: 1000,
+              evaluations: 2,
+            },
+          ],
         ]),
       };
 
       await service.checkQuota('test-id', AgentPattern.SEQUENTIAL_PROCESSING, config);
       await service.checkQuota('test-id', AgentPattern.SEQUENTIAL_PROCESSING, config);
-      const result = await service.checkQuota('test-id', AgentPattern.SEQUENTIAL_PROCESSING, config);
+      const result = await service.checkQuota(
+        'test-id',
+        AgentPattern.SEQUENTIAL_PROCESSING,
+        config,
+      );
 
       expect(result).toBe(false);
     });
@@ -193,7 +210,7 @@ describe('RateLimitService', () => {
       };
 
       await service.checkRateLimit('test-id', config);
-      
+
       const start = Date.now();
       await service.waitForRateLimit('test-id', config);
       const duration = Date.now() - start;
@@ -210,7 +227,9 @@ describe('RateLimitService', () => {
 
       await service.checkRateLimit('test-id', config);
 
-      await expect(service.waitForRateLimit('test-id', config, 0)).rejects.toThrow('Rate limit exceeded after 10 attempts');
+      await expect(service.waitForRateLimit('test-id', config, 0)).rejects.toThrow(
+        'Rate limit exceeded after 10 attempts',
+      );
     });
   });
 
@@ -230,10 +249,15 @@ describe('RateLimitService', () => {
 
       const operation = jest.fn();
 
-      await expect(service.trackConcurrent('test-id', operation, 5)).rejects.toThrow('Concurrent limit exceeded');
-      expect(eventEmitter.emit).toHaveBeenCalledWith('ratelimit.violation', expect.objectContaining({
-        type: ViolationType.CONCURRENT_LIMIT,
-      }));
+      await expect(service.trackConcurrent('test-id', operation, 5)).rejects.toThrow(
+        'Concurrent limit exceeded',
+      );
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        'ratelimit.violation',
+        expect.objectContaining({
+          type: ViolationType.CONCURRENT_LIMIT,
+        }),
+      );
     });
 
     it('should decrement concurrent count after operation', async () => {
@@ -241,10 +265,10 @@ describe('RateLimitService', () => {
       const state = service['getOrCreateState']('test-id');
 
       expect(state.concurrent).toBe(0);
-      
+
       const promise = service.trackConcurrent('test-id', operation, 5);
       expect(state.concurrent).toBe(1);
-      
+
       await promise;
       expect(state.concurrent).toBe(0);
     });
@@ -275,8 +299,8 @@ describe('RateLimitService', () => {
       };
 
       const beforeDate = new Date();
-      await new Promise(resolve => setTimeout(resolve, 10));
-      
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
       await service.checkRateLimit('test-id', config);
       await service.checkRateLimit('test-id', config);
 
@@ -313,7 +337,11 @@ describe('RateLimitService', () => {
       await service.checkQuota('test-id', AgentPattern.SEQUENTIAL_PROCESSING, config);
       service.resetQuota('test-id');
 
-      const result = await service.checkQuota('test-id', AgentPattern.SEQUENTIAL_PROCESSING, config);
+      const result = await service.checkQuota(
+        'test-id',
+        AgentPattern.SEQUENTIAL_PROCESSING,
+        config,
+      );
       expect(result).toBe(true);
     });
   });

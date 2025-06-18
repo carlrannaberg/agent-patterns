@@ -121,8 +121,7 @@ export class BatchProcessorService {
       job.completedAt = new Date();
       job.results = results;
       results.performance.endTime = job.completedAt;
-      results.performance.totalDuration = 
-        job.completedAt.getTime() - job.startedAt.getTime();
+      results.performance.totalDuration = job.completedAt.getTime() - job.startedAt.getTime();
 
       this.eventEmitter.emit('batch.job.completed', { job, results });
     }
@@ -160,7 +159,7 @@ export class BatchProcessorService {
       if (job.status === BatchJobStatus.CANCELLED) break;
 
       job.progress.currentPattern = pattern;
-      
+
       for (const suiteId of job.testSuiteIds) {
         if (job.status === BatchJobStatus.CANCELLED) break;
 
@@ -178,7 +177,7 @@ export class BatchProcessorService {
 
   private async executeParallel(job: BatchJob, results: BatchResults): Promise<void> {
     const tasks: Array<{ pattern: AgentPattern; suiteId: string }> = [];
-    
+
     for (const pattern of job.patterns) {
       for (const suiteId of job.testSuiteIds) {
         tasks.push({ pattern, suiteId });
@@ -188,7 +187,7 @@ export class BatchProcessorService {
     job.progress.totalTests = tasks.length;
 
     const chunks = this.chunkArray(tasks, job.config.maxConcurrency);
-    
+
     for (const chunk of chunks) {
       if (job.status === BatchJobStatus.CANCELLED) break;
 
@@ -222,20 +221,19 @@ export class BatchProcessorService {
 
     job.progress.currentTest = `${pattern}-${suiteId}`;
     const testRun = await this.testRunner.run(options);
-    
+
     return testRun;
   }
 
   private updateProgress(job: BatchJob, testRun: TestRun): void {
     job.progress.completedTests++;
-    
-    const failedTests = testRun.results.filter(r => 
-      r.status === 'failed' || r.status === 'error'
+
+    const failedTests = testRun.results.filter(
+      (r) => r.status === 'failed' || r.status === 'error',
     ).length;
-    
+
     job.progress.failedTests += failedTests;
-    job.progress.percentComplete = 
-      (job.progress.completedTests / job.progress.totalTests) * 100;
+    job.progress.percentComplete = (job.progress.completedTests / job.progress.totalTests) * 100;
 
     this.eventEmitter.emit('batch.progress.updated', job);
   }
@@ -246,7 +244,7 @@ export class BatchProcessorService {
     testRun: TestRun,
   ): void {
     let patternResult = results.patternResults.get(pattern);
-    
+
     if (!patternResult) {
       patternResult = {
         pattern,
@@ -261,20 +259,20 @@ export class BatchProcessorService {
     }
 
     patternResult.testsRun += testRun.results.length;
-    patternResult.testsPassed += testRun.results.filter(r => r.status === 'passed').length;
-    patternResult.testsFailed += testRun.results.filter(r => 
-      r.status === 'failed' || r.status === 'error'
+    patternResult.testsPassed += testRun.results.filter((r) => r.status === 'passed').length;
+    patternResult.testsFailed += testRun.results.filter(
+      (r) => r.status === 'failed' || r.status === 'error',
     ).length;
 
     const scores = testRun.results
-      .filter(r => r.evaluationResult?.score !== undefined)
-      .map(r => r.evaluationResult!.score);
-    
+      .filter((r) => r.evaluationResult?.score !== undefined)
+      .map((r) => r.evaluationResult!.score);
+
     if (scores.length > 0) {
       patternResult.averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
     }
 
-    const latencies = testRun.results.map(r => r.duration);
+    const latencies = testRun.results.map((r) => r.duration);
     patternResult.averageLatency = latencies.reduce((a, b) => a + b, 0) / latencies.length;
   }
 
@@ -303,27 +301,26 @@ export class BatchProcessorService {
   }
 
   private updateBatchSummary(results: BatchResults): void {
-    const allResults = results.testRuns.flatMap(run => run.results);
-    
+    const allResults = results.testRuns.flatMap((run) => run.results);
+
     results.summary = {
       totalTests: allResults.length,
-      passedTests: allResults.filter(r => r.status === 'passed').length,
-      failedTests: allResults.filter(r => r.status === 'failed').length,
-      errorTests: allResults.filter(r => r.status === 'error').length,
-      skippedTests: allResults.filter(r => r.status === 'skipped').length,
+      passedTests: allResults.filter((r) => r.status === 'passed').length,
+      failedTests: allResults.filter((r) => r.status === 'failed').length,
+      errorTests: allResults.filter((r) => r.status === 'error').length,
+      skippedTests: allResults.filter((r) => r.status === 'skipped').length,
       successRate: 0,
       averageScore: 0,
       duration: results.performance.totalDuration,
     };
 
     if (results.summary.totalTests > 0) {
-      results.summary.successRate = 
-        results.summary.passedTests / results.summary.totalTests;
+      results.summary.successRate = results.summary.passedTests / results.summary.totalTests;
 
       const scores = allResults
-        .filter(r => r.evaluationResult?.score !== undefined)
-        .map(r => r.evaluationResult!.score);
-      
+        .filter((r) => r.evaluationResult?.score !== undefined)
+        .map((r) => r.evaluationResult!.score);
+
       if (scores.length > 0) {
         results.summary.averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
       }
@@ -355,7 +352,7 @@ export class BatchProcessorService {
     setInterval(async () => {
       if (!this.isProcessing && this.jobQueue.length > 0) {
         this.isProcessing = true;
-        
+
         try {
           const job = this.getNextJob();
           if (job && job.status === BatchJobStatus.PENDING) {
@@ -373,7 +370,7 @@ export class BatchProcessorService {
 
   private getNextJob(): BatchJob | undefined {
     const strategy = this.jobQueue[0]?.config.prioritization || PrioritizationStrategy.FIFO;
-    
+
     switch (strategy) {
       case PrioritizationStrategy.FIFO:
         return this.jobQueue.shift();

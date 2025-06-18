@@ -44,14 +44,14 @@ export class BiasDetectionService {
 
   constructor(
     private readonly goldDatasetService: GoldDatasetService,
-    private readonly evaluationService: EvaluationService
+    private readonly evaluationService: EvaluationService,
   ) {}
 
   async detectBias(pattern: AgentPattern): Promise<BiasReport> {
     this.logger.log(`Starting bias detection for pattern: ${pattern}`);
 
     const samples = await this.goldDatasetService.getPatternSamples(pattern);
-    
+
     const lengthBias = await this.detectLengthBias(samples, pattern);
     const positionBias = await this.detectPositionBias(samples, pattern);
     const complexityBias = await this.detectComplexityBias(samples, pattern);
@@ -80,12 +80,9 @@ export class BiasDetectionService {
     };
   }
 
-  private async detectLengthBias(
-    samples: any[],
-    pattern: AgentPattern
-  ): Promise<BiasMetric> {
-    const scoredSamples = samples.filter(s => s.humanScores.length > 0);
-    
+  private async detectLengthBias(samples: any[], pattern: AgentPattern): Promise<BiasMetric> {
+    const scoredSamples = samples.filter((s) => s.humanScores.length > 0);
+
     if (scoredSamples.length < 10) {
       return {
         score: 0,
@@ -93,9 +90,9 @@ export class BiasDetectionService {
       };
     }
 
-    const lengths = scoredSamples.map(s => s.expectedOutput?.content.length || 0);
-    const scores = scoredSamples.map(s => 
-      math.mean(s.humanScores.map((hs: any) => hs.scores.overall))
+    const lengths = scoredSamples.map((s) => s.expectedOutput?.content.length || 0);
+    const scores = scoredSamples.map((s) =>
+      math.mean(s.humanScores.map((hs: any) => hs.scores.overall)),
     );
 
     // Calculate correlation between length and score
@@ -121,13 +118,10 @@ export class BiasDetectionService {
     };
   }
 
-  private async detectPositionBias(
-    samples: any[],
-    pattern: AgentPattern
-  ): Promise<BiasMetric> {
+  private async detectPositionBias(samples: any[], pattern: AgentPattern): Promise<BiasMetric> {
     // Detect if evaluation scores are influenced by position in evaluation order
     const evaluationsByPosition: Record<number, number[]> = {};
-    
+
     // Group scores by evaluation position
     samples.forEach((sample, position) => {
       if (sample.humanScores.length > 0) {
@@ -140,14 +134,12 @@ export class BiasDetectionService {
     });
 
     // Calculate variance across positions
-    const positionMeans = Object.values(evaluationsByPosition).map(scores => 
-      math.mean(scores) as number
-    );
-    
+    const positionMeans = Object.values(evaluationsByPosition).map((scores) => math.mean(scores));
+
     const variance = math.var(positionMeans) as number;
     const maxDiff = Math.max(...positionMeans) - Math.min(...positionMeans);
 
-    const biasScore = Math.min(1, variance * maxDiff / 10);
+    const biasScore = Math.min(1, (variance * maxDiff) / 10);
 
     return {
       score: biasScore,
@@ -160,14 +152,11 @@ export class BiasDetectionService {
     };
   }
 
-  private async detectComplexityBias(
-    samples: any[],
-    pattern: AgentPattern
-  ): Promise<BiasMetric> {
+  private async detectComplexityBias(samples: any[], pattern: AgentPattern): Promise<BiasMetric> {
     const complexityGroups = {
-      low: samples.filter(s => s.complexity === 'low' && s.humanScores.length > 0),
-      medium: samples.filter(s => s.complexity === 'medium' && s.humanScores.length > 0),
-      high: samples.filter(s => s.complexity === 'high' && s.humanScores.length > 0),
+      low: samples.filter((s) => s.complexity === 'low' && s.humanScores.length > 0),
+      medium: samples.filter((s) => s.complexity === 'medium' && s.humanScores.length > 0),
+      high: samples.filter((s) => s.complexity === 'high' && s.humanScores.length > 0),
     };
 
     const groupMeans = {
@@ -177,18 +166,24 @@ export class BiasDetectionService {
     };
 
     // ANOVA-like test for complexity bias
-    const grandMean = math.mean(Object.values(groupMeans)) as number;
-    const betweenGroupVar = Object.values(groupMeans).reduce((sum, mean) => 
-      sum + Math.pow(mean - grandMean, 2), 0
-    ) / 2;
+    const grandMean = math.mean(Object.values(groupMeans));
+    const betweenGroupVar =
+      Object.values(groupMeans).reduce((sum, mean) => sum + Math.pow(mean - grandMean, 2), 0) / 2;
 
-    const withinGroupVar = Object.entries(complexityGroups).reduce((sum, [_, group]) => {
-      const groupMean = groupMeans[_ as keyof typeof groupMeans];
-      return sum + group.reduce((s, sample) => {
-        const sampleScore = math.mean(sample.humanScores.map((hs: any) => hs.scores.overall)) as number;
-        return s + Math.pow(sampleScore - groupMean, 2);
-      }, 0);
-    }, 0) / (samples.length - 3);
+    const withinGroupVar =
+      Object.entries(complexityGroups).reduce((sum, [_, group]) => {
+        const groupMean = groupMeans[_ as keyof typeof groupMeans];
+        return (
+          sum +
+          group.reduce((s, sample) => {
+            const sampleScore = math.mean(
+              sample.humanScores.map((hs: any) => hs.scores.overall),
+            ) as number;
+            return s + Math.pow(sampleScore - groupMean, 2);
+          }, 0)
+        );
+      }, 0) /
+      (samples.length - 3);
 
     const fStatistic = betweenGroupVar / Math.max(withinGroupVar, 0.01);
     const biasScore = Math.min(1, fStatistic / 10);
@@ -211,9 +206,9 @@ export class BiasDetectionService {
 
   private async detectEvaluatorBias(samples: any[]): Promise<BiasMetric> {
     const evaluatorScores: Record<string, number[]> = {};
-    
+
     // Collect scores by evaluator
-    samples.forEach(sample => {
+    samples.forEach((sample) => {
       sample.humanScores.forEach((score: any) => {
         if (!evaluatorScores[score.evaluatorId]) {
           evaluatorScores[score.evaluatorId] = [];
@@ -222,10 +217,13 @@ export class BiasDetectionService {
       });
     });
 
-    const evaluatorMeans = Object.entries(evaluatorScores).reduce((acc, [id, scores]) => ({
-      ...acc,
-      [id]: math.mean(scores) as number,
-    }), {});
+    const evaluatorMeans = Object.entries(evaluatorScores).reduce(
+      (acc, [id, scores]) => ({
+        ...acc,
+        [id]: math.mean(scores),
+      }),
+      {},
+    );
 
     const meanScores = Object.values(evaluatorMeans);
     const variance = math.var(meanScores) as number;
@@ -234,8 +232,8 @@ export class BiasDetectionService {
     // Check for outlier evaluators
     const mean = math.mean(meanScores) as number;
     const std = math.std(meanScores) as number;
-    const outliers = Object.entries(evaluatorMeans).filter(([_, evalMean]) => 
-      Math.abs(evalMean - mean) > 2 * std
+    const outliers = Object.entries(evaluatorMeans).filter(
+      ([_, evalMean]) => Math.abs(evalMean - mean) > 2 * std,
     );
 
     const biasScore = Math.min(1, (variance * range) / 10 + outliers.length * 0.2);
@@ -254,8 +252,8 @@ export class BiasDetectionService {
 
   private async detectTemporalBias(samples: any[]): Promise<BiasMetric> {
     const timedSamples = samples
-      .filter(s => s.humanScores.length > 0)
-      .map(s => ({
+      .filter((s) => s.humanScores.length > 0)
+      .map((s) => ({
         timestamp: new Date(s.createdAt).getTime(),
         score: math.mean(s.humanScores.map((hs: any) => hs.scores.overall)) as number,
       }))
@@ -271,11 +269,11 @@ export class BiasDetectionService {
     // Split into time windows
     const windowSize = Math.floor(timedSamples.length / 5);
     const windows = [];
-    
+
     for (let i = 0; i < timedSamples.length; i += windowSize) {
       const window = timedSamples.slice(i, i + windowSize);
       if (window.length > 0) {
-        windows.push(math.mean(window.map(s => s.score)) as number);
+        windows.push(math.mean(window.map((s) => s.score)));
       }
     }
 
@@ -318,7 +316,7 @@ export class BiasDetectionService {
     // Simplified p-value calculation for correlation
     const t = r * Math.sqrt((n - 2) / (1 - r * r));
     const df = n - 2;
-    
+
     // Approximate p-value using t-distribution
     // This is a simplified calculation
     const pValue = 2 * (1 - this.tCDF(Math.abs(t), df));
@@ -330,7 +328,7 @@ export class BiasDetectionService {
     const x = df / (df + t * t);
     const a = df / 2;
     const b = 0.5;
-    
+
     // Beta distribution approximation
     return 0.5 + 0.5 * Math.sign(t) * (1 - this.incompleteBeta(x, a, b));
   }
@@ -350,13 +348,13 @@ export class BiasDetectionService {
     ];
 
     lengths.forEach((length, i) => {
-      const bin = bins.find(b => length >= b.range[0] && length < b.range[1]);
+      const bin = bins.find((b) => length >= b.range[0] && length < b.range[1]);
       if (bin) {
         bin.scores.push(scores[i]);
       }
     });
 
-    return bins.map(bin => ({
+    return bins.map((bin) => ({
       ...bin,
       mean: bin.scores.length > 0 ? math.mean(bin.scores) : 0,
       count: bin.scores.length,
@@ -364,25 +362,25 @@ export class BiasDetectionService {
   }
 
   private calculateBinVariance(bins: any[]): number {
-    const means = bins.filter(b => b.count > 0).map(b => b.mean);
+    const means = bins.filter((b) => b.count > 0).map((b) => b.mean);
     return means.length > 1 ? (math.var(means) as number) : 0;
   }
 
   private calculateGroupMean(group: any[]): number {
     if (group.length === 0) return 0;
-    const scores = group.map(s => 
-      math.mean(s.humanScores.map((hs: any) => hs.scores.overall)) as number
+    const scores = group.map(
+      (s) => math.mean(s.humanScores.map((hs: any) => hs.scores.overall)) as number,
     );
-    return math.mean(scores) as number;
+    return math.mean(scores);
   }
 
   private calculateTrend(values: number[]): number {
     if (values.length < 2) return 0;
-    
+
     const x = Array.from({ length: values.length }, (_, i) => i);
     const correlation = this.calculatePearsonCorrelation(x, values);
-    
-    return correlation * (values[values.length - 1] - values[0]) / values[0];
+
+    return (correlation * (values[values.length - 1] - values[0])) / values[0];
   }
 
   private calculateOverallBias(biasTypes: Record<string, BiasMetric>): number {
@@ -474,28 +472,28 @@ export class BiasDetectionService {
 
   private generateRecommendations(
     biasTypes: Record<string, BiasMetric>,
-    alerts: BiasAlert[]
+    alerts: BiasAlert[],
   ): string[] {
     const recommendations: string[] = [];
 
     if (biasTypes.length.score > this.alertThresholds.medium) {
       recommendations.push(
         'Implement length normalization in scoring to reduce length bias',
-        'Review scoring rubrics to ensure they do not favor specific response lengths'
+        'Review scoring rubrics to ensure they do not favor specific response lengths',
       );
     }
 
     if (biasTypes.position.score > this.alertThresholds.medium) {
       recommendations.push(
         'Randomize evaluation order for each evaluator',
-        'Implement breaks between evaluation sessions to reduce fatigue effects'
+        'Implement breaks between evaluation sessions to reduce fatigue effects',
       );
     }
 
     if (biasTypes.complexity.score > this.alertThresholds.medium) {
       recommendations.push(
         'Ensure balanced representation of complexity levels in training',
-        'Consider separate scoring scales for different complexity levels'
+        'Consider separate scoring scales for different complexity levels',
       );
     }
 
@@ -503,7 +501,7 @@ export class BiasDetectionService {
       recommendations.push(
         'Provide additional training for outlier evaluators',
         'Implement calibration sessions to align evaluator standards',
-        'Consider weighted averaging based on evaluator consistency'
+        'Consider weighted averaging based on evaluator consistency',
       );
     }
 
@@ -511,13 +509,13 @@ export class BiasDetectionService {
       recommendations.push(
         'Schedule regular recalibration sessions',
         'Monitor for concept drift in evaluation criteria',
-        'Implement sliding window analysis for temporal patterns'
+        'Implement sliding window analysis for temporal patterns',
       );
     }
 
-    if (alerts.filter(a => a.severity === 'high').length >= 2) {
+    if (alerts.filter((a) => a.severity === 'high').length >= 2) {
       recommendations.unshift(
-        'URGENT: Multiple high-severity biases detected. Immediate recalibration recommended.'
+        'URGENT: Multiple high-severity biases detected. Immediate recalibration recommended.',
       );
     }
 

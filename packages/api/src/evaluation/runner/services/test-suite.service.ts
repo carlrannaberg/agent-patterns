@@ -8,9 +8,7 @@ import { TestCaseService } from '../../services/test-case.service';
 export class TestSuiteService {
   private readonly suites = new Map<string, TestSuite>();
 
-  constructor(
-    private readonly testCaseService: TestCaseService,
-  ) {
+  constructor(private readonly testCaseService: TestCaseService) {
     this.initializeDefaultSuites();
   }
 
@@ -60,7 +58,7 @@ export class TestSuiteService {
 
   async createDefaultSuite(patterns: AgentPattern[]): Promise<TestSuite> {
     const testCases = await this.generateDefaultTestCases(patterns);
-    
+
     return this.createSuite({
       name: 'Ad-hoc Test Suite',
       description: 'Automatically generated test suite',
@@ -75,14 +73,16 @@ export class TestSuiteService {
 
     for (const pattern of patterns) {
       const patternTestCases = await this.testCaseService.getTestCasesForPattern(pattern);
-      testCases.push(...patternTestCases.map(tc => ({
-        id: uuidv4(),
-        pattern,
-        input: tc.input,
-        expectedOutput: tc.expectedOutput,
-        metadata: tc.metadata,
-        timeout: 30000,
-      })));
+      testCases.push(
+        ...patternTestCases.map((tc) => ({
+          id: uuidv4(),
+          pattern,
+          input: tc.input,
+          expectedOutput: tc.expectedOutput,
+          metadata: tc.metadata,
+          timeout: 30000,
+        })),
+      );
     }
 
     return testCases;

@@ -117,11 +117,13 @@ describe('TestRunnerService', () => {
       const mockSuite = {
         id: 'test-suite',
         name: 'Test Suite',
-        testCases: Array(10).fill(null).map((_, i) => ({
-          id: `test-${i}`,
-          pattern: AgentPattern.SEQUENTIAL_PROCESSING,
-          input: { text: `test-${i}` },
-        })),
+        testCases: Array(10)
+          .fill(null)
+          .map((_, i) => ({
+            id: `test-${i}`,
+            pattern: AgentPattern.SEQUENTIAL_PROCESSING,
+            input: { text: `test-${i}` },
+          })),
         config: {
           parallel: true,
           maxConcurrency: 5,
@@ -163,7 +165,7 @@ describe('TestRunnerService', () => {
       };
 
       testSuiteService.getSuite.mockResolvedValue(mockSuite);
-      
+
       let attempts = 0;
       evaluationService.evaluatePattern.mockImplementation(async () => {
         attempts++;
@@ -192,7 +194,7 @@ describe('TestRunnerService', () => {
 
       testSuiteService.getSuite.mockResolvedValue(mockSuite);
       evaluationService.evaluatePattern.mockImplementation(
-        () => new Promise(resolve => setTimeout(resolve, 1000)),
+        () => new Promise((resolve) => setTimeout(resolve, 1000)),
       );
 
       const runPromise = service.run({ suiteId: 'test-suite' });
@@ -206,7 +208,9 @@ describe('TestRunnerService', () => {
     });
 
     it('should throw error for non-existent run', async () => {
-      await expect(service.cancel('non-existent')).rejects.toThrow('Test run non-existent not found');
+      await expect(service.cancel('non-existent')).rejects.toThrow(
+        'Test run non-existent not found',
+      );
     });
   });
 
@@ -232,7 +236,9 @@ describe('TestRunnerService', () => {
     });
 
     it('should throw error for non-existent run', async () => {
-      await expect(service.getStatus('non-existent')).rejects.toThrow('Test run non-existent not found');
+      await expect(service.getStatus('non-existent')).rejects.toThrow(
+        'Test run non-existent not found',
+      );
     });
   });
 });

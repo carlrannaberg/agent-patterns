@@ -36,9 +36,7 @@ export class RetryService {
   private readonly logger = new Logger(RetryService.name);
   private readonly circuitBreakers = new Map<string, CircuitBreaker>();
 
-  constructor(
-    private readonly eventEmitter: EventEmitter2,
-  ) {}
+  constructor(private readonly eventEmitter: EventEmitter2) {}
 
   async executeWithRetry<T>(
     operation: () => Promise<T>,
@@ -60,7 +58,7 @@ export class RetryService {
     for (let attempt = 1; attempt <= retryConfig.maxAttempts; attempt++) {
       try {
         const result = await operation();
-        
+
         return {
           success: true,
           result,
@@ -69,16 +67,14 @@ export class RetryService {
         };
       } catch (error) {
         lastError = error;
-        
+
         if (!retryConfig.retryCondition(error) || attempt === retryConfig.maxAttempts) {
           break;
         }
 
         const delay = this.calculateDelay(attempt, retryConfig);
-        
-        this.logger.debug(
-          `Retry attempt ${attempt}/${retryConfig.maxAttempts} after ${delay}ms`,
-        );
+
+        this.logger.debug(`Retry attempt ${attempt}/${retryConfig.maxAttempts} after ${delay}ms`);
 
         if (retryConfig.onRetry) {
           retryConfig.onRetry(error, attempt);
@@ -114,17 +110,17 @@ export class RetryService {
       if (Date.now() - breaker.lastFailureTime < breaker.config.resetTimeout) {
         throw new Error(`Circuit breaker is OPEN for ${key}`);
       }
-      
+
       breaker.state = CircuitBreakerState.HALF_OPEN;
       breaker.halfOpenAttempts = 0;
     }
 
     try {
       const result = await operation();
-      
+
       if (breaker.state === CircuitBreakerState.HALF_OPEN) {
         breaker.halfOpenAttempts++;
-        
+
         if (breaker.halfOpenAttempts >= breaker.config.halfOpenMaxAttempts) {
           breaker.state = CircuitBreakerState.CLOSED;
           breaker.failures = 0;
@@ -134,12 +130,12 @@ export class RetryService {
       } else if (breaker.state === CircuitBreakerState.CLOSED) {
         breaker.failures = 0;
       }
-      
+
       return result;
     } catch (error) {
       breaker.failures++;
       breaker.lastFailureTime = Date.now();
-      
+
       if (breaker.state === CircuitBreakerState.HALF_OPEN) {
         breaker.state = CircuitBreakerState.OPEN;
         this.logger.warn(`Circuit breaker for ${key} reopened after half-open failure`);
@@ -149,7 +145,7 @@ export class RetryService {
         this.logger.warn(`Circuit breaker for ${key} opened after ${breaker.failures} failures`);
         this.eventEmitter.emit('circuitbreaker.opened', { key, reason: 'threshold-exceeded' });
       }
-      
+
       throw error;
     }
   }
@@ -175,15 +171,17 @@ export class RetryService {
         return await operation();
       } catch (error) {
         lastError = error;
-        
+
         if (attempt === maxRetries || !shouldRetry(error, attempt)) {
           throw error;
         }
 
         const delay = Math.min(baseDelay * Math.pow(2, attempt), maxDelay);
         const jitteredDelay = delay + Math.random() * delay * 0.1;
-        
-        this.logger.debug(`Retrying after ${jitteredDelay}ms (attempt ${attempt + 1}/${maxRetries})`);
+
+        this.logger.debug(
+          `Retrying after ${jitteredDelay}ms (attempt ${attempt + 1}/${maxRetries})`,
+        );
         await this.delay(jitteredDelay);
       }
     }
@@ -238,7 +236,7 @@ export class RetryService {
     config: Partial<CircuitBreakerConfig>,
   ): CircuitBreaker {
     let breaker = this.circuitBreakers.get(key);
-    
+
     if (!breaker) {
       breaker = {
         state: CircuitBreakerState.CLOSED,
@@ -253,12 +251,12 @@ export class RetryService {
       };
       this.circuitBreakers.set(key, breaker);
     }
-    
+
     return breaker;
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

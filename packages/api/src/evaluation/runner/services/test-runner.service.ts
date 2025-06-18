@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { v4 as uuidv4 } from 'uuid';
-import { 
-  TestRunner, 
-  TestRun, 
-  TestRunOptions, 
-  TestRunStatus, 
-  TestSuite, 
+import {
+  TestRunner,
+  TestRun,
+  TestRunOptions,
+  TestRunStatus,
+  TestSuite,
   TestCase,
   TestRunResult,
   TestResultStatus,
@@ -30,7 +30,7 @@ export class TestRunnerService implements TestRunner {
   async run(options: TestRunOptions): Promise<TestRun> {
     const runId = uuidv4();
     const suite = await this.getOrCreateSuite(options);
-    
+
     const testRun: TestRun = {
       id: runId,
       suiteId: suite.id,
@@ -101,12 +101,12 @@ export class TestRunnerService implements TestRunner {
     let filtered = [...testCases];
 
     if (options.patterns && options.patterns.length > 0) {
-      filtered = filtered.filter(tc => options.patterns.includes(tc.pattern));
+      filtered = filtered.filter((tc) => options.patterns.includes(tc.pattern));
     }
 
     if (options.tags && options.tags.length > 0) {
-      filtered = filtered.filter(tc => 
-        tc.metadata?.tags?.some((tag: string) => options.tags.includes(tag))
+      filtered = filtered.filter((tc) =>
+        tc.metadata?.tags?.some((tag: string) => options.tags.includes(tag)),
       );
     }
 
@@ -114,9 +114,9 @@ export class TestRunnerService implements TestRunner {
   }
 
   private async runSequential(
-    testRun: TestRun, 
-    testCases: TestCase[], 
-    suite: TestSuite
+    testRun: TestRun,
+    testCases: TestCase[],
+    suite: TestSuite,
   ): Promise<void> {
     for (const testCase of testCases) {
       if (testRun.status === TestRunStatus.CANCELLED) {
@@ -130,9 +130,9 @@ export class TestRunnerService implements TestRunner {
   }
 
   private async runParallel(
-    testRun: TestRun, 
-    testCases: TestCase[], 
-    suite: TestSuite
+    testRun: TestRun,
+    testCases: TestCase[],
+    suite: TestSuite,
   ): Promise<void> {
     const maxConcurrency = suite.config.maxConcurrency || 5;
     const chunks = this.chunkArray(testCases, maxConcurrency);
@@ -142,20 +142,17 @@ export class TestRunnerService implements TestRunner {
         break;
       }
 
-      const promises = chunk.map(testCase => this.runTestCase(testCase, suite));
+      const promises = chunk.map((testCase) => this.runTestCase(testCase, suite));
       const results = await Promise.all(promises);
-      
-      results.forEach(result => {
+
+      results.forEach((result) => {
         testRun.results.push(result);
         this.eventEmitter.emit('test.case.completed', { testRun, result });
       });
     }
   }
 
-  private async runTestCase(
-    testCase: TestCase, 
-    suite: TestSuite
-  ): Promise<TestRunResult> {
+  private async runTestCase(testCase: TestCase, suite: TestSuite): Promise<TestRunResult> {
     const startedAt = new Date();
     let retryCount = 0;
     let lastError: TestError | undefined;
@@ -218,6 +215,6 @@ export class TestRunnerService implements TestRunner {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

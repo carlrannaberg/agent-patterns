@@ -21,7 +21,7 @@ export class RateLimitService {
   private readonly quotaUsage = new Map<string, Map<QuotaPeriod, QuotaUsage>>();
   private readonly violations: RateLimitViolation[] = [];
   private readonly tokenBuckets = new Map<string, TokenBucket>();
-  
+
   private adaptiveConfig: AdaptiveRateLimitConfig = {
     enabled: true,
     minRequests: 10,
@@ -35,9 +35,7 @@ export class RateLimitService {
   private currentLimits = new Map<string, number>();
   private performanceMetrics = new Map<string, PerformanceMetric>();
 
-  constructor(
-    private readonly eventEmitter: EventEmitter2,
-  ) {
+  constructor(private readonly eventEmitter: EventEmitter2) {
     this.startAdaptiveAdjustment();
   }
 
@@ -52,16 +50,16 @@ export class RateLimitService {
     switch (config.strategy) {
       case RateLimitStrategy.SLIDING_WINDOW:
         return this.checkSlidingWindow(identifier, state, config, now, tokenCount);
-      
+
       case RateLimitStrategy.FIXED_WINDOW:
         return this.checkFixedWindow(identifier, state, config, now, tokenCount);
-      
+
       case RateLimitStrategy.TOKEN_BUCKET:
         return this.checkTokenBucket(identifier, config, tokenCount);
-      
+
       case RateLimitStrategy.LEAKY_BUCKET:
         return this.checkLeakyBucket(identifier, config, tokenCount);
-      
+
       default:
         throw new Error(`Unknown rate limit strategy: ${config.strategy}`);
     }
@@ -78,18 +76,19 @@ export class RateLimitService {
 
     for (const [period, limit] of Object.entries(config)) {
       if (period === 'perPattern') continue;
-      
+
       const quotaPeriod = this.getPeriodEnum(period);
       const usage = this.getOrCreateUsage(usageMap, quotaPeriod, limit as QuotaLimit);
-      
+
       if (this.isQuotaPeriodExpired(usage, now)) {
         this.resetQuotaUsage(usage, limit as QuotaLimit, now);
       }
 
-      if (usage.requests + 1 > usage.remaining.requests ||
-          usage.tokens + tokenCount > usage.remaining.tokens ||
-          usage.evaluations + 1 > usage.remaining.evaluations) {
-        
+      if (
+        usage.requests + 1 > usage.remaining.requests ||
+        usage.tokens + tokenCount > usage.remaining.tokens ||
+        usage.evaluations + 1 > usage.remaining.evaluations
+      ) {
         this.recordViolation({
           timestamp: now,
           type: ViolationType.QUOTA_EXCEEDED,
@@ -98,15 +97,17 @@ export class RateLimitService {
           pattern: pattern,
           metadata: { period, identifier },
         });
-        
+
         return false;
       }
     }
 
     if (config.perPattern) {
       const patternLimit = config.perPattern.get(pattern);
-      if (patternLimit && 
-          !await this.checkPatternQuota(identifier, pattern, patternLimit, tokenCount)) {
+      if (
+        patternLimit &&
+        !(await this.checkPatternQuota(identifier, pattern, patternLimit, tokenCount))
+      ) {
         return false;
       }
     }
@@ -151,12 +152,12 @@ export class RateLimitService {
         attempted: state.concurrent + 1,
         metadata: { identifier },
       });
-      
+
       throw new Error(`Concurrent limit exceeded: ${state.concurrent}/${maxConcurrent}`);
     }
 
     state.concurrent++;
-    
+
     try {
       return await operation();
     } finally {
@@ -166,7 +167,7 @@ export class RateLimitService {
 
   getViolations(since?: Date): RateLimitViolation[] {
     if (since) {
-      return this.violations.filter(v => v.timestamp >= since);
+      return this.violations.filter((v) => v.timestamp >= since);
     }
     return [...this.violations];
   }
@@ -194,7 +195,7 @@ export class RateLimitService {
     } else {
       this.quotaUsage.delete(identifier);
     }
-    
+
     this.logger.log(`Quota reset for ${identifier} ${period || 'all periods'}`);
   }
 
@@ -206,13 +207,16 @@ export class RateLimitService {
     tokenCount: number,
   ): boolean {
     const windowStart = now - config.windowMs;
-    
+
     if (state.windowStart.getTime() < windowStart) {
       const timePassed = now - state.windowStart.getTime();
       const windowsPassed = timePassed / config.windowMs;
-      
+
       state.requests = Math.max(0, state.requests - Math.floor(windowsPassed * config.maxRequests));
-      state.tokens = Math.max(0, state.tokens - Math.floor(windowsPassed * (config.maxTokens || 0)));
+      state.tokens = Math.max(
+        0,
+        state.tokens - Math.floor(windowsPassed * (config.maxTokens || 0)),
+      );
       state.windowStart = new Date(windowStart);
     }
 
@@ -243,7 +247,7 @@ export class RateLimitService {
     state.requests++;
     state.tokens += tokenCount;
     state.lastRequest = new Date();
-    
+
     return true;
   }
 
@@ -287,7 +291,7 @@ export class RateLimitService {
     state.requests++;
     state.tokens += tokenCount;
     state.lastRequest = new Date();
-    
+
     return true;
   }
 
@@ -297,7 +301,7 @@ export class RateLimitService {
     tokenCount: number,
   ): boolean {
     let bucket = this.tokenBuckets.get(identifier);
-    
+
     if (!bucket) {
       bucket = {
         tokens: config.maxRequests,
@@ -314,7 +318,7 @@ export class RateLimitService {
     bucket.lastRefill = now;
 
     const requiredTokens = Math.max(1, tokenCount);
-    
+
     if (bucket.tokens < requiredTokens) {
       this.recordViolation({
         timestamp: new Date(),
@@ -341,7 +345,7 @@ export class RateLimitService {
 
   private getOrCreateState(identifier: string): RateLimitState {
     let state = this.rateLimitStates.get(identifier);
-    
+
     if (!state) {
       state = {
         requests: 0,
@@ -353,18 +357,18 @@ export class RateLimitService {
       };
       this.rateLimitStates.set(identifier, state);
     }
-    
+
     return state;
   }
 
   private getOrCreateQuotaUsage(identifier: string): Map<QuotaPeriod, QuotaUsage> {
     let usageMap = this.quotaUsage.get(identifier);
-    
+
     if (!usageMap) {
       usageMap = new Map();
       this.quotaUsage.set(identifier, usageMap);
     }
-    
+
     return usageMap;
   }
 
@@ -374,7 +378,7 @@ export class RateLimitService {
     limit: QuotaLimit,
   ): QuotaUsage {
     let usage = usageMap.get(period);
-    
+
     if (!usage) {
       usage = {
         period,
@@ -386,7 +390,7 @@ export class RateLimitService {
       };
       usageMap.set(period, usage);
     }
-    
+
     return usage;
   }
 
@@ -411,10 +415,11 @@ export class RateLimitService {
     const usageMap = this.getOrCreateQuotaUsage(key);
     const usage = this.getOrCreateUsage(usageMap, QuotaPeriod.DAILY, limit);
 
-    if (usage.requests + 1 > limit.requests ||
-        usage.tokens + tokenCount > limit.tokens ||
-        usage.evaluations + 1 > limit.evaluations) {
-      
+    if (
+      usage.requests + 1 > limit.requests ||
+      usage.tokens + tokenCount > limit.tokens ||
+      usage.evaluations + 1 > limit.evaluations
+    ) {
       this.recordViolation({
         timestamp: new Date(),
         type: ViolationType.QUOTA_EXCEEDED,
@@ -423,7 +428,7 @@ export class RateLimitService {
         pattern: pattern,
         metadata: { identifier, patternQuota: true },
       });
-      
+
       return false;
     }
 
@@ -444,7 +449,7 @@ export class RateLimitService {
 
   private getResetTime(period: QuotaPeriod, from: Date = new Date()): Date {
     const resetDate = new Date(from);
-    
+
     switch (period) {
       case QuotaPeriod.HOURLY:
         resetDate.setHours(resetDate.getHours() + 1, 0, 0, 0);
@@ -458,7 +463,7 @@ export class RateLimitService {
         resetDate.setHours(0, 0, 0, 0);
         break;
     }
-    
+
     return resetDate;
   }
 
@@ -477,11 +482,11 @@ export class RateLimitService {
 
   private recordViolation(violation: RateLimitViolation): void {
     this.violations.push(violation);
-    
+
     if (this.violations.length > 10000) {
       this.violations.shift();
     }
-    
+
     this.eventEmitter.emit('ratelimit.violation', violation);
   }
 
@@ -515,12 +520,12 @@ export class RateLimitService {
         if (errorRate > this.adaptiveConfig.errorThreshold) {
           newLimit = Math.max(
             this.adaptiveConfig.minRequests,
-            Math.floor(limit * (1 - this.adaptiveConfig.adjustmentFactor))
+            Math.floor(limit * (1 - this.adaptiveConfig.adjustmentFactor)),
           );
         } else if (successRate > this.adaptiveConfig.successThreshold) {
           newLimit = Math.min(
             this.adaptiveConfig.maxRequests,
-            Math.ceil(limit * (1 + this.adaptiveConfig.adjustmentFactor))
+            Math.ceil(limit * (1 + this.adaptiveConfig.adjustmentFactor)),
           );
         }
 
@@ -537,7 +542,7 @@ export class RateLimitService {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

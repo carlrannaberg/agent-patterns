@@ -131,14 +131,12 @@ describe('BatchProcessorService', () => {
         { errorHandling: ErrorHandlingStrategy.CONTINUE },
       );
 
-      testRunner.run
-        .mockRejectedValueOnce(new Error('Test error'))
-        .mockResolvedValueOnce({
-          id: 'test-run-2',
-          status: TestRunStatus.COMPLETED,
-          results: [{ status: 'passed', evaluationResult: { score: 0.9 }, duration: 100 }],
-          duration: 100,
-        });
+      testRunner.run.mockRejectedValueOnce(new Error('Test error')).mockResolvedValueOnce({
+        id: 'test-run-2',
+        status: TestRunStatus.COMPLETED,
+        results: [{ status: 'passed', evaluationResult: { score: 0.9 }, duration: 100 }],
+        duration: 100,
+      });
 
       const results = await service.executeBatch(job.id);
 
@@ -162,7 +160,9 @@ describe('BatchProcessorService', () => {
     });
 
     it('should throw error for non-existent job', async () => {
-      await expect(service.executeBatch('non-existent')).rejects.toThrow('Batch job non-existent not found');
+      await expect(service.executeBatch('non-existent')).rejects.toThrow(
+        'Batch job non-existent not found',
+      );
     });
   });
 
@@ -181,7 +181,9 @@ describe('BatchProcessorService', () => {
     });
 
     it('should throw error for non-existent job', async () => {
-      await expect(service.cancelBatch('non-existent')).rejects.toThrow('Batch job non-existent not found');
+      await expect(service.cancelBatch('non-existent')).rejects.toThrow(
+        'Batch job non-existent not found',
+      );
     });
   });
 
@@ -201,7 +203,9 @@ describe('BatchProcessorService', () => {
     });
 
     it('should throw error for non-existent job', async () => {
-      await expect(service.getBatchStatus('non-existent')).rejects.toThrow('Batch job non-existent not found');
+      await expect(service.getBatchStatus('non-existent')).rejects.toThrow(
+        'Batch job non-existent not found',
+      );
     });
   });
 

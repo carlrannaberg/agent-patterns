@@ -3,11 +3,7 @@ import { promises as fs } from 'fs';
 import { join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { AgentPattern } from '../enums/agent-pattern.enum';
-import { 
-  GoldSample, 
-  GoldDatasetMetadata, 
-  HumanScore 
-} from '../interfaces/gold-dataset.interface';
+import { GoldSample, GoldDatasetMetadata, HumanScore } from '../interfaces/gold-dataset.interface';
 
 @Injectable()
 export class GoldDatasetService {
@@ -29,7 +25,7 @@ export class GoldDatasetService {
     expectedOutput?: GoldSample['expectedOutput'],
     complexity: GoldSample['complexity'] = 'medium',
     edgeCase = false,
-    tags: string[] = []
+    tags: string[] = [],
   ): Promise<GoldSample> {
     const sample: GoldSample = {
       id: uuidv4(),
@@ -61,13 +57,13 @@ export class GoldDatasetService {
   async getPatternSamples(
     pattern: AgentPattern,
     limit?: number,
-    stratified = true
+    stratified = true,
   ): Promise<GoldSample[]> {
     const patternDir = join(this.datasetPath, pattern);
     try {
       const files = await fs.readdir(patternDir);
-      const sampleFiles = files.filter(f => f.endsWith('.json') && f !== 'metadata.json');
-      
+      const sampleFiles = files.filter((f) => f.endsWith('.json') && f !== 'metadata.json');
+
       const samples: GoldSample[] = [];
       for (const file of sampleFiles) {
         const data = await fs.readFile(join(patternDir, file), 'utf-8');
@@ -88,7 +84,7 @@ export class GoldDatasetService {
   async addHumanScore(
     pattern: AgentPattern,
     sampleId: string,
-    humanScore: HumanScore
+    humanScore: HumanScore,
   ): Promise<GoldSample> {
     const sample = await this.getSample(pattern, sampleId);
     sample.humanScores.push(humanScore);
@@ -103,11 +99,11 @@ export class GoldDatasetService {
     let agreementCount = 0;
 
     const complexityDist = { low: 0, medium: 0, high: 0 };
-    
+
     for (const sample of samples) {
       complexityDist[sample.complexity]++;
-      sample.humanScores.forEach(score => evaluatorIds.add(score.evaluatorId));
-      
+      sample.humanScores.forEach((score) => evaluatorIds.add(score.evaluatorId));
+
       if (sample.humanScores.length >= 2) {
         const agreement = this.calculatePairwiseAgreement(sample.humanScores);
         totalAgreement += agreement;
@@ -131,7 +127,7 @@ export class GoldDatasetService {
     await this.ensureDatasetDirectory();
     const patternDir = join(this.datasetPath, sample.pattern);
     await fs.mkdir(patternDir, { recursive: true });
-    
+
     const filePath = this.getSamplePath(sample.pattern, sample.id);
     await fs.writeFile(filePath, JSON.stringify(sample, null, 2));
   }
@@ -142,9 +138,9 @@ export class GoldDatasetService {
 
   private stratifySamples(samples: GoldSample[], limit?: number): GoldSample[] {
     const grouped = {
-      low: samples.filter(s => s.complexity === 'low'),
-      medium: samples.filter(s => s.complexity === 'medium'),
-      high: samples.filter(s => s.complexity === 'high'),
+      low: samples.filter((s) => s.complexity === 'low'),
+      medium: samples.filter((s) => s.complexity === 'medium'),
+      high: samples.filter((s) => s.complexity === 'high'),
     };
 
     if (!limit) return samples;
@@ -178,7 +174,7 @@ export class GoldDatasetService {
     for (let i = 0; i < scores.length - 1; i++) {
       for (let j = i + 1; j < scores.length; j++) {
         const diff = Math.abs(scores[i].scores.overall - scores[j].scores.overall);
-        const agreement = 1 - (diff / 10); // Assuming 0-10 scale
+        const agreement = 1 - diff / 10; // Assuming 0-10 scale
         totalAgreement += Math.max(0, agreement);
         pairCount++;
       }

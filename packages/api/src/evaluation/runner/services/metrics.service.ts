@@ -27,7 +27,7 @@ export class MetricsService implements OnModuleInit {
   private readonly systemMetrics: SystemMetrics[] = [];
   private readonly errorMetrics: Map<string, ErrorMetrics> = new Map();
   private readonly alerts: Map<string, MetricAlert> = new Map();
-  
+
   private readonly maxMetricsRetention = 7 * 24 * 60 * 60 * 1000; // 7 days
   private systemMetricsInterval: NodeJS.Timer;
   private cleanupInterval: NodeJS.Timer;
@@ -43,9 +43,7 @@ export class MetricsService implements OnModuleInit {
     cacheMissRate: 0.5, // 50%
   };
 
-  constructor(
-    private readonly eventEmitter: EventEmitter2,
-  ) {}
+  constructor(private readonly eventEmitter: EventEmitter2) {}
 
   onModuleInit() {
     this.startSystemMetricsCollection();
@@ -93,10 +91,7 @@ export class MetricsService implements OnModuleInit {
     this.checkTokenUsageAlerts(pattern, metric.totalTokens);
   }
 
-  recordError(
-    pattern: AgentPattern | undefined,
-    error: any,
-  ): void {
+  recordError(pattern: AgentPattern | undefined, error: any): void {
     const errorKey = `${pattern || 'global'}-${error.constructor.name}`;
     const existing = this.errorMetrics.get(errorKey);
 
@@ -118,45 +113,27 @@ export class MetricsService implements OnModuleInit {
 
   @OnEvent('evaluation.completed')
   handleEvaluationCompleted(event: any): void {
-    this.recordPerformance(
-      event.pattern,
-      MetricOperation.EVALUATION,
-      event.duration,
-      true,
-      { score: event.result.score },
-    );
+    this.recordPerformance(event.pattern, MetricOperation.EVALUATION, event.duration, true, {
+      score: event.result.score,
+    });
   }
 
   @OnEvent('evaluation.failed')
   handleEvaluationFailed(event: any): void {
-    this.recordPerformance(
-      event.pattern,
-      MetricOperation.EVALUATION,
-      event.duration || 0,
-      false,
-      { error: event.error.message },
-    );
+    this.recordPerformance(event.pattern, MetricOperation.EVALUATION, event.duration || 0, false, {
+      error: event.error.message,
+    });
     this.recordError(event.pattern, event.error);
   }
 
   @OnEvent('cache.hit')
   handleCacheHit(event: any): void {
-    this.recordPerformance(
-      event.pattern,
-      MetricOperation.CACHE_HIT,
-      event.responseTime,
-      true,
-    );
+    this.recordPerformance(event.pattern, MetricOperation.CACHE_HIT, event.responseTime, true);
   }
 
   @OnEvent('cache.miss')
   handleCacheMiss(event: any): void {
-    this.recordPerformance(
-      event.pattern,
-      MetricOperation.CACHE_MISS,
-      event.responseTime,
-      true,
-    );
+    this.recordPerformance(event.pattern, MetricOperation.CACHE_MISS, event.responseTime, true);
   }
 
   async getAggregatedMetrics(
@@ -169,15 +146,15 @@ export class MetricsService implements OnModuleInit {
     const end = endTime || now;
 
     const relevantPerformanceMetrics = this.performanceMetrics.filter(
-      m => m.timestamp >= start && m.timestamp <= end,
+      (m) => m.timestamp >= start && m.timestamp <= end,
     );
 
     const relevantTokenMetrics = this.tokenUsageMetrics.filter(
-      m => m.timestamp >= start && m.timestamp <= end,
+      (m) => m.timestamp >= start && m.timestamp <= end,
     );
 
     const patterns = new Map<AgentPattern, PatternMetrics>();
-    
+
     for (const pattern of Object.values(AgentPattern)) {
       const patternMetrics = this.calculatePatternMetrics(
         pattern,
@@ -233,7 +210,7 @@ export class MetricsService implements OnModuleInit {
 
   getAlerts(active: boolean = true): MetricAlert[] {
     const alerts = Array.from(this.alerts.values());
-    return active ? alerts.filter(a => !a.resolved) : alerts;
+    return active ? alerts.filter((a) => !a.resolved) : alerts;
   }
 
   resolveAlert(alertId: string): void {
@@ -252,18 +229,14 @@ export class MetricsService implements OnModuleInit {
     const start = this.getStartTimeForPeriod(period, now);
 
     const relevantPerformanceMetrics = this.performanceMetrics.filter(
-      m => m.pattern === pattern && m.timestamp >= start,
+      (m) => m.pattern === pattern && m.timestamp >= start,
     );
 
     const relevantTokenMetrics = this.tokenUsageMetrics.filter(
-      m => m.pattern === pattern && m.timestamp >= start,
+      (m) => m.pattern === pattern && m.timestamp >= start,
     );
 
-    return this.calculatePatternMetrics(
-      pattern,
-      relevantPerformanceMetrics,
-      relevantTokenMetrics,
-    );
+    return this.calculatePatternMetrics(pattern, relevantPerformanceMetrics, relevantTokenMetrics);
   }
 
   exportMetrics(format: 'json' | 'csv' = 'json'): string {
@@ -289,31 +262,29 @@ export class MetricsService implements OnModuleInit {
     tokenMetrics: TokenUsageMetrics[],
   ): PatternMetrics {
     const evaluations = performanceMetrics.filter(
-      m => m.pattern === pattern && m.operation === MetricOperation.EVALUATION,
+      (m) => m.pattern === pattern && m.operation === MetricOperation.EVALUATION,
     );
 
-    const durations = evaluations.map(e => e.duration).sort((a, b) => a - b);
-    const successful = evaluations.filter(e => e.success).length;
-    const failed = evaluations.filter(e => !e.success).length;
+    const durations = evaluations.map((e) => e.duration).sort((a, b) => a - b);
+    const successful = evaluations.filter((e) => e.success).length;
+    const failed = evaluations.filter((e) => !e.success).length;
 
     const cacheHits = performanceMetrics.filter(
-      m => m.pattern === pattern && m.operation === MetricOperation.CACHE_HIT,
+      (m) => m.pattern === pattern && m.operation === MetricOperation.CACHE_HIT,
     ).length;
 
     const cacheMisses = performanceMetrics.filter(
-      m => m.pattern === pattern && m.operation === MetricOperation.CACHE_MISS,
+      (m) => m.pattern === pattern && m.operation === MetricOperation.CACHE_MISS,
     ).length;
 
     const totalCacheRequests = cacheHits + cacheMisses;
     const hitRate = totalCacheRequests > 0 ? cacheHits / totalCacheRequests : 0;
 
-    const patternTokens = tokenMetrics.filter(m => m.pattern === pattern);
+    const patternTokens = tokenMetrics.filter((m) => m.pattern === pattern);
     const totalTokens = patternTokens.reduce((sum, m) => sum + m.totalTokens, 0);
     const totalCost = patternTokens.reduce((sum, m) => sum + (m.cost || 0), 0);
 
-    const errors = Array.from(this.errorMetrics.values()).filter(
-      e => e.pattern === pattern,
-    );
+    const errors = Array.from(this.errorMetrics.values()).filter((e) => e.pattern === pattern);
 
     return {
       pattern,
@@ -321,17 +292,14 @@ export class MetricsService implements OnModuleInit {
         total: evaluations.length,
         successful,
         failed,
-        avgDuration: durations.length > 0 
-          ? durations.reduce((a, b) => a + b, 0) / durations.length 
-          : 0,
+        avgDuration:
+          durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0,
         p95Duration: this.percentile(durations, 0.95),
         p99Duration: this.percentile(durations, 0.99),
       },
       tokens: {
         total: totalTokens,
-        avgPerEvaluation: evaluations.length > 0 
-          ? totalTokens / evaluations.length 
-          : 0,
+        avgPerEvaluation: evaluations.length > 0 ? totalTokens / evaluations.length : 0,
         cost: totalCost,
       },
       cache: {
@@ -350,14 +318,13 @@ export class MetricsService implements OnModuleInit {
     endTime: Date,
   ): TotalMetrics {
     const evaluations = performanceMetrics.filter(
-      m => m.operation === MetricOperation.EVALUATION,
+      (m) => m.operation === MetricOperation.EVALUATION,
     );
 
-    const successful = evaluations.filter(e => e.success).length;
-    const durations = evaluations.map(e => e.duration);
-    const avgDuration = durations.length > 0 
-      ? durations.reduce((a, b) => a + b, 0) / durations.length 
-      : 0;
+    const successful = evaluations.filter((e) => e.success).length;
+    const durations = evaluations.map((e) => e.duration);
+    const avgDuration =
+      durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
 
     const totalTokens = tokenMetrics.reduce((sum, m) => sum + m.totalTokens, 0);
     const totalCost = tokenMetrics.reduce((sum, m) => sum + (m.cost || 0), 0);
@@ -382,22 +349,20 @@ export class MetricsService implements OnModuleInit {
     endTime: Date,
   ): Promise<SystemHealthMetrics> {
     const relevantSystemMetrics = this.systemMetrics.filter(
-      m => m.timestamp >= startTime && m.timestamp <= endTime,
+      (m) => m.timestamp >= startTime && m.timestamp <= endTime,
     );
 
-    const cpuUsages = relevantSystemMetrics.map(m => m.cpu.usage);
-    const memoryUsages = relevantSystemMetrics.map(m => m.memory.percentage);
+    const cpuUsages = relevantSystemMetrics.map((m) => m.cpu.usage);
+    const memoryUsages = relevantSystemMetrics.map((m) => m.memory.percentage);
 
     const uptime = process.uptime() * 1000;
 
     return {
       uptime,
-      avgCpuUsage: cpuUsages.length > 0 
-        ? cpuUsages.reduce((a, b) => a + b, 0) / cpuUsages.length 
-        : 0,
-      avgMemoryUsage: memoryUsages.length > 0 
-        ? memoryUsages.reduce((a, b) => a + b, 0) / memoryUsages.length 
-        : 0,
+      avgCpuUsage:
+        cpuUsages.length > 0 ? cpuUsages.reduce((a, b) => a + b, 0) / cpuUsages.length : 0,
+      avgMemoryUsage:
+        memoryUsages.length > 0 ? memoryUsages.reduce((a, b) => a + b, 0) / memoryUsages.length : 0,
       peakCpuUsage: Math.max(...cpuUsages, 0),
       peakMemoryUsage: Math.max(...memoryUsages, 0),
       queueHealth: {
@@ -431,10 +396,7 @@ export class MetricsService implements OnModuleInit {
 
   private checkTokenUsageAlerts(pattern: AgentPattern, tokens: number): void {
     const recentTokens = this.tokenUsageMetrics
-      .filter(m => 
-        m.pattern === pattern && 
-        m.timestamp.getTime() > Date.now() - 60000,
-      )
+      .filter((m) => m.pattern === pattern && m.timestamp.getTime() > Date.now() - 60000)
       .reduce((sum, m) => sum + m.totalTokens, 0);
 
     if (recentTokens > this.alertThresholds.tokenUsagePerMinute) {
@@ -451,15 +413,16 @@ export class MetricsService implements OnModuleInit {
   }
 
   private checkErrorRateAlerts(pattern?: AgentPattern): void {
-    const recentEvaluations = this.performanceMetrics.filter(m => 
-      m.operation === MetricOperation.EVALUATION &&
-      (!pattern || m.pattern === pattern) &&
-      m.timestamp.getTime() > Date.now() - 300000, // Last 5 minutes
+    const recentEvaluations = this.performanceMetrics.filter(
+      (m) =>
+        m.operation === MetricOperation.EVALUATION &&
+        (!pattern || m.pattern === pattern) &&
+        m.timestamp.getTime() > Date.now() - 300000, // Last 5 minutes
     );
 
     if (recentEvaluations.length === 0) return;
 
-    const failures = recentEvaluations.filter(m => !m.success).length;
+    const failures = recentEvaluations.filter((m) => !m.success).length;
     const errorRate = failures / recentEvaluations.length;
 
     if (errorRate > this.alertThresholds.errorRate) {
@@ -522,17 +485,17 @@ export class MetricsService implements OnModuleInit {
 
       this.performanceMetrics.splice(
         0,
-        this.performanceMetrics.findIndex(m => m.timestamp.getTime() > cutoffTime),
+        this.performanceMetrics.findIndex((m) => m.timestamp.getTime() > cutoffTime),
       );
 
       this.tokenUsageMetrics.splice(
         0,
-        this.tokenUsageMetrics.findIndex(m => m.timestamp.getTime() > cutoffTime),
+        this.tokenUsageMetrics.findIndex((m) => m.timestamp.getTime() > cutoffTime),
       );
 
       this.systemMetrics.splice(
         0,
-        this.systemMetrics.findIndex(m => m.timestamp.getTime() > cutoffTime),
+        this.systemMetrics.findIndex((m) => m.timestamp.getTime() > cutoffTime),
       );
 
       // Clean up old resolved alerts
@@ -560,7 +523,7 @@ export class MetricsService implements OnModuleInit {
 
   private getStartTimeForPeriod(period: MetricPeriod, now: Date): Date {
     const time = new Date(now);
-    
+
     switch (period) {
       case MetricPeriod.MINUTE:
         time.setMinutes(time.getMinutes() - 1);
@@ -578,7 +541,7 @@ export class MetricsService implements OnModuleInit {
         time.setMonth(time.getMonth() - 1);
         break;
     }
-    
+
     return time;
   }
 
@@ -604,13 +567,13 @@ export class MetricsService implements OnModuleInit {
 
   private getCompletedEvaluations(): number {
     return this.performanceMetrics.filter(
-      m => m.operation === MetricOperation.EVALUATION && m.success,
+      (m) => m.operation === MetricOperation.EVALUATION && m.success,
     ).length;
   }
 
   private getFailedEvaluations(): number {
     return this.performanceMetrics.filter(
-      m => m.operation === MetricOperation.EVALUATION && !m.success,
+      (m) => m.operation === MetricOperation.EVALUATION && !m.success,
     ).length;
   }
 
@@ -623,20 +586,22 @@ export class MetricsService implements OnModuleInit {
   private convertToCSV(data: any): string {
     // Simplified CSV conversion
     const lines: string[] = [];
-    
+
     // Performance metrics CSV
     lines.push('Type,Timestamp,Pattern,Operation,Duration,Success');
     for (const metric of data.performance) {
-      lines.push([
-        'Performance',
-        metric.timestamp.toISOString(),
-        metric.pattern,
-        metric.operation,
-        metric.duration,
-        metric.success,
-      ].join(','));
+      lines.push(
+        [
+          'Performance',
+          metric.timestamp.toISOString(),
+          metric.pattern,
+          metric.operation,
+          metric.duration,
+          metric.success,
+        ].join(','),
+      );
     }
-    
+
     return lines.join('\n');
   }
 

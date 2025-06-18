@@ -73,7 +73,7 @@ export class EvaluationQueueService implements OnModuleInit {
     };
 
     await this.evaluationQueue.add(type, evaluationJob, jobOptions);
-    
+
     this.eventEmitter.emit('queue.job.added', evaluationJob);
     return evaluationJob;
   }
@@ -81,7 +81,7 @@ export class EvaluationQueueService implements OnModuleInit {
   async addBulkJobs(
     jobs: Array<{ type: JobType; data: JobData; options?: JobOptions; priority?: JobPriority }>,
   ): Promise<EvaluationJob[]> {
-    const evaluationJobs = jobs.map(job => ({
+    const evaluationJobs = jobs.map((job) => ({
       id: uuidv4(),
       type: job.type,
       priority: job.priority || JobPriority.NORMAL,
@@ -90,7 +90,7 @@ export class EvaluationQueueService implements OnModuleInit {
       createdAt: new Date(),
     }));
 
-    const bulkJobs = evaluationJobs.map(job => ({
+    const bulkJobs = evaluationJobs.map((job) => ({
       name: job.type,
       data: job,
       opts: {
@@ -108,7 +108,7 @@ export class EvaluationQueueService implements OnModuleInit {
     }));
 
     await this.evaluationQueue.addBulk(bulkJobs);
-    
+
     this.eventEmitter.emit('queue.jobs.bulk.added', evaluationJobs);
     return evaluationJobs;
   }
@@ -125,34 +125,33 @@ export class EvaluationQueueService implements OnModuleInit {
         case JobType.SINGLE_EVALUATION:
           result = await this.processSingleEvaluation(evaluationJob);
           break;
-        
+
         case JobType.BATCH_EVALUATION:
           result = await this.processBatchEvaluation(evaluationJob);
           break;
-        
+
         case JobType.API_TEST:
           result = await this.processApiTest(evaluationJob);
           break;
-        
+
         case JobType.SCHEDULED_EVALUATION:
           result = await this.processScheduledEvaluation(evaluationJob);
           break;
-        
+
         default:
           throw new Error(`Unknown job type: ${evaluationJob.type}`);
       }
 
       this.eventEmitter.emit('queue.job.completed', { job: evaluationJob, result });
       return result;
-
     } catch (error) {
       this.logger.error(`Job ${evaluationJob.id} failed`, error);
       this.eventEmitter.emit('queue.job.failed', { job: evaluationJob, error });
-      
+
       if (job.attemptsMade >= (job.opts.attempts || 3)) {
         this.addToDeadLetterQueue(evaluationJob, error);
       }
-      
+
       throw error;
     }
   }
@@ -210,14 +209,7 @@ export class EvaluationQueueService implements OnModuleInit {
   }
 
   async getQueueMetrics(): Promise<QueueMetrics> {
-    const [
-      waiting,
-      active,
-      completed,
-      failed,
-      delayed,
-      paused,
-    ] = await Promise.all([
+    const [waiting, active, completed, failed, delayed, paused] = await Promise.all([
       this.evaluationQueue.getWaitingCount(),
       this.evaluationQueue.getActiveCount(),
       this.evaluationQueue.getCompletedCount(),
@@ -228,17 +220,18 @@ export class EvaluationQueueService implements OnModuleInit {
 
     const jobs = await this.evaluationQueue.getJobs(['completed']);
     const processingTimes = jobs
-      .filter(job => job.finishedOn && job.processedOn)
-      .map(job => job.finishedOn! - job.processedOn!);
+      .filter((job) => job.finishedOn && job.processedOn)
+      .map((job) => job.finishedOn! - job.processedOn!);
 
-    const averageProcessingTime = processingTimes.length > 0
-      ? processingTimes.reduce((a, b) => a + b, 0) / processingTimes.length
-      : 0;
+    const averageProcessingTime =
+      processingTimes.length > 0
+        ? processingTimes.reduce((a, b) => a + b, 0) / processingTimes.length
+        : 0;
 
     const now = Date.now();
-    const minute = jobs.filter(job => job.finishedOn && now - job.finishedOn < 60000).length;
-    const hour = jobs.filter(job => job.finishedOn && now - job.finishedOn < 3600000).length;
-    const day = jobs.filter(job => job.finishedOn && now - job.finishedOn < 86400000).length;
+    const minute = jobs.filter((job) => job.finishedOn && now - job.finishedOn < 60000).length;
+    const hour = jobs.filter((job) => job.finishedOn && now - job.finishedOn < 3600000).length;
+    const day = jobs.filter((job) => job.finishedOn && now - job.finishedOn < 86400000).length;
 
     return {
       waiting,
@@ -277,10 +270,10 @@ export class EvaluationQueueService implements OnModuleInit {
 
   async retryFailedJob(jobId: string): Promise<void> {
     const failedJobs = await this.evaluationQueue.getFailed();
-    const job = failedJobs.find(j => j.data.id === jobId);
-    
+    const job = failedJobs.find((j) => j.data.id === jobId);
+
     if (!job) {
-      const dlqJob = this.deadLetterQueue.jobs.find(j => j.job.id === jobId);
+      const dlqJob = this.deadLetterQueue.jobs.find((j) => j.job.id === jobId);
       if (dlqJob && dlqJob.canRetry) {
         await this.addJob(dlqJob.job.type, dlqJob.job.data, dlqJob.job.options);
         this.removeFromDeadLetterQueue(jobId);
@@ -311,7 +304,7 @@ export class EvaluationQueueService implements OnModuleInit {
     };
 
     this.deadLetterQueue.jobs.push(failedJob);
-    
+
     if (this.deadLetterQueue.jobs.length > this.deadLetterQueue.maxSize) {
       this.deadLetterQueue.jobs.shift();
     }
@@ -320,7 +313,7 @@ export class EvaluationQueueService implements OnModuleInit {
   }
 
   private removeFromDeadLetterQueue(jobId: string): void {
-    const index = this.deadLetterQueue.jobs.findIndex(j => j.job.id === jobId);
+    const index = this.deadLetterQueue.jobs.findIndex((j) => j.job.id === jobId);
     if (index !== -1) {
       this.deadLetterQueue.jobs.splice(index, 1);
     }
@@ -350,19 +343,19 @@ export class EvaluationQueueService implements OnModuleInit {
 
   private async cleanupOldJobs(): Promise<void> {
     const now = Date.now();
-    
+
     this.deadLetterQueue.jobs = this.deadLetterQueue.jobs.filter(
-      job => now - job.failedAt.getTime() < this.deadLetterQueue.retentionPeriod
+      (job) => now - job.failedAt.getTime() < this.deadLetterQueue.retentionPeriod,
     );
 
     const jobs = await this.evaluationQueue.getJobs(['completed', 'failed']);
-    const oldJobs = jobs.filter(job => {
+    const oldJobs = jobs.filter((job) => {
       const age = now - (job.finishedOn || job.timestamp);
       return age > 24 * 60 * 60 * 1000; // 24 hours
     });
 
-    await Promise.all(oldJobs.map(job => job.remove()));
-    
+    await Promise.all(oldJobs.map((job) => job.remove()));
+
     this.logger.log(`Cleaned up ${oldJobs.length} old jobs`);
   }
 }

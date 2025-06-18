@@ -52,7 +52,7 @@ export class WorkflowOrchestratorService {
 
     this.validateWorkflow(newWorkflow);
     this.workflows.set(id, newWorkflow);
-    
+
     return newWorkflow;
   }
 
@@ -88,17 +88,17 @@ export class WorkflowOrchestratorService {
 
     try {
       const results = await this.runWorkflow(workflow, execution);
-      
+
       workflow.status = WorkflowStatus.COMPLETED;
       workflow.completedAt = new Date();
       workflow.results = results;
 
       this.eventEmitter.emit('workflow.completed', { workflow, executionId, results });
-      
+
       return results;
     } catch (error) {
       this.logger.error(`Workflow ${workflowId} failed`, error);
-      
+
       workflow.status = WorkflowStatus.FAILED;
       workflow.completedAt = new Date();
 
@@ -107,7 +107,7 @@ export class WorkflowOrchestratorService {
       }
 
       this.eventEmitter.emit('workflow.failed', { workflow, executionId, error });
-      
+
       throw error;
     } finally {
       this.activeWorkflows.delete(executionId);
@@ -142,7 +142,7 @@ export class WorkflowOrchestratorService {
 
     execution.status = WorkflowStatus.CANCELLED;
     this.activeWorkflows.delete(executionId);
-    
+
     this.eventEmitter.emit('workflow.cancelled', { executionId });
   }
 
@@ -175,11 +175,11 @@ export class WorkflowOrchestratorService {
         await this.waitForResume(execution);
       }
 
-      const stage = workflow.stages.find(s => s.id === stageId);
+      const stage = workflow.stages.find((s) => s.id === stageId);
       if (!stage) continue;
 
       const shouldRun = await this.evaluateStageCondition(stage, execution, results);
-      
+
       if (!shouldRun) {
         results.stages.set(stageId, {
           stageId,
@@ -192,7 +192,7 @@ export class WorkflowOrchestratorService {
 
       workflow.currentStage = stageId;
       const stageResult = await this.executeStage(stage, execution, workflow);
-      
+
       results.stages.set(stageId, stageResult);
 
       if (stageResult.status === StageStatus.COMPLETED) {
@@ -200,7 +200,7 @@ export class WorkflowOrchestratorService {
         execution.context.stageOutputs.set(stageId, stageResult.output);
       } else {
         results.summary.failedStages++;
-        
+
         if (!workflow.config.allowPartialSuccess) {
           results.summary.success = false;
           throw new Error(`Stage ${stageId} failed`);
@@ -230,9 +230,9 @@ export class WorkflowOrchestratorService {
     while (attempts < maxAttempts) {
       try {
         attempts++;
-        
+
         const output = await this.runStageByType(stage, execution, workflow);
-        
+
         return {
           stageId: stage.id,
           status: StageStatus.COMPLETED,
@@ -244,7 +244,7 @@ export class WorkflowOrchestratorService {
         };
       } catch (error) {
         this.logger.error(`Stage ${stage.id} attempt ${attempts} failed`, error);
-        
+
         if (attempts >= maxAttempts) {
           return {
             stageId: stage.id,
@@ -261,7 +261,7 @@ export class WorkflowOrchestratorService {
           1000 * Math.pow(stage.retryPolicy?.backoffMultiplier || 2, attempts - 1),
           stage.retryPolicy?.maxBackoff || 30000,
         );
-        
+
         await this.delay(backoff);
       }
     }
@@ -277,28 +277,28 @@ export class WorkflowOrchestratorService {
     switch (stage.type) {
       case StageType.EVALUATION:
         return this.runEvaluationStage(stage, execution);
-      
+
       case StageType.BATCH:
         return this.runBatchStage(stage, execution);
-      
+
       case StageType.API_TEST:
         return this.runApiTestStage(stage, execution);
-      
+
       case StageType.VALIDATION:
         return this.runValidationStage(stage, execution);
-      
+
       case StageType.NOTIFICATION:
         return this.runNotificationStage(stage, execution);
-      
+
       case StageType.CONDITIONAL:
         return this.runConditionalStage(stage, execution);
-      
+
       case StageType.PARALLEL:
         return this.runParallelStage(stage, execution, workflow);
-      
+
       case StageType.APPROVAL:
         return this.runApprovalStage(stage, execution);
-      
+
       default:
         throw new Error(`Unknown stage type: ${stage.type}`);
     }
@@ -325,10 +325,7 @@ export class WorkflowOrchestratorService {
     return { jobId: job.id, patterns, testSuiteIds };
   }
 
-  private async runBatchStage(
-    stage: WorkflowStage,
-    execution: WorkflowExecution,
-  ): Promise<any> {
+  private async runBatchStage(stage: WorkflowStage, execution: WorkflowExecution): Promise<any> {
     const patterns = stage.config.patterns || [];
     const testSuiteIds = stage.config.testSuiteIds || [];
 
@@ -343,10 +340,7 @@ export class WorkflowOrchestratorService {
     return results;
   }
 
-  private async runApiTestStage(
-    stage: WorkflowStage,
-    execution: WorkflowExecution,
-  ): Promise<any> {
+  private async runApiTestStage(stage: WorkflowStage, execution: WorkflowExecution): Promise<any> {
     const patterns = stage.config.patterns || [];
     const results = [];
 
@@ -380,7 +374,7 @@ export class WorkflowOrchestratorService {
     for (const rule of rules) {
       const value = this.getValueFromContext(rule.field, execution.context);
       const passed = this.evaluateValidationRule(rule, value);
-      
+
       results.push({
         field: rule.field,
         passed,
@@ -401,7 +395,7 @@ export class WorkflowOrchestratorService {
     execution: WorkflowExecution,
   ): Promise<any> {
     const config = stage.config.notificationConfig;
-    
+
     this.eventEmitter.emit('workflow.notification', {
       workflowId: execution.workflowId,
       stageId: stage.id,
@@ -426,9 +420,9 @@ export class WorkflowOrchestratorService {
     workflow: Workflow,
   ): Promise<any> {
     const parallelStageIds = stage.config.parallelStages || [];
-    const parallelStages = workflow.stages.filter(s => parallelStageIds.includes(s.id));
+    const parallelStages = workflow.stages.filter((s) => parallelStageIds.includes(s.id));
 
-    const promises = parallelStages.map(s => this.executeStage(s, execution, workflow));
+    const promises = parallelStages.map((s) => this.executeStage(s, execution, workflow));
     const results = await Promise.all(promises);
 
     return results.reduce((acc, result, index) => {
@@ -437,12 +431,9 @@ export class WorkflowOrchestratorService {
     }, {});
   }
 
-  private async runApprovalStage(
-    stage: WorkflowStage,
-    execution: WorkflowExecution,
-  ): Promise<any> {
+  private async runApprovalStage(stage: WorkflowStage, execution: WorkflowExecution): Promise<any> {
     const approvalConfig = stage.config.approvalConfig;
-    
+
     this.eventEmitter.emit('workflow.approval.requested', {
       workflowId: execution.workflowId,
       stageId: stage.id,
@@ -469,28 +460,25 @@ export class WorkflowOrchestratorService {
     switch (stage.condition.type) {
       case ConditionType.ALWAYS:
         return true;
-      
+
       case ConditionType.ON_SUCCESS:
         const prevStage = stage.dependencies?.[0];
         if (!prevStage) return true;
         return results.stages.get(prevStage)?.status === StageStatus.COMPLETED;
-      
+
       case ConditionType.ON_FAILURE:
         const failedStage = stage.dependencies?.[0];
         if (!failedStage) return false;
         return results.stages.get(failedStage)?.status === StageStatus.FAILED;
-      
+
       case ConditionType.EXPRESSION:
         // Evaluate custom expression
         return true;
-      
+
       case ConditionType.THRESHOLD:
-        const value = this.getValueFromContext(
-          stage.condition.field || '',
-          execution.context,
-        );
+        const value = this.getValueFromContext(stage.condition.field || '', execution.context);
         return value >= (stage.condition.threshold || 0);
-      
+
       default:
         return true;
     }
@@ -508,7 +496,7 @@ export class WorkflowOrchestratorService {
     }
 
     // Validate stage IDs are unique
-    const stageIds = workflow.stages.map(s => s.id);
+    const stageIds = workflow.stages.map((s) => s.id);
     if (new Set(stageIds).size !== stageIds.length) {
       throw new Error('Workflow contains duplicate stage IDs');
     }
@@ -523,7 +511,7 @@ export class WorkflowOrchestratorService {
     visited.add(stageId);
     recursionStack.add(stageId);
 
-    const stage = stages.find(s => s.id === stageId);
+    const stage = stages.find((s) => s.id === stageId);
     if (!stage) return false;
 
     for (const dep of stage.dependencies || []) {
@@ -548,7 +536,7 @@ export class WorkflowOrchestratorService {
       if (visited.has(stageId)) return;
       visited.add(stageId);
 
-      const stage = stages.find(s => s.id === stageId);
+      const stage = stages.find((s) => s.id === stageId);
       if (!stage) return;
 
       for (const dep of stage.dependencies || []) {
@@ -565,10 +553,7 @@ export class WorkflowOrchestratorService {
     return stack;
   }
 
-  private createStateManager(
-    workflow: Workflow,
-    context: WorkflowContext,
-  ): any {
+  private createStateManager(workflow: Workflow, context: WorkflowContext): any {
     const checkpoints: WorkflowCheckpoint[] = [];
     let currentStage = '';
 
@@ -577,8 +562,8 @@ export class WorkflowOrchestratorService {
         currentStage,
         completedStages: Array.from(context.stageOutputs.keys()),
         pendingStages: workflow.stages
-          .filter(s => !context.stageOutputs.has(s.id))
-          .map(s => s.id),
+          .filter((s) => !context.stageOutputs.has(s.id))
+          .map((s) => s.id),
         context,
         checkpoints,
       }),
@@ -613,15 +598,15 @@ export class WorkflowOrchestratorService {
 
   private async rollbackWorkflow(execution: WorkflowExecution): Promise<void> {
     this.logger.log(`Rolling back workflow ${execution.workflowId}`);
-    
+
     const workflow = this.workflows.get(execution.workflowId);
     if (!workflow) return;
 
     workflow.status = WorkflowStatus.ROLLING_BACK;
-    
+
     // Rollback logic would be implemented here
     execution.stateManager.rollback();
-    
+
     this.eventEmitter.emit('workflow.rolledback', { workflowId: execution.workflowId });
   }
 
@@ -669,7 +654,7 @@ export class WorkflowOrchestratorService {
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private initializeDefaultWorkflows(): void {

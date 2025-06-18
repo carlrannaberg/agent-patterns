@@ -106,12 +106,12 @@ describe('CalibrationService', () => {
 
     it('should throw error with insufficient samples', async () => {
       goldDatasetService.getPatternSamples.mockResolvedValue(
-        generateTestSamples(10) // Less than required 30
+        generateTestSamples(10), // Less than required 30
       );
 
-      await expect(
-        service.calibratePattern(AgentPattern.SEQUENTIAL_PROCESSING)
-      ).rejects.toThrow('Insufficient samples for calibration');
+      await expect(service.calibratePattern(AgentPattern.SEQUENTIAL_PROCESSING)).rejects.toThrow(
+        'Insufficient samples for calibration',
+      );
     });
 
     it('should converge early when threshold is met', async () => {
@@ -123,7 +123,7 @@ describe('CalibrationService', () => {
         evaluationCount++;
         // Return scores that will quickly converge
         return {
-          overall: 7.5 + (evaluationCount * 0.01),
+          overall: 7.5 + evaluationCount * 0.01,
           accuracy: 7,
           coherence: 8,
           completeness: 7.5,
@@ -172,7 +172,7 @@ describe('CalibrationService', () => {
       const score = await service.evaluateWithCalibration(
         AgentPattern.SEQUENTIAL_PROCESSING,
         'test input',
-        'test output'
+        'test output',
       );
 
       expect(score).toBeDefined();
@@ -202,13 +202,13 @@ describe('CalibrationService', () => {
       const shortScore = await service.evaluateWithCalibration(
         AgentPattern.SEQUENTIAL_PROCESSING,
         'input',
-        shortOutput
+        shortOutput,
       );
 
       const longScore = await service.evaluateWithCalibration(
         AgentPattern.SEQUENTIAL_PROCESSING,
         'input',
-        longOutput
+        longOutput,
       );
 
       // Both scores should be defined but potentially different due to length normalization
@@ -272,12 +272,7 @@ describe('CalibrationService', () => {
       const humanScores = [7, 8, 6, 9, 7, 8, 7, 8, 9, 7];
       const llmScores = [7.5, 8.2, 6.1, 8.8, 7.2, 8.1, 7.3, 8.0, 8.9, 7.1];
 
-      const ci = (service as any).bootstrapConfidenceInterval(
-        humanScores,
-        llmScores,
-        100,
-        0.95
-      );
+      const ci = (service as any).bootstrapConfidenceInterval(humanScores, llmScores, 100, 0.95);
 
       expect(ci.lower).toBeLessThan(ci.upper);
       expect(ci.lower).toBeGreaterThanOrEqual(-1);
@@ -301,7 +296,7 @@ describe('CalibrationService', () => {
         currentWeights,
         humanScores,
         llmScores,
-        0.1
+        0.1,
       );
 
       // Weights should be normalized (sum to 1)
@@ -309,7 +304,7 @@ describe('CalibrationService', () => {
       expect(sum).toBeCloseTo(1, 5);
 
       // All weights should be between 0 and 1
-      Object.values(newWeights).forEach(weight => {
+      Object.values(newWeights).forEach((weight) => {
         expect(weight).toBeGreaterThanOrEqual(0);
         expect(weight).toBeLessThanOrEqual(1);
       });
@@ -320,11 +315,11 @@ describe('CalibrationService', () => {
 // Helper functions
 function generateTestSamples(count: number): GoldSample[] {
   const samples: GoldSample[] = [];
-  
+
   for (let i = 0; i < count; i++) {
     const baseScore = 5 + Math.random() * 5; // 5-10 range
     const variation = Math.random() * 2 - 1; // ±1 variation
-    
+
     samples.push({
       id: `sample-${i}`,
       pattern: AgentPattern.SEQUENTIAL_PROCESSING_PROCESSING,
@@ -351,7 +346,7 @@ function generateTestSamples(count: number): GoldSample[] {
       tags: [],
     });
   }
-  
+
   return samples;
 }
 
