@@ -42,6 +42,3 @@ pnpm-debug.log*
 
 # Claude IDE
 .claude
-
-# Redis
-dump.rdb

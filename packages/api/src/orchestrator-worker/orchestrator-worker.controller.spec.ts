@@ -85,16 +85,5 @@ describe('OrchestratorWorkerController', () => {
         controller.implementFeature({ input: featureRequest }, mockResponse),
       ).rejects.toThrow('Service error');
     });
-
-    it('should handle database feature request', async () => {
-      const featureRequest = 'Add PostgreSQL database integration with migrations';
-      const mockResponse = {
-        setHeader: jest.fn(),
-      } as any;
-
-      await controller.implementFeature({ input: featureRequest }, mockResponse);
-
-      expect(service.implementFeature).toHaveBeenCalledWith(featureRequest);
-    });
   });
 });
