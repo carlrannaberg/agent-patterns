@@ -7,7 +7,6 @@ import ParallelProcessingPage from './pages/ParallelProcessingPage';
 import OrchestratorWorkerPage from './pages/OrchestratorWorkerPage';
 import EvaluatorOptimizerPage from './pages/EvaluatorOptimizerPage';
 import MultiStepToolUsagePage from './pages/MultiStepToolUsagePage';
-import EvaluationDashboard from './pages/EvaluationDashboard';
 
 function App() {
   return (
@@ -20,7 +19,6 @@ function App() {
         <Route path="orchestrator-worker" element={<OrchestratorWorkerPage />} />
         <Route path="evaluator-optimizer" element={<EvaluatorOptimizerPage />} />
         <Route path="multi-step-tool-usage" element={<MultiStepToolUsagePage />} />
-        <Route path="evaluation-dashboard" element={<EvaluationDashboard />} />
       </Route>
     </Routes>
   );
